@@ -40,7 +40,8 @@ body {
   z-index: 100000;
   margin: 2rem;
   bottom:0;
-  right:0
+  right:0;
+  outline:none!important;
 }
 .fa-moon{
   color:black;
@@ -183,7 +184,7 @@ color: rgb(255, 208, 0);
 .watermark {
   font-size: 8vw;
   font-family: "Anton", sans-serif;
-  color: rgba(218, 218, 218, 0.4);
+  color: rgba(218, 218, 218, 0.2);
   /* letter-spacing: 2rem; */
   margin-left:1rem;
   z-index: 0;
