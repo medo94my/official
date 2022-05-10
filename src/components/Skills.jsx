@@ -1,60 +1,54 @@
+import {  Container, Grid,  Typography ,Stack} from '@mui/material'
 import React from 'react'
+import ComplexGrid from './ComplexGrid'
+import { WaterMark } from './utils'
+
+const data=[
+  {
+    id:1,
+    icon:'src/img/web-design.png',
+    title:'Frontend',
+    langs:['HTML','CSS3','JavaScript']
+  },
+  {
+    id:2,
+    icon:'src/img/web-programming.png',
+    title:'Backend',
+    langs:['Python','PHP','Nodejs']
+  },
+  {
+    id:3,
+    icon:'src/img/web.png',
+    title:'Framework',
+    langs:['Flask','Laravel','Express']
+  },
+  {
+    id:4,
+    icon:'src/img/web-page.png',
+    title:'Databases',
+    langs:['MYSQL','MONGODB']
+  },
+]
 
 const Skills = () => {
   return (
-    <section id="skills">
-    <div className="bg-text">
-          <h1 className="watermark " >my skills</h1> 
-        </div>
-        
-        <div className="container">
-          <div className="content">
+    <Grid container positioin={'relative'} sx={{pr:'2rem'}} >
 
-          
-          <h1 className="py-5 text-title"> skills</h1>
-          <div className="row">
-            <div className="col-lg-6 col-md-6 col-sm-12 my-2 d-flex align-items-center justify-content-center">
-              <div className="media p-3 justify-content-center">
-                <img src="src/img/web-design.png" className=" align-self-center mr-3 " width="64" alt="..."/>
-                <div className="media-body">
-                  <h5 className="mt-0 text-title">Frontend Technology</h5>
-                  <div className="py-3"> <span className="skill">HTML</span><span className="skill">CSS3</span><span className="skill">JavaScript</span></div>
-                </div>
-                
-              </div> 
-            </div>
-            <div className="col-lg-6 col-md-6 col-sm-12 my-2  d-flex align-items-center justify-content-center">
-              <div className="media p-3 justify-content-center">
-                <img src="src/img/web-programming.png" className=" align-self-center mr-3 " width="64" alt="..."/>
-                    <div className="media-body">
-                      <h5 className="mt-0 text-title">Backend Technology</h5>
-                      <div className="py-3"> <span className="skill">Python</span><span className="skill">PHP</span><span className="skill">C#</span></div>
-                    </div>
-                  </div>  
-            </div>
-            <div className="col-lg-6 col-md-6 col-sm-12 my-2  d-flex align-items-center justify-content-center">
-              <div className="media p-3 justify-content-center">
-                <img src="src/img/web.png" className=" align-self-center mr-3 " width="64" alt="..."/>
-                <div className="media-body">
-                  <h5 className="mt-0 text-title">FrameWorks</h5>
-                  <div className="py-3"> <span className="skill">Flask</span><span className="skill">Django</span><span className="skill">Laravel</span></div>
-                </div>
-              </div>      
-            </div>
-            <div className="col-lg-6 col-md-6 col-sm-12 my-2  d-flex align-items-center justify-content-center">
-              <div className="media p-3 justify-content-center">
-                <img src="src/img/web-page.png" className=" align-self-center mr-3 " width="64" alt="..."/>
-                <div className="media-body">
-                  <h5 className="mt-0 text-title">Database Management</h5>
-                  <div className="py-3"> <span className="skill">MYSQL</span><span className="skill">MONGODB</span></div>
-                </div>
-                
-              </div>      
-            </div>
-          </div>
-        </div>
-        </div>
-      </section>
+    <Grid item sm={1} position={'relative'} display={{xs:'none',sm:'block'}} sx={{py:'1rem'}}>
+          <WaterMark variant='h1'fontSize={{xs:'48px',sm:'96px'}} >skills</WaterMark> 
+        </Grid>
+
+        
+        <Grid sx={12} sm={10} item>          
+          <Typography variant='h2' sx={{textTransform:'uppercase', fontWeight:'bold'}}>skills</Typography>
+          <Grid container sx={{py:'4rem'}} justifyContent='center' alignItems='center'>
+            {data.map(item=>(
+            <ComplexGrid  key={item.id} item={item}/>
+            ))}
+            
+          </Grid>
+        </Grid>
+      </Grid>
   )
 }
 

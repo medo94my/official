@@ -1,32 +1,132 @@
-import React from 'react'
+import { GitHub, Visibility } from "@mui/icons-material";
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Grid,
+  Stack,
+  Typography,
+} from "@mui/material";
+import React from "react";
+import { WaterMark } from "./utils";
 
 const Projects = () => {
   return (
-    <section id="Portfolio">
-            <div className="container  p-5">
-              <div className="bg-text" style={{left:0}}>
-                <h1 className="watermark ">my portfolio</h1> 
+    <Grid container position={"relative"} sx={{ pr: "2rem" }}>
+      <Grid
+        item
+        sm={1}
+        position={"relative"}
+        display={{ xs: "none", sm: "block" }}
+        sx={{ py: "1rem" }}
+      >
+        <WaterMark variant="h1" fontSize={{ xs: "48px", sm: "96px" }}>
+          Projects
+        </WaterMark>
+      </Grid>
+      <Grid item container xs={12} sm={11} className="content">
+        <Typography
+          variant="h2"
+          sx={{ textTransform: "uppercase", fontWeight: "bold" }}
+        >
+          portfolio
+        </Typography>
+        <Grid container className="row">
+          <Grid
+            item
+            xs={12}
+            sm={4}
+            className="col-md-6 col-lg-4 col-sm-12 my-sm-3"
+          >
+            <div className="card border-0 transform-on-hover custom-card">
+              <div className="p-4" style={{ background: "black" }}>
+                <img
+                  src="./src/img/avatar.png"
+                  width="120"
+                  alt="Card Image"
+                  className="card-img-top"
+                />
               </div>
-              <div className="content">
-              <h1 className="py-5 text-title"> my portfolio</h1>
-                <div className="row">
-                    <div className="col-md-6 col-lg-4 col-sm-12 my-sm-3">
-                        <div className="card border-0 transform-on-hover custom-card">
-                          <div className="p-4" style={{background: 'black'}}>
-                            <img src="./src/img/avatar.png" alt="Card Image" className="card-img-top"/>
-                          </div>
-                            <div className="card-body">
-                                <h6>E-commerce- martify grocery</h6>
-                                <p className=" card-text">This was my FYP using php. This is an online grocery shop to be able to buy form major shops online and deliver it to home </p>
-                                <p>Type:<span className="badge badge-pill badge-info mx-2">Solo</span></p>
-                                <div className="d-flex justify-content-between">
-                                  <a href="https://github.com/medo94my/undertesting" className="btn btn-warning mx-2" role="button" target="_blank" ><i className="fab fa-github-alt mx-1"></i>Github</a>
-                                  <a name="" id="" className="btn btn-outline-warning mx-2" href="http://martifyapp.herokuapp.com/" target="_blank" role="button"><i className="far fa-eye mx-1"></i>View</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-md-6 col-lg-4 col-sm-12 my-sm-3">
+              <div className="card-body">
+                <h6>E-commerce- martify grocery</h6>
+                <p className=" card-text">
+                  This was my FYP using php. This is an online grocery shop to
+                  be able to buy form major shops online and deliver it to home{" "}
+                </p>
+                <p>
+                  Type:
+                  <span className="badge badge-pill badge-info mx-2">Solo</span>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <a
+                    href="https://github.com/medo94my/undertesting"
+                    className="btn btn-warning mx-2"
+                    role="button"
+                    target="_blank"
+                  >
+                    <i className="fab fa-github-alt mx-1"></i>Github
+                  </a>
+                  <a
+                    name=""
+                    id=""
+                    className="btn btn-outline-warning mx-2"
+                    href="http://martifyapp.herokuapp.com/"
+                    target="_blank"
+                    role="button"
+                  >
+                    <i className="far fa-eye mx-1"></i>Github
+                  </a>
+                </div>
+              </div>
+            </div>
+            <Card sx={{ minWidth: 100 }}>
+              <CardContent>
+                <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+           E-commerce- martify grocery
+        </Typography>
+                <Stack
+                  width={"100%"}
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <img
+                    src={"./src/img/avatar.png"}
+                    width={'100%'}
+                    display={"block"}
+                    style={{ margin: "0 auto" }}
+                  />
+                </Stack>
+                <Box sx={{px:'2rem',width:'100%'}}>
+
+                {/* <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                  E-commerce- martify grocery
+                </Typography> */}
+                <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                This was my FYP using php. This is an online grocery shop to
+                  be able to buy form major shops online and deliver it to home
+                </Typography>
+                <Typography variant="body2">
+                  Project Type: <br />
+                  <Chip label="Solo" sx={{ margin: "5px 10px" }} />
+                </Typography>
+                </Box>
+              </CardContent>
+              <CardActions>
+                <Stack width={'100%'} direction={'row'} justifyContent='space-around' alignItems='center'>
+                <Button  variant='contained' size="large" color={'warning'} startIcon={<GitHub />}>
+                  Github
+                </Button>
+                <Button variant='outlined' color={'warning'} size="large" startIcon={<Visibility />}>
+                  View
+                </Button>
+                </Stack>
+              </CardActions>
+            </Card>
+          </Grid>
+          {/* <div className="col-md-6 col-lg-4 col-sm-12 my-sm-3">
                         <div className="card border-0 transform-on-hover custom-card">
                           <div className="p-4" style={{background: 'black'}}>
                             <img src="./src/img/avatar.png" alt="Card Image" className="card-img-top"/>
@@ -41,8 +141,8 @@ const Projects = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="col-md-6 col-lg-4 col-sm-12 my-sm-3">
+                    </div> */}
+          {/* <div className="col-md-6 col-lg-4 col-sm-12 my-sm-3">
                         <div className="card border-0 transform-on-hover custom-card">
                           <div className="p-4" style={{background: 'black'}}>
                             <img src="./src/img/avatar.png" alt="Card Image" className="card-img-top"/>
@@ -59,12 +159,11 @@ const Projects = () => {
                                 </div>
                               </div>
                         </div>
-                    </div>
-            </div>
-          </div>
-            </div>
-          </section>
-  )
-}
+                    </div> */}
+        </Grid>
+      </Grid>
+    </Grid>
+  );
+};
 
-export default Projects
+export default Projects;

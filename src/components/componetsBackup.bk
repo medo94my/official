@@ -1,0 +1,13 @@
+{/* <MyComponent1 color='red' top='50%'/> */}
+        <{/* Typography variant="h1" sx={{minHeight:'112px',display:{xs:'none',sm:"block"}}} textAlign='center' fontWeight='200' ref={name}>
+        </Typography>
+        <Typography variant='h4' textAlign="center" fontWeight='bold' textTransform={'uppercase'}>
+         Create a stunning website and show the world 
+        </Typography>
+        <Typography variant="h3" sx={{display:{xs:'block',sm:"none"},textTransform:"uppercase"}} mt={2} textAlign='center' fontWeight='400'>
+          ahmed tawfik
+        </Typography>
+        <Typography variant='h5' sx={{minHeight:'33px'}} ref={occupation} textAlign="center"/>
+        <Typography variant='subtitle' textAlign="center">
+          Planning | Designing | UI/UX | Developing | Deploying
+        </Typography> */}

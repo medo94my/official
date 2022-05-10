@@ -1,45 +1,45 @@
+import { Box, Container, Grid, Stack, Typography } from '@mui/material'
 import React from 'react'
+import CardInfo from './CardInfo'
+import { WaterMark } from './utils'
 
+
+const data=[
+  {
+    id:1,
+    img:'src/img/custom.svg',
+    desc:'Planning the most suitable technology that is needed for the desired application'
+  },
+  {
+    id:2,
+    img:'src/img/custom.svg',
+    desc:'Begin to design the interface and implement the required styles'
+  },
+  {
+    id:3,
+    img:'src/img/custom.svg',
+    desc:'Planning the most suitable technology that is needed for the desired application'
+  },
+]
 const Services = () => {
   return (
-    <section id="service">
-    <div className="bg-text">
-          <h1 className="watermark " >my Services</h1> 
-        </div>
+    <Grid container sx={{pr:'2rem'}} >
+        <Grid item sm={1} position={'relative'} display={{xs:'none',sm:'block'}} sx={{py:'1rem'}}>
+          <WaterMark variant='h1'fontSize={{xs:'48px',sm:'96px'}} >services</WaterMark> 
+        </Grid>
         
-        <div className="container">
-          <div className="content">
+        <Grid item xs={12}  sm={10}>
+          <Typography variant='h2' sx={{textTransform:'uppercase', fontWeight:'bold'}}> Services</Typography>
 
-          <h1 className="py-5 text-title">My Services</h1>
-          <div className="row">
-            <div className="col-lg-4 col-md-6 col-sm-12 my-2 d-flex align-items-center justify-content-center">
-              <div className="card rounded d-flex align-items-center" style={{width: '15rem'}}>
-                <img className="card-img-top w-25 pt-3 " src="src/img/custom.svg"  alt="Card image cap"/>
-                <div className="card-body">
-                  <p className="card-text text-center">Planning the most suitable technology that is needed for the desired application</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4 col-md-6 col-sm-12 my-2  d-flex align-items-center justify-content-center">
-              <div className="card rounded d-flex align-items-center" style={{width: '15rem'}}>
-                <img className="card-img-top w-25 pt-3 " src="src/img/custom.svg"  alt="Card image cap"/>
-                <div className="card-body">
-                  <p className="card-text text-center">Begin to design the interface and implement the required styles</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4 col-md-6 col-sm-12 my-2  d-flex align-items-center justify-content-center">
-              <div className="card rounded d-flex align-items-center" style={{width: '15rem'}}>
-                <img className="card-img-top w-25 pt-3 " src="src/img/custom.svg"  alt="Card image cap"/>
-                <div className="card-body">
-                  <p className="card-text text-center">Develop the application according to the plan has been selected before</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        </div>
-      </section>
+          <Grid item container justifyContent='center' alignItems='center' >
+              {data.map(item=>(
+            <Grid key={item.id} item xs={12} sm={4} container justifyContent='center' alignItems='center'>
+              <CardInfo item={item}  />
+            </Grid>
+              ))}
+          </Grid>
+        </Grid>
+      </Grid>
   )
 }
 
