@@ -23,7 +23,7 @@ const Projects = () => {
         display={{ xs: "none", lg: "block" }}
         sx={{ py: "1rem" }}
       >
-        <WaterMark variant="h1" fontSize={{ xs: "48px", sm: "96px" }}>
+        <WaterMark variant="h1" fontSize={{ xs: "48px", sm: "96px"}}>
           Projects
         </WaterMark>
       </Grid>
@@ -41,10 +41,11 @@ const Projects = () => {
               item
               xs={12}
               sm={4}
+              sx={{p:5}}
             >
-              <Card sx={{ minWidth: 275 }}>
+              <Card sx={{ minWidth: 275,p:2 }}>
                 <CardContent>
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                  <Typography variant="h6" textAlign='center' color="text.secondary" gutterBottom>
              E-commerce- martify grocery
           </Typography>
                   <Stack

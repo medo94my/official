@@ -4,23 +4,23 @@ import { Chip, Box,Grid, CardMedia, CardContent, Card, Stack  } from '@mui/mater
 export default function ComplexGrid({item}) {
   return (
 
-    <Grid container item xs={12} md={6} sx={{py:3}} bgcolor={'secondary'} border={'1px solid gray'} justifyContent='center' alignItems='center'  >
-      <Card sx={{ display: "flex",width:'100%' }}>
+    <Grid container item xs={12} md={5} sx={{p:2}} bgcolor={'secondary'} justifyContent='center' alignItems='center'  >
+      <Card sx={{ display: "flex",width:'100%',height:'100%',px:2,justifyContent:'center', alignItems:'center' }} >
       <CardMedia
         component="img"
-        sx={{ width: 151 }}
+        sx={{ width: 124, height:124, p:2 }}
         image={item.icon}
         alt="Live from space album cover"
       />
 
-        <CardContent sx={{ display: "flex", flexDirection: "column" ,justifyContent:'space-between', alignItems:'flex-start',width:'100%' }} >
-          <Typography component="div" variant="h5">
-            {item.title}
+        <CardContent sx={{ display: "flex", flexDirection: "column" ,justifyContent:'space-around',p:{xs:.5,md:2}, alignItems:'flex-start',width:'100%' }} >
+          <Typography component="div" variant="h5" sx={{p:{xs:'.5rem 5px'}}}>
+            {item.title.toUpperCase()}
           </Typography>
-          <Stack direction={'row'}>
+          <Stack direction={'row'} gap={1} sx={{py:{xs:2},flexWrap:'wrap'}} >
 
           {item.langs.map((item) => (
-            <Chip key={item} label={item}></Chip>
+            <Chip key={item} label={item} color={'warning'}></Chip>
             ))}
             </Stack>
         </CardContent>

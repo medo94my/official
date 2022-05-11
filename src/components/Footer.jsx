@@ -9,8 +9,8 @@ function Copyright() {
   return (
     <Typography variant="body2" color="text.secondary">
       {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
+      <Link color="inherit" href="https://www.ahmedtawfik.work">
+        ahmedtawfik.work
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -24,10 +24,8 @@ function Copyright() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '100vh',
       }}
     >
-      <CssBaseline />
     
       <Box
         component="footer"
@@ -41,9 +39,6 @@ function Copyright() {
           justifyContent:'center',
           alignItems:'center',
           flexDirection:'column'}}>
-          <Typography variant="body1">
-            My sticky footer can be found here.
-          </Typography>
           <Copyright />
         </Container>
       </Box>

@@ -1,3 +1,4 @@
+import { DesignServices, Search, Web } from '@mui/icons-material'
 import { Box, Container, Grid, Stack, Typography } from '@mui/material'
 import React from 'react'
 import CardInfo from './CardInfo'
@@ -7,18 +8,18 @@ import { WaterMark } from './utils'
 const data=[
   {
     id:1,
-    img:'src/img/custom.svg',
-    desc:'Planning the most suitable technology that is needed for the desired application'
+    img:<Search sx={{display:'block',width:'128px',height:'128px',mx:'auto', p:2}} />,
+    desc:'Researching & Planning'
   },
   {
     id:2,
-    img:'src/img/custom.svg',
-    desc:'Begin to design the interface and implement the required styles'
+    img:<DesignServices sx={{display:'block',width:'128px',height:'128px',mx:'auto', p:2}} />,
+    desc:'UI/UX'
   },
   {
     id:3,
-    img:'src/img/custom.svg',
-    desc:'Planning the most suitable technology that is needed for the desired application'
+    img:<Web sx={{display:'block',width:'128px',height:'128px',mx:'auto', p:2}} />,
+    desc:'Writing Code'
   },
 ]
 const Services = () => {
@@ -31,9 +32,9 @@ const Services = () => {
         <Grid item container justifyContent={'center'} alignItems={'center'} xs={12}  lg={10}>
           <Typography variant='h2' sx={{textTransform:'uppercase', fontWeight:'bold',marginY:5}}> Services</Typography>
 
-          <Grid item container justifyContent='center' alignItems='center' >
+          <Grid item container justifyContent='center' alignItems='center' sx={{p:4}} >
               {data.map(item=>(
-            <Grid key={item.id} item xs={12} sm={4} container justifyContent='center' alignItems='center'>
+            <Grid key={item.id} item sx={{p:3}}  xs={12} sm={4} container justifyContent='center' alignItems='center'>
               <CardInfo item={item}  />
             </Grid>
               ))}
