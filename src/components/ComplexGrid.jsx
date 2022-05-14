@@ -20,7 +20,7 @@ export default function ComplexGrid({item}) {
           <Stack direction={'row'} gap={1} sx={{py:{xs:2},flexWrap:'wrap'}} >
 
           {item.langs.map((item) => (
-            <Chip key={item} label={item} color={'warning'}></Chip>
+            <Chip key={item} label={item} sx={{backgroundColor:'gold',fontWeight:600,color:'black'}}></Chip>
             ))}
             </Stack>
         </CardContent>

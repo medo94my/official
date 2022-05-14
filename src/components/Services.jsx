@@ -2,6 +2,7 @@ import { DesignServices, Search, Web } from '@mui/icons-material'
 import { Box, Container, Grid, Stack, Typography } from '@mui/material'
 import React from 'react'
 import CardInfo from './CardInfo'
+import Section from './Section'
 import { WaterMark } from './utils'
 
 
@@ -24,23 +25,12 @@ const data=[
 ]
 const Services = () => {
   return (
-    <Grid container>
-        <Grid item sm={1} position={'relative'} display={{xs:'none',lg:'block'}} sx={{py:'1rem'}}>
-          <WaterMark variant='h1' fontSize={{xs:'48px',md:'96px'}} >services</WaterMark> 
-        </Grid>
-        
-        <Grid item container justifyContent={'center'} alignItems={'center'} xs={12}  lg={10}>
-          <Typography variant='h2' sx={{textTransform:'uppercase', fontWeight:'bold',marginY:5}}> Services</Typography>
-
-          <Grid item container justifyContent='center' alignItems='center' sx={{p:4}} >
+          <Section title={'Services'} styles={{backgroundColor:'gold',color:'black'}}>
               {data.map(item=>(
-            <Grid key={item.id} item sx={{p:3}}  xs={12} sm={4} container justifyContent='center' alignItems='center'>
-              <CardInfo item={item}  />
-            </Grid>
+              <CardInfo key={item.id} item={item}  />
               ))}
-          </Grid>
-        </Grid>
-      </Grid>
+          </Section>
+
   )
 }
 
