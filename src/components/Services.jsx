@@ -1,3 +1,4 @@
+import styled from '@emotion/styled'
 import { DesignServices, Search, Web } from '@mui/icons-material'
 import { Box, Container, Grid, Stack, Typography } from '@mui/material'
 import React from 'react'
@@ -10,7 +11,7 @@ const data=[
   {
     id:1,
     img:<Search sx={{display:'block',width:'128px',height:'128px',mx:'auto', p:2}} />,
-    desc:'Researching & Planning'
+    desc:'Planning'
   },
   {
     id:2,
@@ -25,9 +26,10 @@ const data=[
 ]
 const Services = () => {
   return (
-          <Section title={'Services'} styles={{backgroundColor:'gold',color:'black'}}>
+          <Section title={'Services'}>
               {data.map(item=>(
-              <CardInfo key={item.id} item={item}  />
+              <CardInfo key={item.id} className='arrow' item={item}  />
+  
               ))}
           </Section>
 

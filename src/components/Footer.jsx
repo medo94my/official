@@ -1,9 +1,10 @@
 import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
-import Box from '@mui/material/Box';
+import {Box,IconButton,Stack} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
+import { Email, GitHub, Home, LinkedIn, Twitter, WhatsApp } from '@mui/icons-material'
 
 function Copyright() {
   return (
@@ -26,6 +27,19 @@ function Copyright() {
         flexDirection: 'column',
       }}
     >
+       
+                            <Stack direction='row' justifyContent='center' my={3}>
+                            <IconButton size='large' aria-label="Github">
+                            <GitHub fontSize='large'/>
+                          </IconButton>
+                            <IconButton aria-label="LinkedIn" size='large'>
+                            <LinkedIn fontSize='large'/>
+                          </IconButton>
+                            <IconButton aria-label="Twitter" size='large'>
+                            <Twitter fontSize='large'/>
+                          </IconButton>
+                                                      
+                            </Stack>
     
       <Box
         component="footer"

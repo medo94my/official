@@ -32,18 +32,6 @@ const About = () => {
                           </Box>
                           </Box>
                           <Typography variant='subtitle1' textAlign={{xs:'center',md:'left'}} sx={{mb:5}}>I've created websites using cutting-edge technology and have worked with backend technologies like Python Flask, Python Django, and Nodejs Express, as well as frontend technologies like vanilla Javascript, Reactjs, and Vue.</Typography>
-                            <Stack direction='row' justifyContent='center'>
-                            <IconButton aria-label="Github">
-                            <GitHub />
-                          </IconButton>
-                            <IconButton aria-label="LinkedIn">
-                            <LinkedIn />
-                          </IconButton>
-                            <IconButton aria-label="Twitter">
-                            <Twitter />
-                          </IconButton>
-                                                      
-                            </Stack>
                         </Grid>
                         <Grid item lg={4}  display={{xs:'none',lg:'block'}}>
                         <img className="about-img" src={about} width="500" alt=""/>

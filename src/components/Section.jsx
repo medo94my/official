@@ -1,13 +1,13 @@
-import { Container, Grid, Typography, Stack } from "@mui/material";
-import React from "react";
-import ComplexGrid from "./ComplexGrid";
-import { WaterMark } from "./utils";
-import { skills as data } from "../data";
+import { Container, Grid, Typography, Stack } from "@mui/material"
+import React from "react"
+import ComplexGrid from "./ComplexGrid"
+import { WaterMark } from "./utils"
+import { skills as data } from "../data"
 
-const Section = ({title,children,styles}) => {
-  return (
-    <Grid container sx={styles}>
-      {/* <Grid
+const Section = ({ title, children, styles }) => {
+    return (
+        <Grid container sx={styles}>
+            {/* <Grid
         item
         sm={1}
         position={"relative"}
@@ -19,31 +19,39 @@ const Section = ({title,children,styles}) => {
         </WaterMark>
       </Grid> */}
 
-      <Grid
-        container
-        justifyContent={"center"}
-        alignItems={"center"}
-        xs={12}
-        lg={12}
-        item
-      >
-        <Typography
-          variant="h2"
-          sx={{ textTransform: "uppercase", fontWeight: "bold", marginY: 5 }}
-        >
-          {title}
-        </Typography>
-        <Grid
-          container
-          sx={{ py: "4rem" }}
-          justifyContent="center"
-          alignItems="center"
-        >
-          {children}
+            <Grid
+                container
+                justifyContent={"center"}
+                alignItems={"center"}
+                xs={12}
+                lg={12}
+                item
+            >
+                <Typography
+                    variant="h2"
+                    sx={{
+                        textTransform: "uppercase",
+                        fontWeight: "bold",
+                        marginY: 5,
+                        letterSpacing:'2px',
+                        color:'#fff',
+                        textShadow:'-1vmin -1vmin #3b3f46'
+                    
+                    }}
+                >
+                    {title}
+                </Typography>
+                <Grid
+                    container
+                    sx={{ py: "4rem" }}
+                    justifyContent="center"
+                    alignItems="center"
+                >
+                    {children}
+                </Grid>
+            </Grid>
         </Grid>
-      </Grid>
-    </Grid>
-  );
-};
+    )
+}
 
-export default Section;
+export default Section

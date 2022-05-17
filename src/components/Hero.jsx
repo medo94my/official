@@ -3,7 +3,7 @@ import Typed from "typed.js"
 import { Typography, Button, Stack, Box } from "@mui/material"
 import { styled } from "@mui/system"
 import { Visibility } from "@mui/icons-material"
-import ave from '/src/img/Group.svg'
+import ave from "/src/img/Group.svg"
 const MyComponent = styled("div")({
     clipPath: "polygon(100% 0, 100% 50%, 100% 100%, 0% 100%, 25% 50%, 0% 0%)",
     width: "100%",
@@ -23,14 +23,11 @@ const Wave = styled("div")({
     transform: "rotate(180deg)",
     zIndex: -1,
 })
-const Img=styled('img')`
-position:absolute;
-top:50%;
-right:auto;
-// margin:0px auto;
-transform:translateY(-50%);
-
-
+const Img = styled("img")`
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
 `
 
 export const Hero = () => {
@@ -64,7 +61,7 @@ export const Hero = () => {
                     direction="column"
                     justifyContent="center"
                     px="50px"
-                    width='100%'
+                    width="100%"
                     gap={5}
                     alignItems={{ xs: "center", md: "flex-start" }}
                     sx={{ height: "100%", py: 10, position: "relative" }}
@@ -83,7 +80,7 @@ export const Hero = () => {
                             <br />
                             i'm, ahmed <br />
                             <Box
-                                sx={{ height: "4rem", py: { xs: 3,md:0 } }}
+                                sx={{ height: "4rem", py: { xs: 3, md: 0 } }}
                                 style={{ color: "gold" }}
                                 ref={occupation}
                             ></Box>
@@ -95,7 +92,7 @@ export const Hero = () => {
                             textTransform={"capitalize"}
                             textAlign="center"
                             fontWeight="400"
-                            width='100%'
+                            width="100%"
                             color="white"
                             fontSize={{
                                 xs: "1.2rem",
@@ -112,17 +109,17 @@ export const Hero = () => {
                     <Button
                         variant="contained"
                         sx={{
-                            mt: { xs: 30, md: 10 },
+                            mt: { xs: 30, md: 0 },
                             px: 10,
                             py: 2,
                             mx: "auto",
-                            color: {xs:"white",lg:'black'},
-                            backgroundColor: {xs:"black",lg:'gold'},
+                            color: { xs: "white", lg: "black" },
+                            backgroundColor: { xs: "black", lg: "gold" },
                             transition: "all .5s ease-in",
                             "&:hover": {
-                                transform:'scale(.95)',
-                                backgroundColor:{xs:"black",lg:'gold'},
-                                color: {xs:"gold",lg:'white'},
+                                transform: "scale(.95)",
+                                backgroundColor: { xs: "black", lg: "gold" },
+                                color: { xs: "gold", lg: "white" },
                             },
                         }}
                         size="large"
@@ -138,8 +135,8 @@ export const Hero = () => {
                     flex={1}
                     sx={{ position: "relative", height: "100%" }}
                 >
-                    <MyComponent/>
-                    <Img  src={ave}/>
+                    <MyComponent />
+                    <Img src={ave} />
 
                     {/* <Image src={Me}/> */}
                 </Stack>
