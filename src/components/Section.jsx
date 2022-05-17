@@ -34,8 +34,7 @@ const Section = ({ title, children, styles }) => {
                         fontWeight: "bold",
                         marginY: 5,
                         letterSpacing:'2px',
-                        color:'#fff',
-                        textShadow:'-1vmin -1vmin #3b3f46'
+                        color:'rgba(255,255,255,0.85)',
                     
                     }}
                 >
