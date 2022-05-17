@@ -11,7 +11,7 @@ const About = () => {
           <WaterMark variant='h1' fontSize={{xs:'48px',md:'96px'}} >About</WaterMark> 
         </Grid> */}
         <Grid item container xs={12} justifyContent={'center'} alignItems={'center'} lg={12}>
-              <Typography variant='h2' sx={{textTransform:'uppercase', fontWeight:'bold',marginY:5}}> About</Typography>
+              <Typography variant='h2' sx={{textTransform:'uppercase', fontWeight:'bold',marginY:5, color:'rgba(255,255,255,0.85)'}}> About</Typography>
                        <Grid item container sx={{p:3,alignItems:'center',justifyContent:'center'}}>
                         <Grid  item xs={12} lg={8} sx={{width:'100%'}} px={{xs:2,md:10}}>
                           <Typography variant='h1' fontSize={{xs:39,sm:72,md:96}} textAlign={{xs:'center',sm:'left'}}>Ahmed
