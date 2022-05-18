@@ -11,7 +11,7 @@
     * [ ] section animations randomized 
     * [ ] radnom animation with section content
     * [ ] Skill section
-        * [ ]show langs after delay one by one 
+        * [ ] show langs after delay one by one 
     * Services section 
         * [ ] animatng a icons like rotate and stuff 
     * [ ] loading section 
