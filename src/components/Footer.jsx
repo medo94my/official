@@ -1,10 +1,9 @@
 import * as React from 'react';
-import CssBaseline from '@mui/material/CssBaseline';
 import {Box,IconButton,Stack} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
-import { Email, GitHub, Home, LinkedIn, Twitter, WhatsApp } from '@mui/icons-material'
+import {GitHub, LinkedIn, Twitter } from '@mui/icons-material'
 
 function Copyright() {
   return (

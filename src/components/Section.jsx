@@ -1,12 +1,9 @@
-import { Container, Grid, Typography, Stack } from "@mui/material"
+import { Grid, Typography } from "@mui/material"
 import React from "react"
-import ComplexGrid from "./ComplexGrid"
-import { WaterMark } from "./utils"
-import { skills as data } from "../data"
 
-const Section = ({ title, children, styles }) => {
+const Section = ({ title, children, styles ,secId}) => {
     return (
-        <Grid container sx={styles}>
+        <Grid container sx={styles} minHeight='100vh'>
             {/* <Grid
         item
         sm={1}
@@ -26,6 +23,7 @@ const Section = ({ title, children, styles }) => {
                 xs={12}
                 lg={12}
                 item
+                id={secId}
             >
                 <Typography
                     variant="h2"

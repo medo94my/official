@@ -1,19 +1,18 @@
-import { Email, GitHub, Home, LinkedIn, Twitter, WhatsApp } from '@mui/icons-material'
-import { Box, Grid, IconButton, Link, Stack, Typography } from '@mui/material'
+import { Email, Home, WhatsApp } from '@mui/icons-material'
+import { Box, Grid, Link, Typography } from '@mui/material'
 import React from 'react'
-import { WaterMark } from './utils'
-import about from "/src/img/about.svg"
+import about from "/src/img/aboutme.svg"
 
 const About = () => {
   return (
-    <Grid container >
+    <Grid container id='about' sx={{minHeight:'100vh'}}>
             {/* <Grid item sm={1} position={'relative'} display={{xs:'none',lg:'block'}} sx={{py:'1rem'}}>
           <WaterMark variant='h1' fontSize={{xs:'48px',md:'96px'}} >About</WaterMark> 
         </Grid> */}
         <Grid item container xs={12} justifyContent={'center'} alignItems={'center'} lg={12}>
-              <Typography variant='h2' sx={{textTransform:'uppercase', fontWeight:'bold',marginY:5, color:'rgba(255,255,255,0.85)'}}> About</Typography>
+              <Typography variant='h2' sx={{textTransform:'uppercase', fontWeight:'bold',marginY:5, color:'rgba(255,255,255,0.85)'}}>About</Typography>
                        <Grid item container sx={{p:3,alignItems:'center',justifyContent:'center'}}>
-                        <Grid  item xs={12} lg={8} sx={{width:'100%'}} px={{xs:2,md:10}}>
+                        <Grid  item xs={12} lg={6} sx={{width:'100%'}} px={{xs:2,md:10}}>
                           <Typography variant='h1' fontSize={{xs:39,sm:72,md:96}} textAlign={{xs:'center',sm:'left'}}>Ahmed
                             <span style={{color:'gold'}}> Tawfik</span>
                           </Typography>
@@ -31,10 +30,12 @@ const About = () => {
                             <Link href="mailto:medoroyalrma@gmail.com" color="inherit" style={{textDecoration:'none'}} >medoroyalrma@gmail.com</Link>
                           </Box>
                           </Box>
-                          <Typography variant='subtitle1' textAlign={{xs:'center',md:'left'}} sx={{mb:5}}>I've created websites using cutting-edge technology and have worked with backend technologies like Python Flask, Python Django, and Nodejs Express, as well as frontend technologies like vanilla Javascript, Reactjs, and Vue.</Typography>
+                          <Box sx={{background:'#1E1E1E',p:'1rem',borderRadius:5,border:'1px solid gold'}}>
+                          <Typography variant='subtitle1' sx={{color:'gold'}} textAlign={{xs:'center'}}>I've created websites using cutting-edge technology and have worked with backend technologies like Python Flask, Python Django, and Nodejs Express, as well as frontend technologies like vanilla Javascript, Reactjs, and Vue.</Typography>
+                          </Box>
                         </Grid>
-                        <Grid item lg={4}  display={{xs:'none',lg:'block'}}>
-                        <img className="about-img" src={about} width="500" alt=""/>
+                        <Grid item lg={6} sx={{p:3}}  display={{xs:'none',lg:'block'}}>
+                        <img src={about} style={{margin:'0 auto',display:'block'}} alt="Aboutme"/>
                         </Grid>
                       </Grid>
                       </Grid>

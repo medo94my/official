@@ -8,7 +8,7 @@ import Section from './Section'
 const Skills = () => {
   return (
     
-    <Section title='Skills'>
+    <Section title='Skills' secId='skills'>
     {data.map((item) => (
             <ComplexGrid key={item.id} item={item} />
           ))}

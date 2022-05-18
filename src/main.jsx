@@ -6,10 +6,18 @@ import ResponsiveAppBar from './components/ResponsiveAppBar'
 // import 'bootstrap/dist/cssbootstrap.min.css';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
+
 const darkTheme = createTheme({
   palette: {
     mode: 'dark'
   },
+  typography: {
+    "fontFamily": `"Urbanist","Roboto", "Helvetica", "Arial", sans-serif`,
+    "fontSize": 14,
+    "fontWeightLight": 300,
+    "fontWeightRegular": 400,
+    "fontWeightMedium": 500
+   }
 });
 
 

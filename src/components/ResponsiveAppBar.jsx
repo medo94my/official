@@ -7,11 +7,10 @@ import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-
+import { Stack } from '@mui/material';
 const pages = ['Home','Services','Skills','Projects','About'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
@@ -31,14 +30,17 @@ const ResponsiveAppBar = () => {
     <AppBar position="sticky" color='primary'>
       <Container maxWidth="lg">
         <Toolbar disableGutters>
+        
+
           <Typography
             variant="h6"
             noWrap
             component="div"
             sx={{ mr: 0, display: { xs: 'none', md: 'flex' } }}
-          >
-            AHMED.
+            >
+            AHMED
           </Typography>
+          
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
@@ -71,7 +73,14 @@ const ResponsiveAppBar = () => {
             >
               {pages.map((page) => (
                 <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
+                 <Button
+                key={page}
+                onClick={handleCloseNavMenu}
+                href={`#${page.toLowerCase()}`}
+                sx={{ my: 2,px:3, color: 'white', display: 'block' }}
+              >
+                {page}
+              </Button>
                 </MenuItem>
               ))}
             </Menu>
@@ -89,6 +98,7 @@ const ResponsiveAppBar = () => {
               <Button
                 key={page}
                 onClick={handleCloseNavMenu}
+                href={`#${page.toLowerCase()}`}
                 sx={{ my: 2,px:3, color: 'white', display: 'block' }}
               >
                 {page}

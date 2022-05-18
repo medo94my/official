@@ -26,7 +26,7 @@ const Wave = styled("div")({
 const Img = styled("img")`
     position: absolute;
     top: 50%;
-    right: 10px;
+    right:3vmin;
     transform: translateY(-50%);
 `
 
@@ -49,7 +49,7 @@ export const Hero = () => {
     }, [])
 
     return (
-        <Stack sx={{ height: "95vh" }}>
+        <Stack sx={{ height: "100vh" }} id='home'>
             <Stack
                 direction={{ xs: "column", sm: "row" }}
                 justifyContent="center"
@@ -57,7 +57,7 @@ export const Hero = () => {
                 sx={{ width: "100%", height: "100%" }}
             >
                 <Stack
-                    flex={2}
+                    flex={3}
                     direction="column"
                     justifyContent="center"
                     px="50px"
@@ -132,7 +132,7 @@ export const Hero = () => {
                 </Stack>
                 <Stack
                     display={{ xs: "none", lg: "block" }}
-                    flex={1}
+                    flex={2}
                     sx={{ position: "relative", height: "100%" }}
                 >
                     <MyComponent />

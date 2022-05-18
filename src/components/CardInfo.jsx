@@ -1,15 +1,8 @@
 import * as React from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import { CardActionArea, Grid, styled } from '@mui/material';
-import { DesignServices } from '@mui/icons-material';
-const MyCardMedia=styled(CardMedia)`
-.MuiCardMedia-root .MuiCardMedia-media .MuiCardMedia-img .css-1hoisz4-MuiCardMedia-root{
-    color:white;
-}
-`
 
 const Arrow=styled('span')(
   {
@@ -52,7 +45,7 @@ export default function CardInfo({item}) {
            {item.desc}
           </Typography>
         </CardContent>
-        {item.img}
+        {<item.img sx={{display:'block',width:'128px',height:'128px',mx:'auto', p:2}}/>}
       </CardActionArea>
     </Card>
     {item.id !==3 && <Arrow sx={{ display:{xs:'none',lg:'inline-block'}}}/>}
