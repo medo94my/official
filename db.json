@@ -1,0 +1,102 @@
+{
+  "skills": [
+    {
+      "id": 1,
+      "icon": "/web-design.png",
+      "title": "Frontend",
+      "langs": ["HTML", "CSS3", "JavaScript"]
+    },
+    {
+      "id": 2,
+      "icon": "/feature.png",
+      "title": "Backend",
+      "langs": ["Python", "PHP", "Nodejs"]
+    },
+    {
+      "id": 3,
+      "icon": "/framework.png",
+      "title": "Framework",
+      "langs": ["Flask", "Laravel", "Express"]
+    },
+    {
+      "id": 4,
+      "icon": "/database-storage.png",
+      "title": "Databases",
+      "langs": ["MYSQL", "MONGODB"]
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "name": "Martify",
+      "type": "e-commerce",
+      "languages": ["html", "css", "JS", "PHP", "Laravel"],
+      "desc": "This was my FYP using php. This is an online grocery shop to be able to buy form major shops online and deliver it to home",
+      "github": "https://github.com/medo94my/martify-v1.2",
+      "website": "",
+      "media": "/guess-game.gif"
+    },
+    {
+      "id": 2,
+      "name": "GIS Project",
+      "type": "GIS Maps",
+      "languages": ["python", "flask", "folium", "html", "css"],
+      "desc": "Velit exercitation sunt ipsum deserunt excepteur nisi enim. Occaecat quis esse adipisicing exercitation eiusmod cillum dolore eu eiusmod. ",
+      "github": "https://github.com/medo94my/gis-Project",
+      "website": "https://maps-dev.herokuapp.com/",
+      "media": "/guess-game.gif"
+    },
+    {
+      "id": 3,
+      "name": "Guess number",
+      "type": "game portal",
+      "languages": ["python", "flask", "mongodb", "html", "css", "js"],
+      "desc": "This is a guess number its working the same idea of master mind. it assking user to guess the generated number to get points",
+      "github": "https://github.com/medo94my/game-dev",
+      "website": "https://mastermind-me.herokuapp.com/",
+      "media": "/guess-game.gif"
+    },
+    {
+      "id": 4,
+      "name": "bookify",
+      "type": "online bookstore",
+      "languages": ["python", "flask", "mongodb", "html", "css", "js"],
+      "desc": "This is a guess number its working the same idea of master mind. it assking user to guess the generated number to get points",
+      "github": "https://github.com/medo94my/E-commerce_front_end",
+      "website": "https://sprightly-smakager-12110c.netlify.app",
+      "media": "/bookify.gif"
+    }
+  ],
+  "services": [
+    {
+      "id": 1,
+      "icon": "Search",
+      "desc": "Planning"
+    },
+    {
+      "id": 2,
+      "icon": "Palette",
+      "desc": "Designing"
+    },
+    {
+      "id": 3,
+      "icon": "Code",
+      "desc": "Coding"
+    }
+  ],
+  "socialLinks": [],
+  "personalInfo": {
+    "firstName": "Ahmed",
+    "lastName": "Tawfik",
+    "address": "Based in Istanbul, Turkey",
+    "phone": "+601111884535",
+    "email": "medoroyalrma@gmail.com",
+    "summary": {
+      "text1": "I've created websites using cutting-edge technology and have worked with backend technologies like ",
+      "backend": ["Python Flask", "Python Django", "Nodejs Express"],
+      "text2": ", as well as frontend technologies like ",
+      "frontend": ["vanilla Javascript", "Reactjs", "Vue"],
+      "text3": "."
+    }
+  }
+}
