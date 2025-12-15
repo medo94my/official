@@ -19,7 +19,13 @@ export async function GET(
       )
     }
 
-    return NextResponse.json(project)
+    // Transform tags from string to array
+    const projectWithArrayTags = {
+      ...project,
+      tags: project.tags ? project.tags.split(',').filter(Boolean) : [],
+    }
+
+    return NextResponse.json(projectWithArrayTags)
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to fetch project' },
@@ -46,7 +52,7 @@ export async function PUT(
         image: body.image,
         githubUrl: body.githubUrl,
         liveUrl: body.liveUrl,
-        tags: body.tags,
+        tags: Array.isArray(body.tags) ? body.tags.join(',') : (body.tags || ''),
         featured: body.featured,
         order: body.order,
       },

@@ -8,7 +8,12 @@ export async function GET() {
     const projects = await prisma.project.findMany({
       orderBy: { order: 'asc' },
     })
-    return NextResponse.json(projects)
+    // Transform tags from string to array for frontend
+    const projectsWithArrayTags = projects.map(project => ({
+      ...project,
+      tags: project.tags ? project.tags.split(',').filter(Boolean) : [],
+    }))
+    return NextResponse.json(projectsWithArrayTags)
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to fetch projects' },
@@ -31,7 +36,7 @@ export async function POST(request: NextRequest) {
         image: body.image,
         githubUrl: body.githubUrl,
         liveUrl: body.liveUrl,
-        tags: body.tags || [],
+        tags: Array.isArray(body.tags) ? body.tags.join(',') : (body.tags || ''),
         featured: body.featured || false,
         order: body.order || 0,
       },

@@ -58,27 +58,29 @@ export default function HomePage() {
   const [hero, setHero] = useState<Hero>({ headline: 'Welcome', subheadline: '', ctaText: 'View My Work', ctaUrl: '#portfolio' })
 
   useEffect(() => {
-    // Fetch all data
+    // Fetch all data with error handling
     Promise.all([
-      fetch('/api/projects').then(r => r.json()),
-      fetch('/api/skills').then(r => r.json()),
-      fetch('/api/services').then(r => r.json()),
-      fetch('/api/about').then(r => r.json()),
-      fetch('/api/hero').then(r => r.json()),
+      fetch('/api/projects').then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch('/api/skills').then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch('/api/services').then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch('/api/about').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/hero').then(r => r.ok ? r.json() : null).catch(() => null),
     ]).then(([projectsData, skillsData, servicesData, aboutData, heroData]) => {
-      setProjects(projectsData)
-      setSkills(skillsData)
-      setServices(servicesData)
+      setProjects(Array.isArray(projectsData) ? projectsData : [])
+      setSkills(Array.isArray(skillsData) ? skillsData : [])
+      setServices(Array.isArray(servicesData) ? servicesData : [])
       setAbout(aboutData)
       if (heroData) setHero(heroData)
     })
   }, [])
 
-  const skillsByCategory = skills.reduce((acc, skill) => {
-    if (!acc[skill.category]) acc[skill.category] = []
-    acc[skill.category].push(skill)
-    return acc
-  }, {} as Record<string, Skill[]>)
+  const skillsByCategory = Array.isArray(skills)
+    ? skills.reduce((acc, skill) => {
+        if (!acc[skill.category]) acc[skill.category] = []
+        acc[skill.category].push(skill)
+        return acc
+      }, {} as Record<string, Skill[]>)
+    : {}
 
   return (
     <div className="min-h-screen bg-black text-white">
