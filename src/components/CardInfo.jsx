@@ -45,7 +45,12 @@ export default function CardInfo({item}) {
            {item.desc}
           </Typography>
         </CardContent>
-        {<item.img sx={{display:'block',width:'128px',height:'128px',mx:'auto', p:2}}/>}
+        {/* Render MUI Icon component or Image URL */}
+        {item.img ? (
+           <item.img sx={{display:'block',width:'128px',height:'128px',mx:'auto', p:2}}/>
+        ) : item.iconUrl ? (
+           <img src={item.iconUrl} alt={item.desc} style={{display:'block', width:'128px', height:'128px', margin:'0 auto', padding:'16px', objectFit: 'contain'}} />
+        ) : null}
       </CardActionArea>
     </Card>
     {item.id !==3 && <Arrow sx={{ display:{xs:'none',lg:'inline-block'}}}/>}
