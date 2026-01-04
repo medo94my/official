@@ -1,9 +1,13 @@
 import React, { useRef, useEffect } from "react"
-import Typed from "typed.js"
 import { Typography, Button, Stack, Box } from "@mui/material"
 import { styled } from "@mui/system"
 import { Visibility } from "@mui/icons-material"
 import ave from "/src/img/Group.svg"
+import gsap from "gsap"
+import { TextPlugin } from "gsap/TextPlugin"
+
+gsap.registerPlugin(TextPlugin)
+
 const MyComponent = styled("div")({
     clipPath: "polygon(100% 0, 100% 50%, 100% 100%, 0% 100%, 25% 50%, 0% 0%)",
     width: "100%",
@@ -32,19 +36,19 @@ const Img = styled("img")`
 
 export const Hero = () => {
     const occupation = useRef(null)
+
     useEffect(() => {
-        const typed = new Typed(occupation.current, {
-            strings: ["Code Trainer", "Web Manager", "Web Developer"],
-            startDelay: 100,
-            typeSpeed: 50,
-            backDelay: 100,
-            backSpeed: 50,
-            loop: true,
-            cursorChar: "",
+        const words = ["Code Trainer", "Web Manager", "Web Developer"]
+        let tl = gsap.timeline({ repeat: -1 })
+
+        words.forEach((word) => {
+            tl.to(occupation.current, { duration: 1, text: word, ease: "none" })
+              .to(occupation.current, { duration: 0.5, opacity: 1 }) // wait
+              .to(occupation.current, { duration: 1, text: "", ease: "none" })
         })
 
         return () => {
-            typed.destroy()
+           tl.kill();
         }
     }, [])
 
@@ -66,7 +70,6 @@ export const Hero = () => {
                     alignItems={{ xs: "center", md: "flex-start" }}
                     sx={{ height: "100%", py: 10, position: "relative" }}
                 >
-                    {/* <MyComponent1/> */}
                     <Box sx={{ width: "100%", my: { xs: 2, md: 10 } }}>
                         <Typography
                             variant="h1"
@@ -80,7 +83,8 @@ export const Hero = () => {
                             <br />
                             i'm, ahmed <br />
                             <Box
-                                sx={{ height: "4rem", py: { xs: 3, md: 0 } }}
+                                component="span"
+                                sx={{ height: "4rem", py: { xs: 3, md: 0 }, display: 'inline-block' }}
                                 style={{ color: "gold" }}
                                 ref={occupation}
                             ></Box>
@@ -137,22 +141,8 @@ export const Hero = () => {
                 >
                     <MyComponent />
                     <Img src={ave} />
-
-                    {/* <Image src={Me}/> */}
                 </Stack>
             </Stack>
         </Stack>
     )
-}
-
-{
-    /* <div className="work text-uppercase" style={{width:'90%',height:'70%'}}>
-                
-                {/* <h1 className="greeting">Hello, I am</h1> 
-                <h1 className="name" ref={el}></h1>
-                <h2 className="occupation" ref={occupation}></h2>
-              </div>
-                          <div  className=" btn-hero">
-                            <a href="#Portfolio" className="btn btn-outline-warning">SEE PORTFOLIO <i className="fas fa-arrow-right ml-2"></i></a>
-                          </div> */
 }

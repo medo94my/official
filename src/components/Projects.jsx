@@ -11,11 +11,17 @@ import {
     Stack,
     Typography,
 } from "@mui/material"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import Section from "./Section"
-import { projects } from "../data"
+import { getProjects } from "../services/contentful"
 
 const Projects = () => {
+    const [projects, setProjects] = useState([]);
+
+    useEffect(() => {
+        getProjects().then(setProjects);
+    }, []);
+
     return (
         <Section title="Portfolio" secId={"projects"}>
             {projects.map((project) => (
@@ -35,7 +41,7 @@ const Projects = () => {
                             component="img"
                             sx={{ objectFit: "contain" }}
                             image={
-                                project.media ? project.media : projectAvatar
+                                project.media ? project.media : ''
                             }
                         />
 
@@ -45,10 +51,10 @@ const Projects = () => {
                                 color="text.secondary"
                                 gutterBottom
                             >
-                                {project.name.toUpperCase()} -{" "}
+                                {project.name ? project.name.toUpperCase() : ''} -{" "}
                                 <Chip
                                     size="small"
-                                    label={project.type.toUpperCase()}
+                                    label={project.type ? project.type.toUpperCase() : ''}
                                     sx={{
                                         backgroundColor: "gold",
                                         color: "black",
@@ -62,7 +68,7 @@ const Projects = () => {
                                     alignItems="center"
                                     sx={{ pb: 2 }}
                                 >
-                                    {project.languages.map((language, idx) => (
+                                    {project.languages && project.languages.map((language, idx) => (
                                         <Chip
                                             size="small"
                                             key={`${language}-${idx}`}
@@ -72,8 +78,8 @@ const Projects = () => {
                                                 margin: "5px",
                                                 justifyContent: "center",
                                                 alignItems: "center",
-                                                borderColor: "white",
-                                                color: "white",
+                                                borderColor: "gray", // Changed from white as it's inside a white card usually, or verify bg
+                                                color: "gray",
                                             }}
                                         />
                                     ))}
