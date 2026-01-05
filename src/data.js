@@ -4,7 +4,9 @@ import framework from '/src/img/framework.png'
 import database from '/src/img/database-storage.png'
 import bookify from '/src/img/bookify.gif'
 import guessGame from '/src/img/guess-game.gif'
-import { DesignServices, Search, Web } from '@mui/icons-material'
+// import { DesignServices, Search, Web } from '@mui/icons-material'
+import { Palette, Search, Code } from 'lucide-react'
+
 export const skills=[
     {
       id:1,
@@ -83,12 +85,32 @@ export const service=[
   },
   {
     id:2,
-    img:DesignServices ,
+    img:Palette ,
     desc:'Designing'
   },
   {
     id:3,
-    img:Web,
+    img:Code,
     desc:'Coding'
   },
 ]
+
+export const stats = [
+    { label: 'Years of Experience', value: '5+' },
+    { label: 'Projects Completed', value: '25+' },
+    { label: 'Happy Clients', value: '10+' },
+];
+
+export const profile = {
+    name: "Ahmed Tawfik",
+    role: "Web Developer",
+    email: "medoroyalrma@gmail.com",
+    phone: "+601111884535",
+    location: "Istanbul, Turkey",
+    about: "I create websites using cutting-edge technology, specializing in backend frameworks like Python Flask, Django, and Node.js, as well as frontend experiences with React, Vue, and Vanilla JS.",
+    social: {
+        github: "https://github.com/medo94my",
+        linkedin: "https://linkedin.com/in/medo94my",
+        twitter: "https://twitter.com/medo94my"
+    }
+};

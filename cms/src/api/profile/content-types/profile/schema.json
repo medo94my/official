@@ -1,0 +1,36 @@
+{
+    "kind": "singleType",
+    "collectionName": "profiles",
+    "info": {
+        "singularName": "profile",
+        "pluralName": "profiles",
+        "displayName": "Profile"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "name": {
+            "type": "string"
+        },
+        "role": {
+            "type": "string"
+        },
+        "email": {
+            "type": "email"
+        },
+        "phone": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "about": {
+            "type": "text"
+        },
+        "social": {
+            "type": "json"
+        }
+    }
+}

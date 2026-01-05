@@ -1,0 +1,32 @@
+{
+    "kind": "collectionType",
+    "collectionName": "skills",
+    "info": {
+        "singularName": "skill",
+        "pluralName": "skills",
+        "displayName": "Skill"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "title": {
+            "type": "string"
+        },
+        "languages": {
+            "type": "string"
+        },
+        "icon": {
+            "type": "media",
+            "multiple": false,
+            "required": false,
+            "allowedTypes": [
+                "images",
+                "files",
+                "videos",
+                "audios"
+            ]
+        }
+    }
+}

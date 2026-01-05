@@ -1,10 +1,20 @@
 import React, { useRef, useState } from 'react';
-import { Box, Container, TextField, Button, Typography, Stack, MenuItem, Alert } from '@mui/material';
-import { Lightbulb } from '@mui/icons-material';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Lightbulb } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 
 const IdeaSubmission = () => {
     const [status, setStatus] = useState('');
+    const [projectType, setProjectType] = useState('mobile');
     const form = useRef();
 
     const handleSubmit = async (e) => {
@@ -35,91 +45,81 @@ const IdeaSubmission = () => {
     };
 
     return (
-        <Box sx={{ py: 10, bgcolor: '#1a1a1a', color: 'white' }} id="services-form">
-            <Container maxWidth="md">
-                <Typography variant="h3" align="center" gutterBottom fontWeight="bold" sx={{ color: 'gold' }}>
+        <div className="py-20 bg-[#1a1a1a] text-white" id="services-form">
+            <div className="max-w-3xl mx-auto px-4">
+                <h3 className="text-3xl font-bold text-center mb-2 text-yellow-400">
                     From Idea to Production
-                </Typography>
-                <Typography variant="h6" align="center" paragraph sx={{ color: '#ccc' }}>
+                </h3>
+                <p className="text-center text-[#ccc] mb-10 text-lg">
                     Have a brilliant app idea? Let's build it together.
-                </Typography>
+                </p>
 
-                <Box component="form" ref={form} onSubmit={handleSubmit} sx={{ mt: 5 }}>
-                    <Stack spacing={3}>
-                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                            <TextField
+                <form ref={form} onSubmit={handleSubmit} className="mt-8">
+                    <div className="space-y-6">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <Input
                                 name="user_name"
-                                label="Your Name"
-                                variant="filled"
-                                fullWidth
+                                placeholder="Your Name"
                                 required
-                                sx={{ bgcolor: 'white', borderRadius: 1 }}
+                                className="bg-white text-black border-none"
                             />
-                            <TextField
+                            <Input
                                 name="user_email"
-                                label="Email Address"
+                                placeholder="Email Address"
                                 type="email"
-                                variant="filled"
-                                fullWidth
                                 required
-                                sx={{ bgcolor: 'white', borderRadius: 1 }}
+                                className="bg-white text-black border-none"
                             />
-                        </Stack>
+                        </div>
 
-                        <TextField
-                            name="project_type"
-                            label="Project Type"
-                            select
-                            defaultValue="mobile"
-                            variant="filled"
-                            fullWidth
-                            sx={{ bgcolor: 'white', borderRadius: 1 }}
+                        {/* Hidden input to pass value to emailjs */}
+                        <input type="hidden" name="project_type" value={projectType} />
+                        
+                        <Select 
+                            value={projectType} 
+                            onValueChange={setProjectType}
                         >
-                            <MenuItem value="web">Web Application</MenuItem>
-                            <MenuItem value="mobile">Mobile App</MenuItem>
-                            <MenuItem value="ecommerce">E-Commerce</MenuItem>
-                            <MenuItem value="other">Other</MenuItem>
-                        </TextField>
+                            <SelectTrigger className="w-full bg-white text-black border-none h-10">
+                                <SelectValue placeholder="Project Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="web">Web Application</SelectItem>
+                                <SelectItem value="mobile">Mobile App</SelectItem>
+                                <SelectItem value="ecommerce">E-Commerce</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
 
-                        <TextField
-                            name="message"
-                            label="Describe your idea"
-                            multiline
-                            rows={6}
-                            variant="filled"
-                            fullWidth
-                            required
-                            helperText="Tell me about the core features and the problem it solves."
-                            sx={{ bgcolor: 'white', borderRadius: 1, '& .MuiFormHelperText-root': { color: '#aaa' } }}
-                        />
+                        <div className="space-y-1">
+                            <Textarea
+                                name="message"
+                                placeholder="Describe your idea"
+                                rows={6}
+                                required
+                                className="bg-white text-black border-none"
+                            />
+                            <p className="text-xs text-[#aaa] pl-1">Tell me about the core features and the problem it solves.</p>
+                        </div>
 
                         <Button
                             type="submit"
-                            variant="contained"
-                            size="large"
-                            startIcon={<Lightbulb />}
-                            sx={{
-                                bgcolor: 'gold',
-                                color: 'black',
-                                py: 1.5,
-                                fontSize: '1.1rem',
-                                '&:hover': { bgcolor: '#ffd700', transform: 'scale(1.02)' },
-                                transition: 'transform 0.2s'
-                            }}
+                            size="lg"
+                            className="bg-yellow-400 text-black hover:bg-yellow-500 hover:scale-[1.02] transition-transform w-full md:w-auto text-lg py-6"
                         >
-                            Submit Your Idea
+                            <Lightbulb className="mr-2 h-5 w-5" /> Submit Your Idea
                         </Button>
-                    </Stack>
-                    {status === 'sending' && <Alert severity="info" sx={{ mt: 2 }}>Sending...</Alert>}
+                    </div>
+                    
+                    {status === 'sending' && <div className="mt-4 p-3 bg-blue-900/50 text-blue-200 border border-blue-800 rounded">Sending...</div>}
                     {status === 'success' && (
-                        <Alert severity="success" sx={{ mt: 3 }}>
+                        <div className="mt-6 p-4 bg-green-900/50 text-green-200 border border-green-800 rounded">
                             Idea submitted! I'll review it and get back to you shortly.
-                        </Alert>
+                        </div>
                     )}
-                     {status === 'error' && <Alert severity="error" sx={{ mt: 2 }}>Failed to submit. Please try again.</Alert>}
-                </Box>
-            </Container>
-        </Box>
+                     {status === 'error' && <div className="mt-4 p-3 bg-red-900/50 text-red-200 border border-red-800 rounded">Failed to submit. Please try again.</div>}
+                </form>
+            </div>
+        </div>
     );
 };
 

@@ -1,53 +1,21 @@
-import { Grid, Typography } from "@mui/material"
 import React from "react"
 
-const Section = ({ title, children, styles ,secId}) => {
+const Section = ({ title, children, styles, secId }) => {
     return (
-        <Grid container sx={styles} minHeight='100vh'>
-            {/* <Grid
-        item
-        sm={1}
-        position={"relative"}
-        display={{ xs: "none", lg: "block" }}
-        sx={{ py: "1rem" }}
-      >
-        <WaterMark variant="h1" fontSize={{ xs: "42px", sm: "96px" }}>
-          {title}
-        </WaterMark>
-      </Grid> */}
-
-            <Grid
-                container
-                justifyContent={"center"}
-                alignItems={"center"}
-                xs={12}
-                lg={12}
-                item
-                id={secId}
-            >
-                <Typography
-                    variant="h2"
-                    sx={{
-                        textTransform: "uppercase",
-                        fontWeight: "bold",
-                        marginY: 5,
-                        letterSpacing:'2px',
-                        color:'rgba(255,255,255,0.85)',
-                    
-                    }}
-                >
+        <section 
+            className="min-h-screen w-full flex flex-col justify-center items-center dark:bg-slate-900" 
+            style={styles}
+            id={secId}
+        >
+            <div className="w-full flex flex-col justify-center items-center">
+                <h2 className="uppercase font-bold my-10 tracking-[2px] text-[rgba(255,255,255,0.85)] text-6xl">
                     {title}
-                </Typography>
-                <Grid
-                    container
-                    sx={{ py: "4rem" }}
-                    justifyContent="center"
-                    alignItems="center"
-                >
+                </h2>
+                <div className="w-full justify-center items-center py-16">
                     {children}
-                </Grid>
-            </Grid>
-        </Grid>
+                </div>
+            </div>
+        </section>
     )
 }
 

@@ -1,45 +1,37 @@
 import * as React from 'react';
-import Typography from '@mui/material/Typography';
-import { Chip, Box,Grid, CardMedia, CardContent, Card, Stack  } from '@mui/material';
+
+import { Card, CardContent } from "@/components/ui/card";
+import { motion } from "motion/react";
+
+
 export default function ComplexGrid({item}) {
   return (
+    <div>
+      <div className='flex w-full'>
 
-    <Grid container item xs={12} md={5} sx={{p:2}} bgcolor={'secondary'} justifyContent='center' alignItems='center'  >
-      <Card sx={{ display: "flex",width:'100%',height:'100%',px:2,justifyContent:'center', alignItems:'center' }} >
-      <CardMedia
-        component="img"
-        sx={{ width: 124, height:124, p:2 }}
-        image={item.icon}
-        alt="Live from space album cover"
-      />
-
-        <CardContent sx={{ display: "flex", flexDirection: "column" ,justifyContent:'space-around',p:{xs:.5,md:2}, alignItems:'flex-start',width:'100%' }} >
-          <Typography component="div" variant="h5" sx={{p:{xs:'.5rem 5px'}}}>
+        <div className="flex flex-col justify-center items-start p-2 md:p-4 gap-2">
+        <img
+          className="w-[124px] h-[124px] p-2 object-contain"
+          src={item.icon}
+          alt={item.title}
+        />
+          <div className="text-xl uppercase p-1 font-medium">
             {item.title.toUpperCase()}
-          </Typography>
-          <Stack direction={'row'} gap={1} sx={{py:{xs:2},flexWrap:'wrap'}} >
-
-          {item.langs.map((item) => (
-            <Chip key={item} label={item} sx={{backgroundColor:'gold',fontWeight:600,color:'black'}}></Chip>
+          </div>
+          
+        </div>
+        <div className="flex w-full">
+            {item.langs.map((lang) => (
+              <motion.span 
+              initial={{ scale: 0 }} animate={{ scale: 1 }}
+                key={lang} 
+                className="bg-[gold] font-semibold text-black px-3 py-1 rounded-full text-sm"
+              >
+                {lang}
+              </motion.span>
             ))}
-            </Stack>
-        </CardContent>
-    </Card>
-              {/* <Grid xs={12} sm={3} item >
-                <Stack justifyContent='center' alignItems='center' sx={{pr:{xs:'0',sm:'.5rem'}}}>
-                <img src={item.icon} width="64" alt={item.icon.split('/')[2].split('.')[0]}/>
-                </Stack>
-                    </Grid> 
-                <Grid xs={12} sm={9} sx={{p:'5px 7px'}}  item>
-                  <Typography variant='h6' textAlign={{xs:'center',sm:'left'}}>{item.title.toUpperCase()}</Typography>
-                  <Stack direction={'row'} gap={1} sx={{py:1}} flexWrap='wrap' justifyContent={{xs:'center',sm:'flex-start'}} alignItems={{xs:'center',sm:'flex-start'}}>
-                  {item.langs.map((lang,idx)=>(
-                     <Chip label={lang} key={idx} sx={{px:1}}/>
-                     ))}
-                     </Stack>
-                </Grid> */}
-                
-            </Grid> 
+          </div>
+      </div>
+    </div>
   );
 }
-//  <Chip label={lang} key={idx} sx={{px:1}}/>

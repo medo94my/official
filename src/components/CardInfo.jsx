@@ -1,60 +1,35 @@
 import * as React from 'react';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import { CardActionArea, Grid, styled } from '@mui/material';
+import { Card, CardContent } from "@/components/ui/card";
 
-const Arrow=styled('span')(
-  {
-    display:'inline-block',
-   ' &::after':{
-      content:'"→"',
-      color:'gold',
-      animation:'animate 1s linear infinite',
-      position:'absolute',
-      fontSize:96,
-      fontWeight:700,
-      top:'50%',
-      right:'-40px',
-      transform: 'translateY(-50%)',
-
-      '@keyframes animate':{
-        '0%':{
-          color:'gold'
-        },
-        '50%':{
-          color:'orange'
-        },
-        '75%':{
-          color:'yellow'
-        },
-        '100%':{
-          color:'gold'
-        },
-      }
-    }
-  },
-)
 export default function CardInfo({item}) {
   return (
-    <Grid item sx={{p:3}} position='relative'  xs={12} sm={4} container justifyContent='center' alignItems='center'>
-    <Card sx={{minWidth:'17rem'}}>
-      <CardActionArea sx={{height:'15rem' }} >
-        <CardContent>
-          <Typography variant="h5" textAlign={'center'} color="text.primary" textTransform={'uppercase'}>
-           {item.desc}
-          </Typography>
-        </CardContent>
-        {/* Render MUI Icon component or Image URL */}
-        {item.img ? (
-           <item.img sx={{display:'block',width:'128px',height:'128px',mx:'auto', p:2}}/>
-        ) : item.iconUrl ? (
-           <img src={item.iconUrl} alt={item.desc} style={{display:'block', width:'128px', height:'128px', margin:'0 auto', padding:'16px', objectFit: 'contain'}} />
-        ) : null}
-      </CardActionArea>
-    </Card>
-    {item.id !==3 && <Arrow sx={{ display:{xs:'none',lg:'inline-block'}}}/>}
-    
-     </Grid>
+    <div className="w-full flex justify-center items-center h-full">
+        <Card className="w-full h-full bg-[#0a0a0a] border border-gray-800 hover:border-primary transition-all duration-300 group cursor-pointer hover:shadow-[0_0_20px_rgba(255,215,0,0.1)]">
+            <CardContent className="h-full flex flex-col items-center justify-center p-8 gap-6">
+                {/* Render Image or Icon */}
+                <div className="p-4 bg-black rounded-full border border-gray-800 group-hover:border-primary/50 transition-colors">
+                    {item.img ? (
+                         // If item.img is a functional component (Lucide icon)
+                         (typeof item.img === 'function' || typeof item.img === 'object') ? (
+                             <item.img className="w-10 h-10 text-white group-hover:text-primary transition-colors" />
+                         ) : (
+                             <img src={item.img} alt={item.desc} className="w-12 h-12 object-contain" />
+                         )
+                    ) : item.iconUrl ? (
+                        <img src={item.iconUrl} alt={item.desc} className="w-12 h-12 object-contain" />
+                    ) : null}
+                </div>
+
+                <div className="text-center space-y-2">
+                    <h5 className="text-xl uppercase font-bold text-white group-hover:text-primary transition-colors">
+                        {item.desc}
+                    </h5>
+                    <p className="text-sm text-gray-500 max-w-[200px] mx-auto hidden group-hover:block animate-in fade-in slide-in-from-bottom-2">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </p>
+                </div>
+            </CardContent>
+        </Card>
+    </div>
   );
 }

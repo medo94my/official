@@ -1,115 +1,77 @@
 import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
-import { Stack } from '@mui/material';
+import { Button } from '@/components/ui/button'
+import { ModeToggle } from '@/components/mode-toggle'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Menu } from "lucide-react"
+
 const pages = ['Home','Services','Skills','Projects','About'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 const ResponsiveAppBar = () => {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
-
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
   return (
-    <AppBar position="sticky" color='primary'>
-      <Container maxWidth="lg">
-        <Toolbar disableGutters>
-        
+    <div className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
 
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            sx={{ mr: 0, display: { xs: 'none', md: 'flex' } }}
-            >
-            AHMED
-          </Typography>
-          
+          {/* Logo / Brand - Desktop */}
+          <div className="hidden md:flex">
+             <a href="#" className="mr-6 flex items-center space-x-2">
+                <img src="@/img/logo.png" alt="AT Logo" className="h-10 w-auto" />
+             </a>
+          </div>
 
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: 'block', md: 'none' },
-              }}
-            >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                 <Button
-                key={page}
-                onClick={handleCloseNavMenu}
-                href={`#${page.toLowerCase()}`}
-                sx={{ my: 2,px:3, color: 'white', display: 'block' }}
-              >
-                {page}
-              </Button>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}
-          >
-           AHMED.
-          </Typography>
-          <Box sx={{ flexGrow: 3,justifyContent:'center', display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
-              <Button
-                key={page}
-                onClick={handleCloseNavMenu}
-                href={`#${page.toLowerCase()}`}
-                sx={{ my: 2,px:3, color: 'white', display: 'block' }}
-              >
-                {page}
-              </Button>
-            ))}
-          </Box>
+          {/* Mobile Menu */}
+          <div className="flex md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="-ml-2">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[200px]">
+                {pages.map((page) => (
+                  <DropdownMenuItem key={page} asChild>
+                    <a href={`#${page.toLowerCase()}`}>{page}</a>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-          
-        </Toolbar>
-      </Container>
-    </AppBar>
+          {/* Logo / Brand - Mobile Center */}
+          <div className="flex md:hidden flex-1 justify-center">
+             <a href="#" className="flex items-center">
+                <img src="@/img/logo.png" alt="AT Logo" className="h-8 w-auto" />
+             </a>
+          </div>
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex flex-1 items-center justify-center gap-6">
+             <nav className="flex items-center gap-6 text-sm font-medium">
+                {pages.map((page) => (
+                    <a
+                        key={page}
+                        href={`#${page.toLowerCase()}`}
+                        className="transition-colors hover:text-foreground/80 text-foreground/60 hover:text-yellow-400"
+                    >
+                        {page}
+                    </a>
+                ))}
+             </nav>
+          </div>
+
+          {/* Actions (Mode Toggle) */}
+          <div className="flex items-center justify-end">
+            <ModeToggle/>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 export default ResponsiveAppBar;

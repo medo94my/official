@@ -1,6 +1,5 @@
 import React from 'react';
-import { Fab } from '@mui/material';
-import { WhatsApp } from '@mui/icons-material';
+import { MessageCircle } from 'lucide-react';
 
 const WhatsAppButton = () => {
   // Replace with your phone number
@@ -13,23 +12,13 @@ const WhatsAppButton = () => {
   };
 
   return (
-    <Fab
-      color="success"
+    <button
       aria-label="whatsapp"
       onClick={handleClick}
-      sx={{
-        position: 'fixed',
-        bottom: 32,
-        right: 32,
-        zIndex: 1000,
-        bgcolor: '#25D366',
-        '&:hover': {
-          bgcolor: '#128C7E'
-        }
-      }}
+      className="fixed bottom-8 right-8 z-[1000] bg-[#25D366] hover:bg-[#128C7E] text-white p-4 rounded-full shadow-lg transition-colors flex items-center justify-center h-14 w-14"
     >
-      <WhatsApp />
-    </Fab>
+      <MessageCircle className="h-8 w-8" />
+    </button>
   );
 };
 
