@@ -12,6 +12,14 @@ export default defineConfig({
       "/src": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: true,
+    allowedHosts: [
+      'profile.ahmetinnovationhub.com',
+      'strapi.ahmetinnovationhub.com',
+      'localhost',
+    ],
+  },
   test: {
     environment: 'jsdom',
     setupFiles: './src/tests/setup.js',
