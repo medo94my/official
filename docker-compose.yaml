@@ -19,9 +19,6 @@ services:
     restart: unless-stopped
     ports:
       - "1337:1337"
-    volumes:
-      - ./cms:/opt/app
-      - /opt/app/node_modules
     environment:
       - DATABASE_CLIENT=sqlite
       - DATABASE_FILENAME=.tmp/data.db
@@ -42,10 +39,6 @@ services:
     restart: unless-stopped
     ports:
       - "5173:5173"
-    volumes:
-      - .:/app
-      - /app/node_modules
-      # Exclude cms directory from frontend context to avoid confusion/loops if mapped poorly
     environment:
       - VITE_STRAPI_URL=http://localhost:1337 # Browser accesses this, so localhost is correct
     depends_on:
