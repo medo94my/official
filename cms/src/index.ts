@@ -83,7 +83,7 @@ export default {
     // 2. Seed Data
     try {
         // Profile
-        const profileCount = await strapi.documents('api::profile.profile').count();
+        const profileCount = await strapi.documents('api::profile.profile').count({});
         if (profileCount === 0) {
             await strapi.documents('api::profile.profile').create({
                 data: profileData,
@@ -93,7 +93,7 @@ export default {
         }
 
         // Stats
-        const statsCount = await strapi.documents('api::stat.stat').count();
+        const statsCount = await strapi.documents('api::stat.stat').count({});
         if (statsCount === 0) {
             for (const item of statsData) {
                 await strapi.documents('api::stat.stat').create({ data: item, status: 'published' });
@@ -102,7 +102,7 @@ export default {
         }
 
         // Skills
-        const skillsCount = await strapi.documents('api::skill.skill').count();
+        const skillsCount = await strapi.documents('api::skill.skill').count({});
         if (skillsCount === 0) {
             for (const item of skillsData) {
                 await strapi.documents('api::skill.skill').create({ data: item, status: 'published' });
@@ -111,7 +111,7 @@ export default {
         }
 
         // Projects
-        const projectsCount = await strapi.documents('api::project.project').count();
+        const projectsCount = await strapi.documents('api::project.project').count({});
         if (projectsCount === 0) {
             for (const item of projectsData) {
                 await strapi.documents('api::project.project').create({ data: item, status: 'published' });
@@ -120,7 +120,7 @@ export default {
         }
 
         // Services
-        const serviceCount = await strapi.documents('api::service.service').count();
+        const serviceCount = await strapi.documents('api::service.service').count({});
         if (serviceCount === 0) {
             for (const item of serviceData) {
                 await strapi.documents('api::service.service').create({ data: item, status: 'published' });
