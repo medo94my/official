@@ -1,6 +1,26 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: portfolio_db
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: strapi_password_change_in_production
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - portfolio-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U strapi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Strapi Headless CMS
   cms:
     build: 
@@ -8,8 +28,12 @@ services:
       dockerfile: Dockerfile
       args:
         NODE_ENV: production
-        DATABASE_CLIENT: sqlite
-        DATABASE_FILENAME: .tmp/data.db
+        DATABASE_CLIENT: postgres
+        DATABASE_HOST: postgres
+        DATABASE_PORT: 5432
+        DATABASE_NAME: portfolio_db
+        DATABASE_USERNAME: strapi
+        DATABASE_PASSWORD: strapi_password_change_in_production
         JWT_SECRET: super-secret-jwt-token-change-me
         ADMIN_JWT_SECRET: super-secret-admin-jwt-token-change-me
         APP_KEYS: key1,key2,key3,key4
@@ -20,13 +44,20 @@ services:
     ports:
       - "1337:1337"
     environment:
-      - DATABASE_CLIENT=sqlite
-      - DATABASE_FILENAME=.tmp/data.db
+      - DATABASE_CLIENT=postgres
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=portfolio_db
+      - DATABASE_USERNAME=strapi
+      - DATABASE_PASSWORD=strapi_password_change_in_production
       - JWT_SECRET=super-secret-jwt-token-change-me
       - ADMIN_JWT_SECRET=super-secret-admin-jwt-token-change-me
       - APP_KEYS=key1,key2,key3,key4
       - API_TOKEN_SALT=somesalt
       - TRANSFER_TOKEN_SALT=somesalt
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - portfolio-network
 
@@ -49,3 +80,6 @@ services:
 networks:
   portfolio-network:
     driver: bridge
+
+volumes:
+  postgres_data:
