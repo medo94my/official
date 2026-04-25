@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import aboutImage from "@/img/aboutme.svg"
 import { Button } from "@/components/ui/button"
 import { getProfile } from "../services/strapi"
+import { PROFILE } from '../constants/profile'
 
 const About = () => {
     const [profile, setProfile] = useState(null);
@@ -24,7 +25,7 @@ const About = () => {
                         <div className="absolute inset-0 bg-primary/20 rounded-2xl transform translate-x-4 translate-y-4"></div>
                         <img 
                             src={aboutImage} 
-                            alt={profile?.name || "Ahmed Tawfik"} 
+                            alt={profile?.name || PROFILE.name} 
                             className="relative z-10 w-full h-auto rounded-2xl shadow-2xl border border-white/10"
                         />
                     </div>
@@ -39,7 +40,7 @@ const About = () => {
                     </h2>
                     
                     <p className="text-gray-400 text-lg leading-relaxed max-w-xl">
-                        {profile?.about || "I create websites using cutting-edge technology, specializing in backend frameworks like Python Flask, Django, and Node.js..."}
+                        {profile?.about || PROFILE.about}
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg pt-4">
@@ -47,14 +48,14 @@ const About = () => {
                             <MapPin className="text-primary h-5 w-5" />
                             <div className="text-left">
                                 <p className="text-xs text-muted-foreground uppercase">Location</p>
-                                <p className="text-sm font-medium">{profile?.location || "Istanbul, Turkey"}</p>
+                                <p className="text-sm font-medium">{profile?.location || PROFILE.location}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border/50">
                              <Phone className="text-primary h-5 w-5" />
                              <div className="text-left">
                                  <p className="text-xs text-muted-foreground uppercase">Phone</p>
-                                 <p className="text-sm font-medium">{profile?.phone || "+601111884535"}</p>
+                                 <p className="text-sm font-medium">{profile?.phone || PROFILE.phone}</p>
                              </div>
                         </div>
                          <div className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border/50 sm:col-span-2">
@@ -62,7 +63,7 @@ const About = () => {
                              <div className="text-left">
                                  <p className="text-xs text-muted-foreground uppercase">Email</p>
                                  <a href={`mailto:${profile?.email}`} className="text-sm font-medium hover:text-primary transition-colors">
-                                     {profile?.email || "medoroyalrma@gmail.com"}
+                                     {profile?.email || PROFILE.email}
                                  </a>
                              </div>
                         </div>

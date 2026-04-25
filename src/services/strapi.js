@@ -1,5 +1,5 @@
 // src/services/strapi.js
-import { skills, projects, service, stats, profile } from '../data';
+import { FALLBACK_SKILLS, FALLBACK_PROJECTS, FALLBACK_SERVICES, STATS, PROFILE } from '../constants/profile';
 
 const STRAPI_URL = import.meta.env.VITE_STRAPI_URL || 'http://localhost:1337';
 const STRAPI_API = `${STRAPI_URL}/api`;
@@ -45,7 +45,7 @@ export const getSkills = async () => {
     }));
   } catch (error) {
     console.warn('Strapi: Fetch skills failed, using fallback.');
-    return skills;
+    return FALLBACK_SKILLS;
   }
 };
 
@@ -68,7 +68,7 @@ export const getProjects = async () => {
     }));
   } catch (error) {
     console.warn('Strapi: Fetch projects failed, using fallback.');
-    return projects;
+    return FALLBACK_PROJECTS;
   }
 };
 
@@ -87,7 +87,7 @@ export const getServices = async () => {
     }));
   } catch (error) {
     console.warn('Strapi: Fetch services failed, using fallback.');
-    return service;
+    return FALLBACK_SERVICES;
   }
 };
 
@@ -98,7 +98,7 @@ export const getStats = async () => {
         const json = await res.json();
         const items = flatten(json);
         
-        if (items.length === 0) return stats;
+        if (items.length === 0) return STATS;
 
         return items.map(item => ({
             label: item.label,
@@ -106,7 +106,7 @@ export const getStats = async () => {
         }));
     } catch (error) {
         console.warn('Strapi: Fetch stats failed, using fallback.');
-        return stats;
+        return STATS;
     }
 }
 
@@ -118,7 +118,7 @@ export const getProfile = async () => {
         const json = await res.json();
         const items = flatten(json);
         
-        if (!items || items.length === 0) return profile;
+        if (!items || items.length === 0) return PROFILE;
         const item = items[0];
 
         return {
@@ -128,10 +128,10 @@ export const getProfile = async () => {
             phone: item.phone,
             location: item.location,
             about: item.about,
-            social: item.social || profile.social 
+            social: item.social || PROFILE.social 
         };
     } catch (error) {
          console.warn('Strapi: Fetch profile failed, using fallback.');
-         return profile;
+         return PROFILE;
     }
 }

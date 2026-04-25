@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import emailjs from '@emailjs/browser';
 import { getProfile } from "../services/strapi"
+import { PROFILE } from '../constants/profile'
 
 const Contact = () => {
     const [status, setStatus] = useState('');
@@ -106,7 +107,7 @@ const Contact = () => {
                                  </div>
                                  <div>
                                      <p className="text-sm text-gray-500">Location</p>
-                                     <p className="text-white font-medium">{profile?.location || "Istanbul, Turkey"}</p>
+                                     <p className="text-white font-medium">{profile?.location || PROFILE.location}</p>
                                  </div>
                              </div>
                              <div className="flex items-center gap-4">
@@ -115,7 +116,7 @@ const Contact = () => {
                                  </div>
                                  <div className="overflow-hidden">
                                      <p className="text-sm text-gray-500">Email</p>
-                                     <p className="text-white font-medium truncate">{profile?.email || "medoroyalrma@gmail.com"}</p>
+                                     <p className="text-white font-medium truncate">{profile?.email || PROFILE.email}</p>
                                  </div>
                              </div>
                          </div>

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Menu } from "lucide-react"
 
-const pages = ['Home','Services','Skills','Projects','About'];
+import { NAVIGATION_PAGES } from '../constants/profile';
 
 const ResponsiveAppBar = () => {
   return (
@@ -34,7 +34,7 @@ const ResponsiveAppBar = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-[200px]">
-                {pages.map((page) => (
+                {NAVIGATION_PAGES.map((page) => (
                   <DropdownMenuItem key={page} asChild>
                     <a href={`#${page.toLowerCase()}`}>{page}</a>
                   </DropdownMenuItem>
@@ -53,7 +53,7 @@ const ResponsiveAppBar = () => {
           {/* Desktop Menu */}
           <div className="hidden md:flex flex-1 items-center justify-center gap-6">
              <nav className="flex items-center gap-6 text-sm font-medium">
-                {pages.map((page) => (
+                {NAVIGATION_PAGES.map((page) => (
                     <a
                         key={page}
                         href={`#${page.toLowerCase()}`}
