@@ -14,6 +14,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      default:
+        # Addressed as `portfolio-db`, not `db`. The app also joins the shared
+        # infra-proxy network, where another stack already publishes the alias
+        # `db` — a bare `db` there resolves to a foreign Postgres and Prisma
+        # fails authentication against it.
+        aliases:
+          - portfolio-db
     # Not published by default — only the app needs to reach it. Uncomment to
     # run `prisma studio` from the host.
     # ports:
@@ -35,17 +43,30 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-portfolio}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-portfolio}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-portfolio}:${POSTGRES_PASSWORD}@portfolio-db:5432/${POSTGRES_DB:-portfolio}?schema=public
       NEXTAUTH_URL: ${NEXTAUTH_URL:?NEXTAUTH_URL must be set in .env}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NEXTAUTH_SECRET must be set in .env}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     ports:
-      - "${APP_PORT:-3000}:3000"
+      # Loopback only. Public traffic arrives via the infra-proxy network
+      # (Traefik -> Cloudflare Tunnel), so port 3000 does not need to be
+      # reachable from outside this host.
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
     volumes:
       # Résumé PDF and project images can be swapped without a rebuild.
       - ./public/resume:/app/public/resume:ro
+    networks:
+      - default
+      - infra-proxy
 
 volumes:
   pgdata:
+
+networks:
+  # Shared reverse-proxy network. Traefik resolves this container by name over
+  # it; declaring it here means the route survives `docker compose up`, which a
+  # manual `docker network connect` would not.
+  infra-proxy:
+    external: true

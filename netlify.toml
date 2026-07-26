@@ -1,27 +1,34 @@
-# Netlify serves the Next.js app. The Docker/Compose setup in this repo is a
-# separate, self-hosted deployment path — the two do not conflict.
+# Netlify is parked. This repo deploys via Docker — see docker-compose.yml.
 #
-# Required environment variables (set in the Netlify UI, not here):
-#   DATABASE_URL     - a hosted Postgres (Neon, Supabase, …) with sslmode=require
-#   NEXTAUTH_URL     - the site's public URL, e.g. https://ahmedtawfik.netlify.app
-#   NEXTAUTH_SECRET  - openssl rand -base64 32
+# The Netlify site (`ahmedtawfik`) predates this repo becoming a Next.js app.
+# Its last successful deploy was June 2020, and every build since has failed,
+# including production builds, so it was emailing a failure on every push.
 #
-# Optional (each feature hides itself when unset):
-#   OPENAI_API_KEY, NEXT_PUBLIC_EMAILJS_*
+# `ignore` is Netlify's build-skip hook: exit 0 means "nothing changed, skip
+# the build". Exiting 0 unconditionally cancels every build, so no deploy is
+# attempted and none can fail. The existing 2020 static deploy stays live and
+# untouched.
 #
-# NEXT_PUBLIC_* values are compiled into the browser bundle, so changing one
-# needs a redeploy, not just a restart.
+# To revive Netlify as a real deployment target:
+#   1. Delete the [build] block below.
+#   2. Restore the build command and the Next.js runtime plugin:
+#        [build]
+#          command = "npx prisma generate && npm run build"
+#        [[plugins]]
+#          package = "@netlify/plugin-nextjs"
+#      and reinstall it: npm i -D @netlify/plugin-nextjs
+#   3. Add "rhel-openssl-3.0.x" to binaryTargets in prisma/schema.prisma —
+#      Netlify Functions run on Amazon Linux and the Alpine engine will not
+#      load there.
+#   4. Make output: 'standalone' in next.config.js conditional on NETLIFY
+#      being unset; Netlify's runtime manages its own output.
+#   5. Set DATABASE_URL, NEXTAUTH_URL and NEXTAUTH_SECRET in the Netlify UI,
+#      then migrate and seed that database once.
+#      (The build itself does not need a reachable database.)
+#
+#   Note: the 2020 site settings in the Netlify UI are the likely reason builds
+#   fail even with the plugin configured — check Base/Publish directory there
+#   first, since UI settings can conflict with this file.
 
 [build]
-  # `prisma generate` must run before `next build` so the client exists with the
-  # right engine for Netlify's Lambda runtime. It also runs via postinstall;
-  # this is belt and braces for cached-dependency builds.
-  command = "npx prisma generate && npm run build"
-
-[build.environment]
-  NODE_VERSION = "20"
-  # Skip Prisma's postinstall advertisement noise in build logs.
-  PRISMA_HIDE_UPDATE_MESSAGE = "true"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+  ignore = "exit 0"

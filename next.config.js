@@ -1,8 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Standalone output is for the Docker image only. Netlify's Next runtime
-  // manages its own output, so leave it alone there.
-  output: process.env.NETLIFY ? undefined : 'standalone',
+  // Standalone output keeps the Docker image small (see Dockerfile).
+  output: 'standalone',
 
   experimental: {
     // Keeps Prisma out of the webpack bundle so its query engine binary is
