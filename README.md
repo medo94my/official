@@ -41,6 +41,29 @@ Migrations are applied automatically on every start. Seeding is a separate,
 explicit command: it overwrites seeded fields with whatever is in the seed
 file, so it must not be wired into container startup.
 
+### On Netlify
+
+`netlify.toml` configures the Next.js runtime, so a connected site builds with
+no extra setup. Set these in the Netlify UI first — the build succeeds without
+them, but the site will have no content and no working login:
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | A hosted Postgres (Neon, Supabase…), with `sslmode=require` |
+| `NEXTAUTH_URL` | The site's public URL |
+| `NEXTAUTH_SECRET` | `openssl rand -base64 32` |
+
+Then seed that database once from your machine, pointing `DATABASE_URL` at it:
+
+```bash
+npx prisma migrate deploy
+npx tsx lib/migrate-old-data.ts
+```
+
+Netlify and the Docker setup are independent deployment paths and can run side
+by side — `output: 'standalone'` is applied only outside Netlify, and Prisma
+carries a binary target for each.
+
 ### Without Docker
 
 Requires Node 18+ and a PostgreSQL instance.

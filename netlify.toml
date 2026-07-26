@@ -1,0 +1,27 @@
+# Netlify serves the Next.js app. The Docker/Compose setup in this repo is a
+# separate, self-hosted deployment path — the two do not conflict.
+#
+# Required environment variables (set in the Netlify UI, not here):
+#   DATABASE_URL     - a hosted Postgres (Neon, Supabase, …) with sslmode=require
+#   NEXTAUTH_URL     - the site's public URL, e.g. https://ahmedtawfik.netlify.app
+#   NEXTAUTH_SECRET  - openssl rand -base64 32
+#
+# Optional (each feature hides itself when unset):
+#   OPENAI_API_KEY, NEXT_PUBLIC_EMAILJS_*
+#
+# NEXT_PUBLIC_* values are compiled into the browser bundle, so changing one
+# needs a redeploy, not just a restart.
+
+[build]
+  # `prisma generate` must run before `next build` so the client exists with the
+  # right engine for Netlify's Lambda runtime. It also runs via postinstall;
+  # this is belt and braces for cached-dependency builds.
+  command = "npx prisma generate && npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Skip Prisma's postinstall advertisement noise in build logs.
+  PRISMA_HIDE_UPDATE_MESSAGE = "true"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

@@ -3,9 +3,10 @@
 
 generator client {
   provider = "prisma-client-js"
-  // The Docker image is Alpine (musl + OpenSSL 3). Without this the engine
-  // built on the host will not load inside the container.
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  // One target per deployment target, or the query engine will not load:
+  //   linux-musl-openssl-3.0.x - the Alpine Docker image
+  //   rhel-openssl-3.0.x       - Netlify Functions (Amazon Linux, Node 20)
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
