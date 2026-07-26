@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { BTN, FIELD, LABEL, PAGE_TITLE } from '@/app/admin/ui'
 
 export default function HeroPage() {
   const [formData, setFormData] = useState({
@@ -54,69 +55,69 @@ export default function HeroPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-8">Hero Section</h1>
+      <h1 className={`${PAGE_TITLE} mb-8`}>Hero Section</h1>
 
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-8 max-w-2xl">
+      <div className="border border-rule bg-panel p-6 max-w-2xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Headline</label>
+            <label className={`${LABEL}`}>Headline</label>
             <input
               type="text"
               value={formData.headline}
               onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
               required
               placeholder="e.g., Hi, I'm John Doe"
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+              className={`${FIELD}`}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Subheadline</label>
+            <label className={`${LABEL}`}>Subheadline</label>
             <input
               type="text"
               value={formData.subheadline}
               onChange={(e) => setFormData({ ...formData, subheadline: e.target.value })}
               placeholder="e.g., Full Stack Developer"
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+              className={`${FIELD}`}
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">CTA Button Text</label>
+              <label className={`${LABEL}`}>CTA Button Text</label>
               <input
                 type="text"
                 value={formData.ctaText}
                 onChange={(e) => setFormData({ ...formData, ctaText: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">CTA URL</label>
+              <label className={`${LABEL}`}>CTA URL</label>
               <input
                 type="text"
                 value={formData.ctaUrl}
                 onChange={(e) => setFormData({ ...formData, ctaUrl: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Background Image URL</label>
+            <label className={`${LABEL}`}>Background Image URL</label>
             <input
               type="text"
               value={formData.background}
               onChange={(e) => setFormData({ ...formData, background: e.target.value })}
               placeholder="Optional background image"
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+              className={`${FIELD}`}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full px-6 py-3 bg-primary hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg transition"
+            className={`${BTN} w-full transition`}
           >
             Save Changes
           </button>

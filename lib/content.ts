@@ -62,6 +62,18 @@ export async function getSiteContent() {
 }
 
 /**
+ * Featured entries first, then the dashboard's own order.
+ *
+ * Shared so the homepage showcase and the full /projects index cannot disagree
+ * about which three are the top three.
+ */
+export function rankProjects<T extends { featured: boolean; order: number }>(projects: T[]) {
+  return [...projects].sort(
+    (a, b) => Number(b.featured) - Number(a.featured) || a.order - b.order
+  )
+}
+
+/**
  * Parses the `specs` column into label/value rows.
  *
  * Stored as one "LABEL: value" per line so it stays editable in a plain

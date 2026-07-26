@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { BTN, PAGE_TITLE, PANEL } from '@/app/admin/ui'
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -26,46 +27,46 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-8">Dashboard</h1>
+      <h1 className={`${PAGE_TITLE} mb-8`}>Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-          <h3 className="text-gray-400 text-sm font-medium mb-2">Projects</h3>
-          <p className="text-4xl font-bold text-white">{stats.projects}</p>
-          <Link href="/admin/dashboard/projects" className="text-primary hover:text-yellow-400 text-sm mt-4 inline-block">
+        <div className={`${PANEL}`}>
+          <h3 className="text-meta text-muted font-medium mb-2">Projects</h3>
+          <p className="text-4xl font-bold text-ink">{stats.projects}</p>
+          <Link href="/admin/dashboard/projects" className="text-ink hover:text-yellow-400 text-sm mt-4 inline-block">
             Manage →
           </Link>
         </div>
 
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-          <h3 className="text-gray-400 text-sm font-medium mb-2">Skills</h3>
-          <p className="text-4xl font-bold text-white">{stats.skills}</p>
-          <Link href="/admin/dashboard/skills" className="text-primary hover:text-yellow-400 text-sm mt-4 inline-block">
+        <div className={`${PANEL}`}>
+          <h3 className="text-meta text-muted font-medium mb-2">Skills</h3>
+          <p className="text-4xl font-bold text-ink">{stats.skills}</p>
+          <Link href="/admin/dashboard/skills" className="text-ink hover:text-yellow-400 text-sm mt-4 inline-block">
             Manage →
           </Link>
         </div>
 
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-          <h3 className="text-gray-400 text-sm font-medium mb-2">Services</h3>
-          <p className="text-4xl font-bold text-white">{stats.services}</p>
-          <Link href="/admin/dashboard/services" className="text-primary hover:text-yellow-400 text-sm mt-4 inline-block">
+        <div className={`${PANEL}`}>
+          <h3 className="text-meta text-muted font-medium mb-2">Services</h3>
+          <p className="text-4xl font-bold text-ink">{stats.services}</p>
+          <Link href="/admin/dashboard/services" className="text-ink hover:text-yellow-400 text-sm mt-4 inline-block">
             Manage →
           </Link>
         </div>
       </div>
 
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-        <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
+      <div className={`${PANEL}`}>
+        <h2 className="text-xl font-bold text-ink mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
             href="/admin/dashboard/projects"
-            className="px-4 py-3 bg-primary hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg transition text-center"
+            className={BTN}
           >
             Add New Project
           </Link>
           <Link
             href="/admin/dashboard/about"
-            className="px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition text-center"
+            className="px-4 py-3 bg-shelf hover:bg-rule text-ink font-medium  transition text-center"
           >
             Update Profile
           </Link>

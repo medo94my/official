@@ -21,11 +21,15 @@ const config: Config = {
         paper: '#F7F8F8',
         // Slightly raised ground for spec grids.
         shelf: '#F1F3F3',
+        // Panels lifted off the paper — used in the admin, not the public page.
+        panel: '#FFFFFF',
         ink: '#16191C',
         rule: '#DCE0E2',
         muted: '#6B7278',
         // Semantic only.
         live: '#0E7C5A',
+        // Destructive actions only. Never a hover flourish.
+        danger: '#B3261E',
         dim: '#9AA1A6',
       },
       fontFamily: {

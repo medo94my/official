@@ -18,7 +18,14 @@ const NAV_LINKS = [
 ]
 
 const NAV_ITEM =
-  'block px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition'
+  'block border-l-2 px-4 py-3 font-mono text-meta transition-colors'
+
+/** Marking the current page is information the old sidebar simply omitted. */
+function navClass(active: boolean) {
+  return active
+    ? `${NAV_ITEM} border-ink bg-shelf text-ink`
+    : `${NAV_ITEM} border-transparent text-muted hover:border-rule hover:text-ink`
+}
 
 export default function DashboardLayout({
   children,
@@ -44,8 +51,8 @@ export default function DashboardLayout({
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-paper">
+        <div className="label">Loading…</div>
       </div>
     )
   }
@@ -55,17 +62,29 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <Toaster position="top-right" />
+    <div className="min-h-screen bg-paper">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          // Match the page rather than the library default.
+          style: {
+            background: '#FFFFFF',
+            color: '#16191C',
+            border: '1px solid #DCE0E2',
+            borderRadius: 0,
+            fontSize: '0.8125rem',
+          },
+        }}
+      />
 
       {/* Mobile top bar — the only way to reach the nav below lg */}
-      <div className="lg:hidden fixed top-0 inset-x-0 h-14 z-30 flex items-center justify-between px-4 bg-gray-800 border-b border-gray-700">
-        <span className="text-lg font-bold text-white">Portfolio CMS</span>
+      <div className="lg:hidden fixed top-0 inset-x-0 h-14 z-30 flex items-center justify-between px-4 bg-panel border-b border-rule">
+        <span className="font-mono text-meta font-semibold uppercase tracking-[0.09em]">Portfolio CMS</span>
         <button
           onClick={() => setNavOpen(true)}
           aria-label="Open menu"
           aria-expanded={navOpen}
-          className="w-11 h-11 -mr-2 flex items-center justify-center text-gray-300 hover:text-white"
+          className="w-11 h-11 -mr-2 flex items-center justify-center text-muted hover:text-ink"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -77,24 +96,24 @@ export default function DashboardLayout({
       {navOpen && (
         <div
           onClick={() => setNavOpen(false)}
-          className="lg:hidden fixed inset-0 bg-black/60 z-40"
+          className="lg:hidden fixed inset-0 bg-ink/40 z-40"
           aria-hidden="true"
         />
       )}
 
       {/* Sidebar — off-canvas below lg, static from lg up */}
       <div
-        className={`fixed inset-y-0 left-0 w-64 bg-gray-800 border-r border-gray-700 z-50 overflow-y-auto
+        className={`fixed inset-y-0 left-0 w-64 bg-panel border-r border-rule z-50 overflow-y-auto
           transform transition-transform duration-200 ease-in-out lg:translate-x-0
           ${navOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-2xl font-bold text-white">Portfolio CMS</h1>
+            <h1 className="font-mono text-meta font-semibold uppercase tracking-[0.09em]">Portfolio CMS</h1>
             <button
               onClick={() => setNavOpen(false)}
               aria-label="Close menu"
-              className="lg:hidden w-11 h-11 -mr-2 flex items-center justify-center text-gray-400 hover:text-white"
+              className="lg:hidden w-11 h-11 -mr-2 flex items-center justify-center text-muted hover:text-ink"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -104,21 +123,26 @@ export default function DashboardLayout({
 
           <nav className="space-y-1">
             {NAV_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className={NAV_ITEM}>
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={pathname === link.href ? 'page' : undefined}
+                className={navClass(pathname === link.href)}
+              >
                 {link.label}
               </Link>
             ))}
           </nav>
 
-          <div className="mt-8 pt-8 border-t border-gray-700">
-            <Link href="/" className={`${NAV_ITEM} mb-1`}>
-              View Portfolio
+          <div className="mt-8 border-t border-rule pt-6">
+            <Link href="/" className={navClass(false)}>
+              View site
             </Link>
             <button
               onClick={() => signOut({ callbackUrl: '/admin/login' })}
-              className="w-full text-left px-4 py-3 text-red-400 hover:bg-gray-700 hover:text-red-300 rounded-lg transition"
+              className="w-full border-l-2 border-transparent px-4 py-3 text-left font-mono text-meta text-danger transition-colors hover:border-danger hover:bg-shelf"
             >
-              Logout
+              Sign out
             </button>
           </div>
         </div>
@@ -129,8 +153,8 @@ export default function DashboardLayout({
       <div className="lg:ml-64">
         <div className="pt-20 px-4 pb-8 lg:p-8">
           <div className="mb-6">
-            <p className="text-gray-400">
-              Welcome back, <span className="text-white font-semibold">{session.user.email}</span>
+            <p className="label">
+              Signed in as <span className="text-ink">{session.user.email}</span>
             </p>
           </div>
           {children}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { BTN, BTN_DANGER, BTN_GHOST, FIELD, PAGE_TITLE, PANEL } from '@/app/admin/ui'
 
 interface Skill {
   id: string
@@ -51,12 +52,12 @@ export default function SkillsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-8">Skills</h1>
+      <h1 className={`${PAGE_TITLE} mb-8`}>Skills</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 sticky top-8">
-            <h2 className="text-xl font-bold text-white mb-4">{editingId ? 'Edit' : 'Add'} Skill</h2>
+          <div className={`${PANEL} sticky top-8`}>
+            <h2 className="text-xl font-bold text-ink mb-4">{editingId ? 'Edit' : 'Add'} Skill</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="text"
@@ -64,12 +65,12 @@ export default function SkillsPage() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                className={`${FIELD}`}
               />
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                className={`${FIELD}`}
               >
                 <option>Frontend</option>
                 <option>Backend</option>
@@ -81,10 +82,10 @@ export default function SkillsPage() {
                 placeholder="Icon (emoji or class)"
                 value={formData.icon}
                 onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                className={`${FIELD}`}
               />
               <div>
-                <label className="block text-sm text-gray-300 mb-2">Level: {formData.level}%</label>
+                <label className="block text-sm text-ink mb-2">Level: {formData.level}%</label>
                 <input
                   type="range"
                   min="0"
@@ -99,16 +100,16 @@ export default function SkillsPage() {
                 placeholder="Order"
                 value={formData.order}
                 onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                className={`${FIELD}`}
               />
-              <button type="submit" className="w-full px-6 py-3 bg-primary hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg">
+              <button type="submit" className={`${BTN} w-full`}>
                 {editingId ? 'Update' : 'Add'} Skill
               </button>
               {editingId && (
                 <button
                   type="button"
                   onClick={() => { setEditingId(null); setFormData({ name: '', category: 'Frontend', icon: '', level: 75, order: 0 }) }}
-                  className="w-full px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
+                  className={`${BTN_GHOST} w-full`}
                 >
                   Cancel
                 </button>
@@ -120,15 +121,15 @@ export default function SkillsPage() {
         <div className="lg:col-span-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {skills.map((skill) => (
-              <div key={skill.id} className="bg-gray-800 border border-gray-700 rounded-xl p-4">
+              <div key={skill.id} className="bg-panel border border-rule  p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="text-lg font-bold text-white">{skill.icon} {skill.name}</h3>
-                    <p className="text-sm text-gray-400">{skill.category}</p>
+                    <h3 className="text-lg font-bold text-ink">{skill.icon} {skill.name}</h3>
+                    <p className="text-sm text-muted">{skill.category}</p>
                   </div>
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-2 mb-4">
-                  <div className="bg-primary h-2 rounded-full" style={{ width: `${skill.level}%` }} />
+                <div className="w-full bg-shelf h-2 mb-4">
+                  <div className="bg-ink h-2 rounded-full" style={{ width: `${skill.level}%` }} />
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -142,13 +143,13 @@ export default function SkillsPage() {
                         order: skill.order,
                       })
                     }}
-                    className="flex-1 px-3 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded"
+                    className={`${BTN_GHOST} flex-1`}
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(skill.id)}
-                    className="px-3 py-3 bg-red-600 hover:bg-red-700 text-white rounded"
+                    className={`${BTN_DANGER}`}
                   >
                     Delete
                   </button>

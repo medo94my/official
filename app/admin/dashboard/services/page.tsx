@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import VoiceRecorder from '@/components/VoiceRecorder'
 import toast from 'react-hot-toast'
+import { BTN, BTN_DANGER, BTN_GHOST, FIELD, PAGE_TITLE, PANEL } from '@/app/admin/ui'
 
 interface Service {
   id: string
@@ -51,12 +52,12 @@ export default function ServicesPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-8">Services</h1>
+      <h1 className={`${PAGE_TITLE} mb-8`}>Services</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 sticky top-8">
-            <h2 className="text-xl font-bold text-white mb-4">{editingId ? 'Edit' : 'Add'} Service</h2>
+          <div className={`${PANEL} sticky top-8`}>
+            <h2 className="text-xl font-bold text-ink mb-4">{editingId ? 'Edit' : 'Add'} Service</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="text"
@@ -64,7 +65,7 @@ export default function ServicesPage() {
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                className={`${FIELD}`}
               />
               <div>
                 <textarea
@@ -73,7 +74,7 @@ export default function ServicesPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   required
                   rows={4}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                  className={`${FIELD}`}
                 />
                 <div className="mt-2">
                   <VoiceRecorder
@@ -87,23 +88,23 @@ export default function ServicesPage() {
                 placeholder="Icon (emoji or class)"
                 value={formData.icon}
                 onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                className={`${FIELD}`}
               />
               <input
                 type="number"
                 placeholder="Order"
                 value={formData.order}
                 onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                className={`${FIELD}`}
               />
-              <button type="submit" className="w-full px-6 py-3 bg-primary hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg">
+              <button type="submit" className={`${BTN} w-full`}>
                 {editingId ? 'Update' : 'Add'} Service
               </button>
               {editingId && (
                 <button
                   type="button"
                   onClick={() => { setEditingId(null); setFormData({ title: '', description: '', icon: '', order: 0 }) }}
-                  className="w-full px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
+                  className={`${BTN_GHOST} w-full`}
                 >
                   Cancel
                 </button>
@@ -115,10 +116,10 @@ export default function ServicesPage() {
         <div className="lg:col-span-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {services.map((service) => (
-              <div key={service.id} className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+              <div key={service.id} className={`${PANEL}`}>
                 <div className="text-4xl mb-4">{service.icon}</div>
-                <h3 className="text-xl font-bold text-white mb-2">{service.title}</h3>
-                <p className="text-gray-400 text-sm mb-4">{service.description}</p>
+                <h3 className="font-mono text-base font-medium mb-2">{service.title}</h3>
+                <p className="text-meta text-muted mb-4">{service.description}</p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
@@ -130,13 +131,13 @@ export default function ServicesPage() {
                         order: service.order,
                       })
                     }}
-                    className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
+                    className={`${BTN_GHOST} flex-1`}
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(service.id)}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                    className={`${BTN_DANGER}`}
                   >
                     Delete
                   </button>
