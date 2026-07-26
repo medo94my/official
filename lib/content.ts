@@ -40,20 +40,25 @@ export async function getHero() {
   return prisma.hero.findFirst()
 }
 
+export async function getStats() {
+  return prisma.stat.findMany({ orderBy: { order: 'asc' } })
+}
+
 /**
  * One call so the page issues a single parallel round of queries rather than
  * awaiting each section in series.
  */
 export async function getSiteContent() {
-  const [projects, skills, services, about, hero] = await Promise.all([
+  const [projects, skills, services, about, hero, stats] = await Promise.all([
     getProjects(),
     getSkills(),
     getServices(),
     getAbout(),
     getHero(),
+    getStats(),
   ])
 
-  return { projects, skills, services, about, hero }
+  return { projects, skills, services, about, hero, stats }
 }
 
 /** Groups skills for the skills grid, preserving each category's first-seen order. */

@@ -68,6 +68,12 @@ export default function DashboardLayout({
               Services
             </Link>
             <Link
+              href="/admin/dashboard/stats"
+              className="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition"
+            >
+              Stats
+            </Link>
+            <Link
               href="/admin/dashboard/about"
               className="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition"
             >

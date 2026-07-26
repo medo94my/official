@@ -1,8 +1,13 @@
+import Contact from '@/components/Contact'
 import Hero3D from '@/components/Hero3D'
+import IdeaSubmission from '@/components/IdeaSubmission'
 import ProjectCard from '@/components/ProjectCard'
+import ResumeButton from '@/components/ResumeButton'
 import Reveal from '@/components/Reveal'
 import SkillBar from '@/components/SkillBar'
 import SocialLinks from '@/components/SocialLinks'
+import StatsBar from '@/components/StatsBar'
+import WhatsAppButton from '@/components/WhatsAppButton'
 import { getSiteContent, groupSkillsByCategory } from '@/lib/content'
 
 // Content is edited through the admin dashboard, so the page is rendered per
@@ -17,7 +22,7 @@ const DEFAULT_HERO = {
 }
 
 export default async function HomePage() {
-  const { projects, skills, services, about, hero } = await getSiteContent()
+  const { projects, skills, services, about, hero, stats } = await getSiteContent()
   const skillsByCategory = groupSkillsByCategory(skills)
 
   return (
@@ -28,6 +33,8 @@ export default async function HomePage() {
         ctaText={hero?.ctaText ?? DEFAULT_HERO.ctaText}
         ctaUrl={hero?.ctaUrl ?? DEFAULT_HERO.ctaUrl}
       />
+
+      <StatsBar stats={stats} />
 
       {/* Projects */}
       <section id="portfolio" className="py-24 px-6 bg-gradient-to-br from-gray-900 to-black">
@@ -138,6 +145,12 @@ export default async function HomePage() {
 
               <p className="text-gray-300 text-lg leading-relaxed mb-8">{about.bio}</p>
 
+              {about.resume && (
+                <div className="flex justify-center mb-8">
+                  <ResumeButton resume={about.resume} name={about.name} />
+                </div>
+              )}
+
               <SocialLinks
                 github={about.github}
                 linkedin={about.linkedin}
@@ -148,6 +161,12 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      <IdeaSubmission />
+
+      <Contact email={about?.email} location={about?.location} />
+
+      <WhatsAppButton />
 
       <footer className="py-8 px-6 bg-black border-t border-gray-800">
         <div className="max-w-7xl mx-auto text-center">

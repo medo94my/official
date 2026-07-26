@@ -61,6 +61,18 @@ model Service {
   updatedAt   DateTime @updatedAt
 }
 
+/// Headline metrics for the stats strip ("5+ Years of Experience").
+/// Deliberately not seeded — these are claims about the owner that only the
+/// owner can make truthfully. The strip hides itself while the table is empty.
+model Stat {
+  id        String   @id @default(cuid())
+  label     String   @unique
+  value     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model About {
   id          String   @id @default(cuid())
   name        String
