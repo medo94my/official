@@ -32,6 +32,10 @@ model Project {
   githubUrl   String?
   liveUrl     String?
   tags        String   @default("") // Comma-separated technologies
+  /// Engineering properties shown as a spec grid, one per line as
+  /// "LABEL: value" — e.g. "RETRY: exponential + jitter, 3 attempts".
+  /// Plain text rather than JSON so it stays editable in a textarea.
+  specs       String?
   featured    Boolean  @default(false)
   order       Int      @default(0)
   createdAt   DateTime @default(now())

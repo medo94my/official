@@ -1,11 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Send, MapPin, Mail } from 'lucide-react'
 import emailjs from '@emailjs/browser'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 
 const SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID
 const TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID
@@ -18,170 +14,90 @@ type ContactProps = {
 
 type Status = 'idle' | 'sending' | 'success' | 'error'
 
-export default function Contact({ email, location }: ContactProps) {
+const FIELD =
+  'w-full border border-rule bg-paper px-3 py-2.5 font-mono text-meta text-ink placeholder:text-dim focus:border-ink focus:outline-none'
+
+/**
+ * Hidden entirely when EmailJS is unconfigured — the page already lists the
+ * email address in the Contact section, so a second dead form adds nothing.
+ * The original faked a success state when unconfigured, silently dropping
+ * every message.
+ */
+export default function Contact({ email }: ContactProps) {
   const [status, setStatus] = useState<Status>('idle')
   const form = useRef<HTMLFormElement>(null)
 
-  const configured = Boolean(SERVICE_ID && TEMPLATE_ID && PUBLIC_KEY)
+  if (!SERVICE_ID || !TEMPLATE_ID || !PUBLIC_KEY) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.current || !configured) return
+    if (!form.current) return
 
     setStatus('sending')
     try {
-      await emailjs.sendForm(SERVICE_ID!, TEMPLATE_ID!, form.current, PUBLIC_KEY!)
+      await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form.current, PUBLIC_KEY)
       setStatus('success')
       form.current.reset()
     } catch (error) {
-      // The original faked a success state when EmailJS was unconfigured,
-      // which silently dropped every message. Report the failure instead.
       console.error('Contact form failed to send:', error)
       setStatus('error')
     }
   }
 
   return (
-    <section id="contact" className="py-24 w-full bg-black border-t border-gray-900">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col items-center mb-12">
-          <h2 className="text-4xl font-bold text-white uppercase tracking-widest mb-4">
-            Get In <span className="text-primary">Touch</span>
-          </h2>
-          <p className="text-gray-400 max-w-lg text-center">
-            Have a project in mind or just want to say hello? I&apos;d love to hear from you.
-          </p>
-        </div>
-
-        <div className="flex flex-col lg:flex-row gap-8 bg-[#0a0a0a] border border-gray-800 rounded-3xl overflow-hidden shadow-2xl">
-          <div className="w-full lg:w-1/2 p-8 md:p-12">
-            {configured ? (
-              <form ref={form} onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label htmlFor="user_name" className="text-sm font-medium text-gray-400">
-                      Name
-                    </label>
-                    <Input
-                      id="user_name"
-                      name="user_name"
-                      placeholder="John Doe"
-                      required
-                      className="bg-[#111] border-gray-800 focus:border-primary text-white"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="user_email" className="text-sm font-medium text-gray-400">
-                      Email
-                    </label>
-                    <Input
-                      id="user_email"
-                      name="user_email"
-                      type="email"
-                      placeholder="john@example.com"
-                      required
-                      className="bg-[#111] border-gray-800 focus:border-primary text-white"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="message" className="text-sm font-medium text-gray-400">
-                    Message
-                  </label>
-                  <Textarea
-                    id="message"
-                    name="message"
-                    placeholder="Your message here..."
-                    rows={6}
-                    required
-                    className="bg-[#111] border-gray-800 focus:border-primary text-white resize-none"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  size="lg"
-                  disabled={status === 'sending'}
-                  className="w-full bg-primary text-black hover:bg-primary/90 font-bold uppercase tracking-wider py-6"
-                >
-                  {status === 'sending' ? (
-                    'Sending…'
-                  ) : (
-                    <span className="flex items-center">
-                      Send Message <Send className="ml-2 h-4 w-4" aria-hidden="true" />
-                    </span>
-                  )}
-                </Button>
-
-                <p aria-live="polite" className="text-center mt-2">
-                  {status === 'success' && (
-                    <span className="text-green-500">Message sent — I&apos;ll get back to you.</span>
-                  )}
-                  {status === 'error' && (
-                    <span className="text-red-500">
-                      Couldn&apos;t send that. Email me directly at{' '}
-                      <a className="underline" href={`mailto:${email}`}>
-                        {email}
-                      </a>
-                      .
-                    </span>
-                  )}
-                </p>
-              </form>
-            ) : (
-              // No EmailJS credentials: a mailto link that works beats a form
-              // that looks like it works and drops the message.
-              <div className="h-full flex flex-col justify-center gap-4">
-                <p className="text-gray-400">The quickest way to reach me is email.</p>
-                {email && (
-                  <a
-                    href={`mailto:${email}`}
-                    className="inline-flex items-center justify-center gap-2 bg-primary text-black hover:bg-primary/90 font-bold uppercase tracking-wider py-4 px-6 rounded-md transition-colors"
-                  >
-                    <Mail className="h-4 w-4" aria-hidden="true" />
-                    {email}
-                  </a>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="w-full lg:w-1/2 relative min-h-[400px] lg:min-h-0 bg-[#111]">
-            <div className="absolute bottom-8 left-8 right-8 bg-black/90 backdrop-blur-sm p-6 rounded-xl border border-gray-800">
-              <div className="flex flex-col gap-4">
-                {location && (
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-primary/20 rounded-full text-primary">
-                      <MapPin className="h-5 w-5" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Location</p>
-                      <p className="text-white font-medium">{location}</p>
-                    </div>
-                  </div>
-                )}
-                {email && (
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-primary/20 rounded-full text-primary">
-                      <Mail className="h-5 w-5" aria-hidden="true" />
-                    </div>
-                    <div className="overflow-hidden">
-                      <p className="text-sm text-gray-500">Email</p>
-                      <a
-                        href={`mailto:${email}`}
-                        className="text-white font-medium truncate block py-3 -my-2 hover:text-primary transition-colors"
-                      >
-                        {email}
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+    <section id="contact" className="pt-20 sm:pt-28">
+      <div className="mb-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-ink pb-4">
+        <h2 className="font-mono text-lg font-semibold tracking-tight sm:text-xl">
+          Send a message
+        </h2>
+        <span className="label">Reply within a day or two</span>
       </div>
+
+      <form ref={form} onSubmit={handleSubmit} className="max-w-measure">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="user_name" className="label mb-2 block">
+              Name
+            </label>
+            <input id="user_name" name="user_name" required className={FIELD} />
+          </div>
+          <div>
+            <label htmlFor="user_email" className="label mb-2 block">
+              Email
+            </label>
+            <input id="user_email" name="user_email" type="email" required className={FIELD} />
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label htmlFor="message" className="label mb-2 block">
+            Message
+          </label>
+          <textarea id="message" name="message" rows={5} required className={`${FIELD} resize-y`} />
+        </div>
+
+        <button
+          type="submit"
+          disabled={status === 'sending'}
+          className="mt-6 inline-flex min-h-11 items-center gap-2 border border-ink px-5 font-mono text-meta text-ink transition-colors hover:bg-ink hover:text-paper disabled:opacity-50"
+        >
+          {status === 'sending' ? 'Sending…' : 'Send'}
+          <span aria-hidden="true">→</span>
+        </button>
+
+        <p aria-live="polite" className="mt-4 font-mono text-meta">
+          {status === 'success' && <span className="text-live">Sent. I&apos;ll be in touch.</span>}
+          {status === 'error' && (
+            <span className="text-ink">
+              That didn&apos;t send. Email me directly at{' '}
+              <a className="underline decoration-rule underline-offset-4" href={`mailto:${email}`}>
+                {email}
+              </a>
+              .
+            </span>
+          )}
+        </p>
+      </form>
     </section>
   )
 }

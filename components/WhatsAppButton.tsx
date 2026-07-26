@@ -1,12 +1,12 @@
-import { MessageCircle } from 'lucide-react'
-
 const MESSAGE = "Hello! I saw your portfolio and would like to discuss a project."
 
 /**
  * Server component — the number comes from the About record, so it is editable
  * in the dashboard rather than baked into the client bundle at build time.
  *
- * Renders nothing when unset: a link to wa.me/undefined is worse than no button.
+ * Renders nothing when unset: a link to wa.me/undefined is worse than no link.
+ * A bordered pill rather than a floating green circle — the circle read as a
+ * third-party widget bolted onto the page.
  */
 export default function WhatsAppButton({ number }: { number?: string | null }) {
   // wa.me wants bare digits. Accepting "+90 555 000 0000" in the dashboard and
@@ -21,10 +21,10 @@ export default function WhatsAppButton({ number }: { number?: string | null }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Chat on WhatsApp"
-      className="fixed bottom-8 right-8 z-50 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full shadow-lg transition-colors flex items-center justify-center h-14 w-14"
+      className="fixed bottom-5 right-5 z-50 inline-flex min-h-11 items-center gap-2 border border-ink bg-paper px-4 font-mono text-meta text-ink shadow-[0_1px_0_0_theme(colors.ink)] transition-colors hover:bg-ink hover:text-paper"
     >
-      <MessageCircle className="h-7 w-7" aria-hidden="true" />
+      WhatsApp
+      <span aria-hidden="true">→</span>
     </a>
   )
 }

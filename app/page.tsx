@@ -1,10 +1,8 @@
 import Contact from '@/components/Contact'
-import Hero3D from '@/components/Hero3D'
 import IdeaSubmission from '@/components/IdeaSubmission'
-import ProjectCard from '@/components/ProjectCard'
+import ProjectEntry from '@/components/ProjectEntry'
 import ResumeButton from '@/components/ResumeButton'
 import Reveal from '@/components/Reveal'
-import SkillBar from '@/components/SkillBar'
 import SocialLinks from '@/components/SocialLinks'
 import StatsBar from '@/components/StatsBar'
 import WhatsAppButton from '@/components/WhatsAppButton'
@@ -14,170 +12,187 @@ import { getSiteContent, groupSkillsByCategory } from '@/lib/content'
 // request rather than frozen at build time.
 export const dynamic = 'force-dynamic'
 
-const DEFAULT_HERO = {
-  headline: 'Welcome',
-  subheadline: '',
-  ctaText: 'View My Work',
-  ctaUrl: '#portfolio',
+const FALLBACK = {
+  name: 'Ahmet Yilmaz',
+  title: 'Full-Stack Developer',
+  headline: 'I build systems that keep running when things break.',
+}
+
+/** Section heading, set in the instrument voice. */
+function SectionHead({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div className="mb-8 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-ink pb-4">
+      <h2 className="font-mono text-lg font-semibold tracking-tight sm:text-xl">{title}</h2>
+      <span className="label">{eyebrow}</span>
+    </div>
+  )
 }
 
 export default async function HomePage() {
   const { projects, skills, services, about, hero, stats } = await getSiteContent()
   const skillsByCategory = groupSkillsByCategory(skills)
 
+  const name = about?.name || FALLBACK.name
+  const role = about?.title || FALLBACK.title
+
   return (
-    <div className="min-h-screen bg-black text-white">
-      <Hero3D
-        headline={hero?.headline ?? DEFAULT_HERO.headline}
-        subheadline={hero?.subheadline ?? DEFAULT_HERO.subheadline}
-        ctaText={hero?.ctaText ?? DEFAULT_HERO.ctaText}
-        ctaUrl={hero?.ctaUrl ?? DEFAULT_HERO.ctaUrl}
-      />
-
-      <StatsBar stats={stats} />
-
-      {/* Projects */}
-      <section id="portfolio" className="py-24 px-6 bg-gradient-to-br from-gray-900 to-black">
-        <div className="max-w-7xl mx-auto">
-          <Reveal className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold mb-4 break-words bg-gradient-to-r from-white to-primary bg-clip-text text-transparent">
-              Featured Projects
-            </h2>
-            <p className="text-xl text-gray-400">Check out some of my recent work</p>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map((project, index) => (
-              <ProjectCard key={project.id} {...project} index={index} />
-            ))}
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-3xl px-5 sm:px-8">
+        {/* ── Masthead ─────────────────────────────────────────────── */}
+        <header className="pt-16 sm:pt-24">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+            <p className="label text-ink">{name}</p>
+            {about?.location && <p className="label">{about.location}</p>}
           </div>
 
-          {projects.length === 0 && (
-            <p className="text-center text-gray-500 text-lg">
-              No projects yet. Add some from the dashboard!
+          <hr className="mt-4 border-ink" />
+
+          <h1 className="mt-10 max-w-[24ch] font-mono text-[1.75rem] font-semibold leading-[1.15] tracking-tight sm:text-[2.5rem]">
+            {hero?.headline || FALLBACK.headline}
+          </h1>
+
+          <p className="mt-6 font-mono text-meta text-muted">
+            {hero?.subheadline || role}
+          </p>
+
+          {about?.bio && (
+            <p className="mt-8 max-w-measure text-[0.9375rem] leading-relaxed text-ink/80">
+              {about.bio}
             </p>
           )}
-        </div>
-      </section>
 
-      {/* Skills */}
-      <section id="skills" className="py-24 px-6 bg-gradient-to-br from-black to-gray-900">
-        <div className="max-w-7xl mx-auto">
-          <Reveal className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold mb-4 break-words bg-gradient-to-r from-primary to-white bg-clip-text text-transparent">
-              Skills &amp; Technologies
-            </h2>
-            <p className="text-xl text-gray-400">My technical expertise</p>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {skillsByCategory.map(([category, categorySkills], catIdx) => (
-              <Reveal
-                key={category}
-                index={catIdx}
-                className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-6 hover:border-primary transition-all"
-              >
-                <h3 className="text-2xl font-bold text-primary mb-6">{category}</h3>
-                <div className="space-y-4">
-                  {categorySkills.map((skill) => (
-                    <SkillBar
-                      key={skill.id}
-                      name={skill.name}
-                      icon={skill.icon}
-                      level={skill.level}
-                    />
-                  ))}
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Services */}
-      <section id="services" className="py-24 px-6 bg-gradient-to-br from-gray-900 to-black">
-        <div className="max-w-7xl mx-auto">
-          <Reveal className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold mb-4 break-words bg-gradient-to-r from-white to-primary bg-clip-text text-transparent">
-              What I Do
-            </h2>
-            <p className="text-xl text-gray-400">Services I offer</p>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <Reveal
-                key={service.id}
-                index={index}
-                variant="scale"
-                className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-8 text-center hover:border-primary transition-all"
-              >
-                <div className="text-6xl mb-4">{service.icon}</div>
-                <h3 className="text-2xl font-bold text-white mb-3">{service.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{service.description}</p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* About */}
-      {about && (
-        <section id="about" className="py-24 px-6 bg-gradient-to-br from-black to-gray-900">
-          <div className="max-w-4xl mx-auto">
-            <Reveal className="text-center mb-12">
-              <h2 className="text-4xl sm:text-5xl font-bold mb-4 break-words bg-gradient-to-r from-primary to-white bg-clip-text text-transparent">
-                About Me
-              </h2>
-            </Reveal>
-
-            <Reveal
-              index={2}
-              className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-8"
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <ResumeButton resume={about?.resume} name={about?.name} />
+            <a
+              href="#work"
+              className="inline-flex min-h-11 items-center font-mono text-meta text-ink underline decoration-rule decoration-1 underline-offset-4 transition-colors hover:decoration-ink"
             >
-              <div className="text-center mb-8">
-                <h3 className="text-3xl font-bold text-white mb-2">{about.name}</h3>
-                <p className="text-xl text-primary">{about.title}</p>
-                {about.location && (
-                  <p className="text-gray-400 mt-2">{about.location}</p>
-                )}
-              </div>
+              {hero?.ctaText || 'See the work'} ↓
+            </a>
+          </div>
+        </header>
 
-              <p className="text-gray-300 text-lg leading-relaxed mb-8">{about.bio}</p>
+        <StatsBar stats={stats} />
 
-              {about.resume && (
-                <div className="flex justify-center mb-8">
-                  <ResumeButton resume={about.resume} name={about.name} />
+        {/* ── Work ─────────────────────────────────────────────────── */}
+        <section id="work" className="pt-16 sm:pt-20">
+          <SectionHead eyebrow={`${projects.length} entries`} title="Selected work" />
+
+          {projects.length === 0 ? (
+            <p className="text-meta text-muted">
+              No projects yet. Add them from the dashboard.
+            </p>
+          ) : (
+            <div>
+              {projects.map((project, index) => (
+                <Reveal key={project.id} index={Math.min(index, 3)}>
+                  <ProjectEntry index={index} {...project} />
+                </Reveal>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ── Stack ────────────────────────────────────────────────── */}
+        {skillsByCategory.length > 0 && (
+          <section id="stack" className="pt-20 sm:pt-28">
+            <SectionHead eyebrow="Day to day" title="Stack" />
+            <dl>
+              {skillsByCategory.map(([category, categorySkills]) => (
+                <div
+                  key={category}
+                  className="grid gap-2 border-b border-rule py-4 sm:grid-cols-[10rem_1fr] sm:gap-6"
+                >
+                  <dt className="label pt-1">{category}</dt>
+                  <dd className="font-mono text-meta leading-relaxed text-ink/85">
+                    {categorySkills.map((s) => s.name).join('  ·  ')}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
+
+        {/* ── Services ─────────────────────────────────────────────── */}
+        {services.length > 0 && (
+          <section id="services" className="pt-20 sm:pt-28">
+            <SectionHead eyebrow="How I work" title="Engagements" />
+            <ol>
+              {services.map((service, i) => (
+                <li
+                  key={service.id}
+                  className="grid gap-2 border-b border-rule py-5 sm:grid-cols-[3rem_1fr] sm:gap-6"
+                >
+                  {/* Ordered because this is the actual sequence of a project. */}
+                  <span className="label tnum pt-1">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <div>
+                    <h3 className="font-mono text-[0.9375rem] font-medium">{service.title}</h3>
+                    <p className="mt-2 max-w-measure text-meta leading-relaxed text-ink/75">
+                      {service.description}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
+        {/* ── Contact ──────────────────────────────────────────────── */}
+        {about && (
+          <section id="about" className="pt-20 sm:pt-28">
+            <SectionHead eyebrow="Get in touch" title="Contact" />
+            <dl>
+              {about.email && (
+                <div className="grid gap-1 border-b border-rule py-4 sm:grid-cols-[10rem_1fr] sm:gap-6">
+                  <dt className="label pt-1">Email</dt>
+                  <dd>
+                    <a
+                      href={`mailto:${about.email}`}
+                      className="inline-flex min-h-11 items-center font-mono text-meta text-ink underline decoration-rule decoration-1 underline-offset-4 transition-colors hover:decoration-ink"
+                    >
+                      {about.email}
+                    </a>
+                  </dd>
                 </div>
               )}
+              {about.location && (
+                <div className="grid gap-1 border-b border-rule py-4 sm:grid-cols-[10rem_1fr] sm:gap-6">
+                  <dt className="label pt-1">Based in</dt>
+                  <dd className="font-mono text-meta text-ink/85">{about.location}</dd>
+                </div>
+              )}
+              <div className="grid gap-3 border-b border-rule py-4 sm:grid-cols-[10rem_1fr] sm:gap-6">
+                <dt className="label pt-1">Elsewhere</dt>
+                <dd>
+                  <SocialLinks
+                    github={about.github}
+                    linkedin={about.linkedin}
+                    twitter={about.twitter}
+                  />
+                </dd>
+              </div>
+            </dl>
+          </section>
+        )}
 
-              <SocialLinks
-                github={about.github}
-                linkedin={about.linkedin}
-                twitter={about.twitter}
-                email={about.email}
-              />
-            </Reveal>
+        <IdeaSubmission />
+
+        <Contact email={about?.email} location={about?.location} />
+
+        {/* ── Colophon ─────────────────────────────────────────────── */}
+        <footer className="mt-20 border-t border-ink py-8 pb-28 sm:mt-28 sm:pb-8">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+            <p className="label tnum">
+              © {new Date().getFullYear()} {name}
+            </p>
+            <p className="label">Next.js · Postgres · self-hosted</p>
           </div>
-        </section>
-      )}
-
-      <IdeaSubmission />
-
-      <Contact email={about?.email} location={about?.location} />
+        </footer>
+      </div>
 
       <WhatsAppButton number={about?.whatsapp} />
-
-      {/* Extra bottom padding on small screens so the fixed WhatsApp button
-          (bottom-8, 56px tall) cannot sit on top of the footer text. */}
-      <footer className="pt-8 pb-28 sm:pb-8 px-6 bg-black border-t border-gray-800">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-gray-500">
-            © {new Date().getFullYear()} {about?.name || 'Portfolio'}. Built with Next.js &amp;
-            React Three Fiber.
-          </p>
-        </div>
-      </footer>
     </div>
   )
 }

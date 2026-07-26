@@ -61,6 +61,27 @@ export async function getSiteContent() {
   return { projects, skills, services, about, hero, stats }
 }
 
+/**
+ * Parses the `specs` column into label/value rows.
+ *
+ * Stored as one "LABEL: value" per line so it stays editable in a plain
+ * textarea. Lines without a colon are skipped rather than rendered half-empty.
+ */
+export function parseSpecs(specs?: string | null) {
+  if (!specs) return []
+  return specs
+    .split('\n')
+    .map((line) => {
+      const idx = line.indexOf(':')
+      if (idx < 1) return null
+      const label = line.slice(0, idx).trim()
+      const value = line.slice(idx + 1).trim()
+      if (!label || !value) return null
+      return { label, value }
+    })
+    .filter((row): row is { label: string; value: string } => row !== null)
+}
+
 /** Groups skills for the skills grid, preserving each category's first-seen order. */
 export function groupSkillsByCategory<T extends { category: string }>(skills: T[]) {
   const grouped = new Map<string, T[]>()

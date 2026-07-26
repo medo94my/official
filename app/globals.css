@@ -2,71 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  background-color: #000;
-  color: #fff;
-  overflow-x: hidden;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1a1a1a;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #f0ad4e;
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #d89b3d;
-}
-
-/* Line Clamp */
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Animations */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Hairlines must stay hairlines; stop mobile Safari inflating type. */
+    -webkit-text-size-adjust: 100%;
   }
-  50% {
-    transform: translateY(-20px);
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    /* No overflow-x: hidden. It hides overflow bugs instead of preventing
+       them — the layout is measured at 320px and must genuinely fit. */
+  }
+
+  /* One visible focus treatment, used everywhere. */
+  :focus-visible {
+    outline: 2px solid theme('colors.ink');
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: theme('colors.ink');
+    color: theme('colors.paper');
   }
 }
 
-@keyframes glow {
-  0% {
-    box-shadow: 0 0 5px #f0ad4e, 0 0 10px #f0ad4e;
+@layer utilities {
+  /* The instrument voice: small, letterspaced, uppercase mono. Used for
+     eyebrows, spec labels and metadata — never for prose. */
+  .label {
+    @apply font-mono text-label uppercase text-muted;
   }
-  100% {
-    box-shadow: 0 0 10px #f0ad4e, 0 0 20px #f0ad4e, 0 0 30px #f0ad4e;
+
+  /* Tabular figures so spec values and years align down the column. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite alternate;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

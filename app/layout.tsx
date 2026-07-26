@@ -1,10 +1,22 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
 import { getAbout } from '@/lib/content'
 
-const inter = Inter({ subsets: ['latin'] })
+// IBM Plex was designed for technical and engineering contexts, which is the
+// subject here. The mono is the display face, not just the code face.
+const mono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-mono',
+})
+
+const sans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-sans',
+})
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
@@ -59,8 +71,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className={`${mono.variable} ${sans.variable}`}>
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>

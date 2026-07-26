@@ -13,6 +13,7 @@ interface Project {
   githubUrl?: string
   liveUrl?: string
   tags: string[]
+  specs?: string | null
   featured: boolean
   order: number
 }
@@ -29,6 +30,7 @@ export default function ProjectsPage() {
     githubUrl: '',
     liveUrl: '',
     tags: '',
+    specs: '',
     featured: false,
     order: 0,
   })
@@ -99,6 +101,7 @@ export default function ProjectsPage() {
       githubUrl: project.githubUrl || '',
       liveUrl: project.liveUrl || '',
       tags: project.tags.join(', '),
+      specs: project.specs ?? '',
       featured: project.featured,
       order: project.order,
     })
@@ -114,6 +117,7 @@ export default function ProjectsPage() {
       githubUrl: '',
       liveUrl: '',
       tags: '',
+    specs: '',
       featured: false,
       order: 0,
     })
@@ -287,6 +291,23 @@ export default function ProjectsPage() {
                   placeholder="React, TypeScript, Node.js"
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Specs — one &quot;Label: value&quot; per line
+                </label>
+                <textarea
+                  value={formData.specs}
+                  onChange={(e) => setFormData({ ...formData, specs: e.target.value })}
+                  rows={6}
+                  placeholder={'Year: 2026\nRetry: exponential + jitter, 3 attempts\nDedup: name + lat/lon + host'}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white font-mono text-sm focus:ring-2 focus:ring-primary"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Rendered as the spec grid on the project entry. Lines without a colon are
+                  skipped. Leave empty to show none.
+                </p>
               </div>
 
               <div className="flex items-center">

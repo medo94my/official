@@ -5,27 +5,20 @@ type Stat = {
 }
 
 /**
- * Server component — no client JS. The Strapi `getStats()` fetch from the
- * original has been replaced by data passed down from the page.
+ * A measurement strip, not a hero banner. Hidden while the table is empty —
+ * these are claims only the owner can make truthfully.
  */
 export default function StatsBar({ stats }: { stats: Stat[] }) {
   if (stats.length === 0) return null
 
   return (
-    <div className="w-full bg-primary text-black py-8">
-      <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-between items-center">
-        {stats.map((stat) => (
-          <div
-            key={stat.id}
-            className="flex flex-col items-center justify-center w-full sm:flex-1 p-2 border-b sm:border-b-0 sm:border-r last:border-0 border-black/20"
-          >
-            <p className="text-3xl sm:text-4xl font-bold">{stat.value}</p>
-            <p className="text-sm sm:text-base uppercase tracking-wider font-semibold opacity-80">
-              {stat.label}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
+    <dl className="mt-16 grid grid-cols-2 gap-x-8 gap-y-6 border-y border-rule py-6 sm:grid-cols-3">
+      {stats.map((stat) => (
+        <div key={stat.id}>
+          <dd className="font-mono text-2xl font-semibold tracking-tight tnum">{stat.value}</dd>
+          <dt className="label mt-1">{stat.label}</dt>
+        </div>
+      ))}
+    </dl>
   )
 }

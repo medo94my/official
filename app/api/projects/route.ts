@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
         githubUrl: body.githubUrl,
         liveUrl: body.liveUrl,
         tags: Array.isArray(body.tags) ? body.tags.join(',') : (body.tags || ''),
+        specs: body.specs || null,
         featured: body.featured || false,
         order: body.order || 0,
       },

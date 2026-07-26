@@ -1,10 +1,8 @@
-import { Download } from 'lucide-react'
-
 /**
  * Renders nothing when `About.resume` is unset — an empty resume link is worse
  * than no button, because a hiring manager clicking it gets a 404.
  *
- * Set the URL in the admin dashboard (About → Resume URL). A file dropped in
+ * Set the URL in the admin dashboard (About → Resume). A file dropped in
  * `public/resume/` is referenced as `/resume/<filename>.pdf`.
  */
 export default function ResumeButton({
@@ -26,10 +24,10 @@ export default function ResumeButton({
       download={isLocal ? `${(name || 'resume').replace(/\s+/g, '-')}-CV.pdf` : undefined}
       target={isLocal ? undefined : '_blank'}
       rel={isLocal ? undefined : 'noopener noreferrer'}
-      className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-black font-semibold rounded-lg hover:bg-yellow-500 transition-colors"
+      className="inline-flex min-h-11 items-center gap-2 border border-ink px-4 font-mono text-meta text-ink transition-colors hover:bg-ink hover:text-paper"
     >
-      <Download className="h-5 w-5" aria-hidden="true" />
-      Download Résumé
+      Résumé
+      <span aria-hidden="true">↓</span>
     </a>
   )
 }
