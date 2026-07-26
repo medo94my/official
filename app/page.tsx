@@ -166,7 +166,7 @@ export default async function HomePage() {
 
       <Contact email={about?.email} location={about?.location} />
 
-      <WhatsAppButton />
+      <WhatsAppButton number={about?.whatsapp} />
 
       <footer className="py-8 px-6 bg-black border-t border-gray-800">
         <div className="max-w-7xl mx-auto text-center">

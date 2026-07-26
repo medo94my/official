@@ -11,6 +11,7 @@ export default function AboutPage() {
     bio: '',
     email: '',
     phone: '',
+    whatsapp: '',
     location: '',
     avatar: '',
     resume: '',
@@ -28,7 +29,13 @@ export default function AboutPage() {
       const res = await fetch('/api/about')
       const data = await res.json()
       if (data) {
-        setFormData(data)
+        // Unset columns come back as null, and a null `value` flips an input to
+        // uncontrolled. Keep every field a string.
+        setFormData((current) =>
+          Object.fromEntries(
+            Object.keys(current).map((key) => [key, data[key] ?? ''])
+          ) as typeof current
+        )
       }
     } catch (error) {
       console.error('Failed to fetch about info')
@@ -122,6 +129,21 @@ export default function AboutPage() {
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">WhatsApp</label>
+              <input
+                type="text"
+                value={formData.whatsapp}
+                onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                placeholder="+90 555 000 0000"
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Shows the floating WhatsApp button. Leave empty to hide it. Any format works —
+                spaces and the leading + are stripped automatically.
+              </p>
             </div>
 
             <div>

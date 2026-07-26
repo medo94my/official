@@ -27,6 +27,10 @@ const ABOUT = {
   email: 'medoroyalrma@gmail.com',
   // TODO(owner): confirm — this is a Malaysian number but the location is Istanbul.
   phone: '+601111884535',
+  // `whatsapp` is deliberately absent: seeding an unconfirmed number would put
+  // a live "chat with me" button in front of visitors. Set it in the dashboard
+  // (About → WhatsApp) and the button appears. Omitting it here also means a
+  // re-seed leaves whatever you set alone.
   // City only. The previous value was a full street address, which does not
   // belong on a public page.
   location: 'Istanbul, Turkey',

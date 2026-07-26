@@ -66,7 +66,9 @@ rather than rendering something broken:
 |---|---|
 | `OPENAI_API_KEY` | Voice input returns 503; the rest of the dashboard works |
 | `NEXT_PUBLIC_EMAILJS_*` | Contact form falls back to a mailto link; idea form is hidden |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | WhatsApp button is hidden |
+
+The WhatsApp button is not configured here — its number lives on the About
+record, so it is edited in the dashboard and needs no rebuild.
 
 Note that `NEXT_PUBLIC_*` values are inlined into the client bundle at **build**
 time, so changing one requires a rebuild (`docker compose up -d --build`).

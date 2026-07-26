@@ -1,16 +1,20 @@
-'use client'
-
 import { MessageCircle } from 'lucide-react'
 
-// Digits only, no '+' or spaces — wa.me rejects anything else.
-const PHONE = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER
 const MESSAGE = "Hello! I saw your portfolio and would like to discuss a project."
 
-export default function WhatsAppButton() {
-  // Renders nothing rather than linking to wa.me/undefined when unconfigured.
-  if (!PHONE) return null
+/**
+ * Server component — the number comes from the About record, so it is editable
+ * in the dashboard rather than baked into the client bundle at build time.
+ *
+ * Renders nothing when unset: a link to wa.me/undefined is worse than no button.
+ */
+export default function WhatsAppButton({ number }: { number?: string | null }) {
+  // wa.me wants bare digits. Accepting "+90 555 000 0000" in the dashboard and
+  // normalising here beats making the owner remember the wire format.
+  const digits = number?.replace(/\D/g, '')
+  if (!digits) return null
 
-  const href = `https://wa.me/${PHONE}?text=${encodeURIComponent(MESSAGE)}`
+  const href = `https://wa.me/${digits}?text=${encodeURIComponent(MESSAGE)}`
 
   return (
     <a

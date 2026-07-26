@@ -45,7 +45,7 @@ In the dashboard:
 - **Skills** — grouped by category, with levels
 - **Services** — what you offer
 - **Stats** — the metrics strip (hidden until you add entries)
-- **About** — bio, contact details, social links, résumé path
+- **About** — bio, contact details, WhatsApp number, social links, résumé path
 - **Hero** — homepage headline
 
 Changes show up on the homepage immediately — it renders per request.
@@ -66,6 +66,9 @@ broken:
 |---|---|
 | `OPENAI_API_KEY` | Voice input on the Projects/Services/About forms |
 | `NEXT_PUBLIC_EMAILJS_*` | Contact form and idea form (otherwise: mailto link) |
+
+The floating **WhatsApp button** is not in this table — set **About → WhatsApp**
+in the dashboard and it appears immediately, no rebuild needed.
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | Floating WhatsApp button |
 
 `NEXT_PUBLIC_*` values are compiled into the browser bundle, so changing one

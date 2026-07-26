@@ -83,6 +83,9 @@ model About {
   bio         String
   email       String?
   phone       String?
+  /// Number behind the floating WhatsApp button. Stored as typed; the button
+  /// strips everything but digits, since wa.me rejects '+' and spaces.
+  whatsapp    String?
   location    String?
   avatar      String?
   resume      String?  // URL to resume
