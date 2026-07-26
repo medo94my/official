@@ -21,7 +21,13 @@ export default function HeroPage() {
       const res = await fetch('/api/hero')
       const data = await res.json()
       if (data) {
-        setFormData(data)
+        // `background` and `subheadline` are nullable, and a null `value` flips
+        // an input to uncontrolled. Keep every field a string.
+        setFormData((current) =>
+          Object.fromEntries(
+            Object.keys(current).map((key) => [key, data[key] ?? ''])
+          ) as typeof current
+        )
       }
     } catch (error) {
       console.error('Failed to fetch hero info')
