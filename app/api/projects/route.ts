@@ -1,19 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
+import { getProjects } from '@/lib/content'
+
+export const dynamic = 'force-dynamic'
 
 // GET all projects
 export async function GET() {
   try {
-    const projects = await prisma.project.findMany({
-      orderBy: { order: 'asc' },
-    })
-    // Transform tags from string to array for frontend
-    const projectsWithArrayTags = projects.map(project => ({
-      ...project,
-      tags: project.tags ? project.tags.split(',').filter(Boolean) : [],
-    }))
-    return NextResponse.json(projectsWithArrayTags)
+    return NextResponse.json(await getProjects())
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to fetch projects' },

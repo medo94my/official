@@ -1,20 +1,24 @@
 'use client'
 
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 
+// Nullable rather than optional: these come straight from Prisma, which
+// returns null for unset columns.
 interface ProjectCardProps {
   title: string
   description: string
   type: string
   tags: string[]
-  githubUrl?: string
-  liveUrl?: string
-  image?: string
+  githubUrl?: string | null
+  liveUrl?: string | null
+  image?: string | null
+  featured?: boolean
   index: number
 }
 
-export default function ProjectCard({ title, description, type, tags, githubUrl, liveUrl, image, index }: ProjectCardProps) {
+export default function ProjectCard({ title, description, type, tags, githubUrl, liveUrl, image, featured, index }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false)
 
   return (
@@ -28,8 +32,10 @@ export default function ProjectCard({ title, description, type, tags, githubUrl,
       className="relative group"
     >
       <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-6 h-full hover:border-primary transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl">
-        {/* Featured Badge */}
-        {type === 'Featured' && (
+        {/* Featured Badge — driven by the `featured` column; `type` only ever
+            holds "Solo"/"Team", so the old `type === 'Featured'` check never
+            rendered. */}
+        {featured && (
           <div className="absolute -top-3 -right-3 bg-primary text-gray-900 px-4 py-1 rounded-full text-xs font-bold">
             Featured
           </div>
@@ -37,8 +43,15 @@ export default function ProjectCard({ title, description, type, tags, githubUrl,
 
         {/* Image */}
         {image && (
-          <div className="mb-4 rounded-xl overflow-hidden h-48 bg-gray-700">
-            <img src={image} alt={title} className="w-full h-full object-cover" />
+          <div className="relative mb-4 rounded-xl overflow-hidden h-48 bg-gray-700">
+            <Image
+              src={image}
+              alt={`Screenshot of ${title}`}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover"
+              unoptimized={image.endsWith('.gif')}
+            />
           </div>
         )}
 
