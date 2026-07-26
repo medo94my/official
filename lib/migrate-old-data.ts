@@ -9,13 +9,22 @@ import bcrypt from 'bcryptjs'
 async function main() {
   console.log('Migrating data from old portfolio...')
 
-  // Create admin user
-  const hashedPassword = await bcrypt.hash('admin123', 10)
+  // Credentials come from the environment so they are never in source control.
+  const adminEmail = process.env.ADMIN_EMAIL
+  const adminPassword = process.env.ADMIN_PASSWORD
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error(
+      'ADMIN_EMAIL and ADMIN_PASSWORD must be set. See .env.example.'
+    )
+  }
+
+  const hashedPassword = await bcrypt.hash(adminPassword, 10)
   const user = await prisma.user.upsert({
-    where: { email: 'medoroyalrma@gmail.com' },
-    update: {},
+    where: { email: adminEmail },
+    update: { password: hashedPassword },
     create: {
-      email: 'medoroyalrma@gmail.com',
+      email: adminEmail,
       password: hashedPassword,
       name: 'Ahmed Tawfik',
     },
@@ -145,10 +154,8 @@ async function main() {
   console.log('✓ Created services')
 
   console.log('✅ Migration completed successfully!')
-  console.log('\n📝 Default credentials:')
-  console.log('   Email: medoroyalrma@gmail.com')
-  console.log('   Password: admin123')
-  console.log('\n⚠️  Please change your password after first login!')
+  console.log(`\n📝 Sign in at /admin/login as ${adminEmail}`)
+  console.log('   Password: the ADMIN_PASSWORD from your environment.')
 }
 
 main()

@@ -15,10 +15,8 @@ npm run dev
 ## 🔑 Step 2: Login to Your Dashboard
 
 1. Open http://localhost:3000/admin/login
-2. Login with:
-   - **Email**: `medoroyalrma@gmail.com`
-   - **Password**: `admin123`
-3. **IMPORTANT**: Change your password immediately!
+2. Log in with the `ADMIN_EMAIL` / `ADMIN_PASSWORD` you set in `.env`
+   (copy `.env.example` to `.env` first — the seed refuses to run without them).
 
 ## 🎨 Step 3: Customize Your Portfolio
 

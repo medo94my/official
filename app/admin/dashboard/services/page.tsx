@@ -121,7 +121,15 @@ export default function ServicesPage() {
                 <p className="text-gray-400 text-sm mb-4">{service.description}</p>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => { setEditingId(service.id); setFormData(service) }}
+                    onClick={() => {
+                      setEditingId(service.id)
+                      setFormData({
+                        title: service.title,
+                        description: service.description,
+                        icon: service.icon ?? '',
+                        order: service.order,
+                      })
+                    }}
                     className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
                   >
                     Edit

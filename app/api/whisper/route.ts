@@ -2,13 +2,26 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Constructed per request rather than at module scope: the OpenAI client throws
+// when the key is missing, which would fail `next build` on every deploy that
+// doesn't use the optional voice feature.
+function getOpenAI() {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) return null
+  return new OpenAI({ apiKey })
+}
 
 export async function POST(request: NextRequest) {
   try {
     await requireAuth()
+
+    const openai = getOpenAI()
+    if (!openai) {
+      return NextResponse.json(
+        { error: 'Voice input is not configured — OPENAI_API_KEY is unset.' },
+        { status: 503 }
+      )
+    }
 
     const formData = await request.formData()
     const audioFile = formData.get('audio') as File

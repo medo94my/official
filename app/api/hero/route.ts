@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
 
+// Without this Next statically prerenders the GET at build time and the
+// dashboard would keep reading stale content after every edit.
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const hero = await prisma.hero.findFirst()

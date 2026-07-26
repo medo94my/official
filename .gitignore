@@ -34,4 +34,7 @@ yarn-error.log*
 next-env.d.ts
 
 # prisma
-prisma/migrations
+# Local SQLite databases must never be committed — they contain the admin
+# password hash. Migrations ARE tracked; they are part of the schema history.
+prisma/*.db
+prisma/*.db-journal

@@ -132,7 +132,16 @@ export default function SkillsPage() {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => { setEditingId(skill.id); setFormData(skill) }}
+                    onClick={() => {
+                      setEditingId(skill.id)
+                      setFormData({
+                        name: skill.name,
+                        category: skill.category,
+                        icon: skill.icon ?? '',
+                        level: skill.level,
+                        order: skill.order,
+                      })
+                    }}
                     className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded"
                   >
                     Edit
