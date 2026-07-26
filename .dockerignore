@@ -1,0 +1,18 @@
+node_modules
+.next
+.git
+.gitignore
+
+# Never bake secrets or a local database into an image layer.
+.env
+.env.*
+!.env.example
+prisma/*.db
+prisma/*.db-journal
+
+old-portfolio
+*.md
+!public/resume/README.md
+Dockerfile
+.dockerignore
+docker-compose.yml

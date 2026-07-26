@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  // The Docker image is Alpine (musl + OpenSSL 3). Without this the engine
+  // built on the host will not load inside the container.
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  // Unique so the seed can upsert on it and stay idempotent.
+  title       String   @unique
+  description String
+  type        String   // "Solo" or "Team"
+  image       String?
+  githubUrl   String?
+  liveUrl     String?
+  tags        String   @default("") // Comma-separated technologies
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  name        String
+  category    String   // "Frontend", "Backend", "Tools", etc.
+  icon        String?  // Icon name or URL
+  level       Int      @default(50) // 0-100
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // The same skill name can appear under different categories, so identity is
+  // the pair. Lets the seed upsert instead of duplicating on every run.
+  @@unique([name, category])
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  // Unique so the seed can upsert on it and stay idempotent.
+  title       String   @unique
+  description String
+  icon        String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Headline metrics for the stats strip ("5+ Years of Experience").
+/// Deliberately not seeded — these are claims about the owner that only the
+/// owner can make truthfully. The strip hides itself while the table is empty.
+model Stat {
+  id        String   @id @default(cuid())
+  label     String   @unique
+  value     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model About {
+  id          String   @id @default(cuid())
+  name        String
+  title       String
+  bio         String
+  email       String?
+  phone       String?
+  /// Number behind the floating WhatsApp button. Stored as typed; the button
+  /// strips everything but digits, since wa.me rejects '+' and spaces.
+  whatsapp    String?
+  location    String?
+  avatar      String?
+  resume      String?  // URL to resume
+  github      String?
+  linkedin    String?
+  twitter     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Hero {
+  id          String   @id @default(cuid())
+  headline    String
+  subheadline String?
+  ctaText     String   @default("View My Work")
+  ctaUrl      String   @default("#portfolio")
+  background  String?  // Background image URL
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
