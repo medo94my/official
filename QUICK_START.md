@@ -1,137 +1,94 @@
-# Quick Start Guide 🚀
+# Quick Start 🚀
 
-Your portfolio has been completely modernized! Here's how to get started in 3 simple steps:
-
-## ✅ Database is Already Set Up!
-
-I've already configured the database with SQLite and loaded all your existing portfolio data. You're ready to go!
-
-## 🎯 Step 1: Start the Development Server
+## 1. Configure
 
 ```bash
+cp .env.example .env
+```
+
+Fill in at minimum:
+
+- `POSTGRES_PASSWORD` — any strong value
+- `NEXTAUTH_SECRET` — `openssl rand -base64 32`
+- `ADMIN_EMAIL` / `ADMIN_PASSWORD` — your dashboard login
+
+## 2. Start
+
+```bash
+docker compose up -d --build
+
+# First boot only — loads the starting content
+docker compose run --rm app npx tsx lib/migrate-old-data.ts
+```
+
+Portfolio: http://localhost:3000 · Dashboard: http://localhost:3000/admin/login
+
+Migrations run automatically on every start. Seeding is a separate one-off —
+it overwrites seeded fields, so don't run it after you've edited content.
+
+### Without Docker
+
+Needs Node 18+ and a Postgres instance. Point `DATABASE_URL` at it, then:
+
+```bash
+npm install
+npx prisma migrate deploy
+npx tsx lib/migrate-old-data.ts
 npm run dev
 ```
 
-## 🔑 Step 2: Login to Your Dashboard
+## 3. Customize
 
-1. Open http://localhost:3000/admin/login
-2. Log in with the `ADMIN_EMAIL` / `ADMIN_PASSWORD` you set in `.env`
-   (copy `.env.example` to `.env` first — the seed refuses to run without them).
+In the dashboard:
 
-## 🎨 Step 3: Customize Your Portfolio
+- **Projects** — your work
+- **Skills** — grouped by category, with levels
+- **Services** — what you offer
+- **Stats** — the metrics strip (hidden until you add entries)
+- **About** — bio, contact details, social links, résumé path
+- **Hero** — homepage headline
 
-Navigate through the dashboard:
+Changes show up on the homepage immediately — it renders per request.
 
-- **Projects**: View/edit your existing projects (already migrated!)
-- **Skills**: Manage your skills (Frontend, Backend, Database, etc.)
-- **Services**: Update what you offer
-- **About**: Edit your bio and social links
-- **Hero**: Customize the homepage headline
+## Add your résumé
 
-## 🎙️ Using AI Voice Input
+1. Put the PDF in `public/resume/`.
+2. Dashboard → **About** → **Resume** → `/resume/your-file.pdf`.
 
-On the Projects and Services forms, you'll see a microphone button:
+The download button is hidden until that field is set.
 
-1. Click "Start Recording"
-2. Speak naturally about your project
-3. Click "Stop Recording"
-4. Watch as AI transcribes AND enhances your content!
+## Optional features
 
-**Note**: Voice features require an OpenAI API key. Add it to `.env.local`:
-```env
-OPENAI_API_KEY="your-key-here"
-```
+Each of these hides itself when unconfigured, so nothing on the page is ever
+broken:
 
-Get a key from: https://platform.openai.com/api-keys
+| Variable | Enables |
+|---|---|
+| `OPENAI_API_KEY` | Voice input on the Projects/Services/About forms |
+| `NEXT_PUBLIC_EMAILJS_*` | Contact form and idea form (otherwise: mailto link) |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Floating WhatsApp button |
 
-## 📊 What's Already Been Migrated
+`NEXT_PUBLIC_*` values are compiled into the browser bundle, so changing one
+needs a rebuild: `docker compose up -d --build`.
 
-✅ Your 3 projects (Martify, GUESS game, Blog)
-✅ Your skills (HTML, CSS, JS, Python, PHP, etc.)
-✅ Your services
-✅ Your bio and contact info
-✅ All your social links (GitHub, LinkedIn, Twitter)
+### AI voice input
 
-## 🌐 View Your Portfolio
+On forms with a microphone button: record, stop, and Whisper transcribes and
+rewrites the text for you. Without `OPENAI_API_KEY` the endpoint returns 503
+and everything else keeps working.
 
-Open http://localhost:3000 to see your live portfolio with:
-- 3D animated hero section
-- All your existing projects
-- Your skills organized by category
-- Modern animations throughout
+## Troubleshooting
 
-## 🚀 Deploy to Production
+**Port 3000 taken** — set `APP_PORT=3001` in `.env`.
 
-When you're ready to go live:
-
-1. **Get a PostgreSQL database** (free options):
-   - [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres)
-   - [Supabase](https://supabase.com)
-   - [Neon](https://neon.tech)
-
-2. **Update `.env.local`**:
-   ```env
-   DATABASE_URL="your-postgres-connection-string"
-   ```
-
-3. **Update Prisma schema**:
-   Change `provider = "sqlite"` to `provider = "postgresql"` in `prisma/schema.prisma`
-
-4. **Push schema and migrate**:
-   ```bash
-   npx prisma db push
-   npx tsx lib/migrate-old-data.ts
-   ```
-
-5. **Deploy to Vercel**:
-   - Push to GitHub (already done ✓)
-   - Connect repo on [vercel.com](https://vercel.com)
-   - Add environment variables
-   - Deploy!
-
-## 🔧 Troubleshooting
-
-### Port already in use
+**Reset the database** (destroys all content):
 ```bash
-# Kill the process using port 3000
-lsof -ti:3000 | xargs kill -9
+docker compose down -v && docker compose up -d
+docker compose run --rm app npx tsx lib/migrate-old-data.ts
 ```
 
-### Database issues
-```bash
-# Reset database
-rm prisma/dev.db
-npx prisma db push
-npx tsx lib/migrate-old-data.ts
-```
+**Schema change** — `npx prisma migrate dev --name <what-changed>`, then commit
+the generated folder in `prisma/migrations/`.
 
-### Need to reinstall
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
-
-## 📚 Learn More
-
-- **Full README**: See `README.md` for detailed documentation
-- **Prisma Studio**: Run `npx prisma studio` to view database in GUI
-- **API Endpoints**: All at `/api/*` (projects, skills, services, etc.)
-
-## 💡 Tips
-
-1. **Update content regularly** through the dashboard - no code editing needed!
-2. **Use voice input** to save time describing projects
-3. **Mark projects as featured** to highlight them
-4. **Customize colors** in `tailwind.config.ts`
-5. **Add project images** by uploading to a service like Imgur and using the URL
-
-## 🎉 You're All Set!
-
-Your portfolio is now:
-- ✅ Modern and professional
-- ✅ Easy to update via dashboard
-- ✅ AI-powered content creation
-- ✅ 3D animated and beautiful
-- ✅ Ready to deploy
-
-Just run `npm run dev` and start customizing! 🚀
+**Inspect the data** — `npx prisma studio` (uncomment the `db` port mapping in
+`docker-compose.yml` first).
