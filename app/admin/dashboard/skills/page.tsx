@@ -142,13 +142,13 @@ export default function SkillsPage() {
                         order: skill.order,
                       })
                     }}
-                    className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded"
+                    className="flex-1 px-3 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(skill.id)}
-                    className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded"
+                    className="px-3 py-3 bg-red-600 hover:bg-red-700 text-white rounded"
                   >
                     Delete
                   </button>

@@ -7,7 +7,10 @@ import { motion } from 'framer-motion'
 function AnimatedSphere() {
   return (
     <Float speed={2} rotationIntensity={1} floatIntensity={2}>
-      <Sphere args={[1, 100, 200]} scale={2.5}>
+      {/* 48x48 segments, not 100x200. MeshDistortMaterial displaces vertices
+          every frame, so ~20k segments was pure cost on a phone GPU for no
+          visible gain once the distortion noise is applied. */}
+      <Sphere args={[1, 48, 48]} scale={2.5}>
         <MeshDistortMaterial
           color="#f0ad4e"
           attach="material"
@@ -31,14 +34,28 @@ interface Hero3DProps {
 export default function Hero3D({ headline, subheadline, ctaText = 'View My Work', ctaUrl = '#portfolio' }: Hero3DProps) {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-800">
-      {/* 3D Background */}
-      <div className="absolute inset-0 opacity-40">
-        <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+      {/* 3D Background — decorative only, so it never intercepts touch or
+          clicks. Belt and braces with enableRotate={false} below. */}
+      <div className="absolute inset-0 opacity-40 pointer-events-none">
+        {/* pointerEvents on the Canvas itself, not just the wrapper: R3F sets
+            pointer-events:auto on its own inner divs, which overrides an
+            inherited `none` from the parent. */}
+        <Canvas camera={{ position: [0, 0, 5], fov: 75 }} style={{ pointerEvents: 'none' }}>
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 5]} intensity={1} />
           <pointLight position={[-10, -10, -5]} intensity={0.5} color="#f0ad4e" />
           <AnimatedSphere />
-          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
+          {/* enableRotate={false} matters on touch: the canvas fills the whole
+              min-h-screen hero, and OrbitControls calls preventDefault on
+              touch-drag — so a swipe to scroll the page would rotate the sphere
+              instead. autoRotate still drives the animation. */}
+          <OrbitControls
+            enableZoom={false}
+            enablePan={false}
+            enableRotate={false}
+            autoRotate
+            autoRotateSpeed={0.5}
+          />
         </Canvas>
       </div>
 

@@ -40,7 +40,7 @@ export default async function HomePage() {
       <section id="portfolio" className="py-24 px-6 bg-gradient-to-br from-gray-900 to-black">
         <div className="max-w-7xl mx-auto">
           <Reveal className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-white to-primary bg-clip-text text-transparent">
+            <h2 className="text-4xl sm:text-5xl font-bold mb-4 break-words bg-gradient-to-r from-white to-primary bg-clip-text text-transparent">
               Featured Projects
             </h2>
             <p className="text-xl text-gray-400">Check out some of my recent work</p>
@@ -64,7 +64,7 @@ export default async function HomePage() {
       <section id="skills" className="py-24 px-6 bg-gradient-to-br from-black to-gray-900">
         <div className="max-w-7xl mx-auto">
           <Reveal className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-white bg-clip-text text-transparent">
+            <h2 className="text-4xl sm:text-5xl font-bold mb-4 break-words bg-gradient-to-r from-primary to-white bg-clip-text text-transparent">
               Skills &amp; Technologies
             </h2>
             <p className="text-xl text-gray-400">My technical expertise</p>
@@ -98,7 +98,7 @@ export default async function HomePage() {
       <section id="services" className="py-24 px-6 bg-gradient-to-br from-gray-900 to-black">
         <div className="max-w-7xl mx-auto">
           <Reveal className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-white to-primary bg-clip-text text-transparent">
+            <h2 className="text-4xl sm:text-5xl font-bold mb-4 break-words bg-gradient-to-r from-white to-primary bg-clip-text text-transparent">
               What I Do
             </h2>
             <p className="text-xl text-gray-400">Services I offer</p>
@@ -126,7 +126,7 @@ export default async function HomePage() {
         <section id="about" className="py-24 px-6 bg-gradient-to-br from-black to-gray-900">
           <div className="max-w-4xl mx-auto">
             <Reveal className="text-center mb-12">
-              <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-white bg-clip-text text-transparent">
+              <h2 className="text-4xl sm:text-5xl font-bold mb-4 break-words bg-gradient-to-r from-primary to-white bg-clip-text text-transparent">
                 About Me
               </h2>
             </Reveal>
@@ -168,7 +168,9 @@ export default async function HomePage() {
 
       <WhatsAppButton number={about?.whatsapp} />
 
-      <footer className="py-8 px-6 bg-black border-t border-gray-800">
+      {/* Extra bottom padding on small screens so the fixed WhatsApp button
+          (bottom-8, 56px tall) cannot sit on top of the footer text. */}
+      <footer className="pt-8 pb-28 sm:pb-8 px-6 bg-black border-t border-gray-800">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-gray-500">
             © {new Date().getFullYear()} {about?.name || 'Portfolio'}. Built with Next.js &amp;

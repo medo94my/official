@@ -170,7 +170,7 @@ export default function Contact({ email, location }: ContactProps) {
                       <p className="text-sm text-gray-500">Email</p>
                       <a
                         href={`mailto:${email}`}
-                        className="text-white font-medium truncate block hover:text-primary transition-colors"
+                        className="text-white font-medium truncate block py-3 -my-2 hover:text-primary transition-colors"
                       >
                         {email}
                       </a>

@@ -172,12 +172,18 @@ export default function ProjectsPage() {
       {/* Form Modal */}
       {isFormOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-gray-800 rounded-xl p-4 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-white">
                 {editingProject ? 'Edit Project' : 'Add New Project'}
               </h2>
-              <button onClick={resetForm} className="text-gray-400 hover:text-white">
+              {/* p-2 -m-2 widens the touch target to 40px without changing the
+                  visible icon size */}
+              <button
+                onClick={resetForm}
+                aria-label="Close"
+                className="p-2 -m-2 text-gray-400 hover:text-white"
+              >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -216,7 +222,7 @@ export default function ProjectsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Type</label>
                   <select
