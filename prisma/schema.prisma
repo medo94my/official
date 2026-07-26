@@ -21,7 +21,8 @@ model User {
 
 model Project {
   id          String   @id @default(cuid())
-  title       String
+  // Unique so the seed can upsert on it and stay idempotent.
+  title       String   @unique
   description String
   type        String   // "Solo" or "Team"
   image       String?
@@ -43,11 +44,16 @@ model Skill {
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  // The same skill name can appear under different categories, so identity is
+  // the pair. Lets the seed upsert instead of duplicating on every run.
+  @@unique([name, category])
 }
 
 model Service {
   id          String   @id @default(cuid())
-  title       String
+  // Unique so the seed can upsert on it and stay idempotent.
+  title       String   @unique
   description String
   icon        String?
   order       Int      @default(0)
