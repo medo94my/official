@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
+import { contentChanged, handleApiError } from '@/lib/api'
 
 export async function PUT(
   request: NextRequest,
@@ -19,12 +20,9 @@ export async function PUT(
       },
     })
 
-    return NextResponse.json(stat)
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json({ error: 'Failed to update stat' }, { status: 500 })
+    return contentChanged(stat)
+  } catch (error) {
+    return handleApiError(error)
   }
 }
 
@@ -37,11 +35,8 @@ export async function DELETE(
 
     await prisma.stat.delete({ where: { id: params.id } })
 
-    return NextResponse.json({ message: 'Stat deleted successfully' })
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json({ error: 'Failed to delete stat' }, { status: 500 })
+    return contentChanged({ message: 'Stat deleted successfully' })
+  } catch (error) {
+    return handleApiError(error)
   }
 }

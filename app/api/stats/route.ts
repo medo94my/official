@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
+import { contentChanged, handleApiError } from '@/lib/api'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,11 +27,8 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(stat, { status: 201 })
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json({ error: 'Failed to create stat' }, { status: 500 })
+    return contentChanged(stat, { status: 201 })
+  } catch (error) {
+    return handleApiError(error)
   }
 }

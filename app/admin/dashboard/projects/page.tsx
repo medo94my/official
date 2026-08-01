@@ -1,13 +1,32 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import VoiceRecorder from '@/components/VoiceRecorder'
 import toast from 'react-hot-toast'
-import { BTN, BTN_DANGER, BTN_GHOST, FIELD, FIELD_MONO, LABEL, PAGE_TITLE, PANEL } from '@/app/admin/ui'
+import { BTN, BTN_DANGER, BTN_GHOST, CHECKBOX, FIELD, FIELD_MONO, LABEL, PAGE_TITLE, PANEL } from '@/app/admin/ui'
+import { apiRequest, errorMessage } from '@/app/admin/client'
+import { slugify } from '@/lib/slug'
+
+/** The thirteen case-study fields, in the order they render on the detail page. */
+const CASE_STUDY_FIELDS = [
+  { key: 'problem', label: 'Problem', rows: 4, hint: 'What was actually wrong before this existed.' },
+  { key: 'audience', label: "Who it's for", rows: 2, hint: '' },
+  { key: 'context', label: 'Context', rows: 3, hint: 'Where it sits, what it replaced.' },
+  { key: 'constraints', label: 'Constraints', rows: 3, hint: 'One per line.' },
+  { key: 'myRole', label: 'My role', rows: 2, hint: '' },
+  { key: 'responsibilities', label: 'Responsibilities', rows: 3, hint: 'One per line.' },
+  { key: 'approach', label: 'Approach', rows: 4, hint: '' },
+  { key: 'keyDecisions', label: 'Key decisions', rows: 4, hint: '"Decision: rationale", one per line.' },
+  { key: 'challenges', label: 'Challenges', rows: 3, hint: 'One per line.' },
+  { key: 'tradeoffs', label: 'Trade-offs', rows: 3, hint: '"Gained: …" / "Gave up: …", one per line.' },
+  { key: 'outcome', label: 'Outcome', rows: 3, hint: 'Only what you can stand behind.' },
+  { key: 'lessons', label: 'Lessons', rows: 3, hint: 'One per line.' },
+] as const
 
 interface Project {
   id: string
   title: string
+  slug: string
   description: string
   type: string
   image?: string
@@ -17,78 +36,112 @@ interface Project {
   specs?: string | null
   featured: boolean
   order: number
+  status?: string | null
+  caseStudyUrl?: string | null
+  problem?: string | null
+  audience?: string | null
+  context?: string | null
+  constraints?: string | null
+  myRole?: string | null
+  responsibilities?: string | null
+  approach?: string | null
+  keyDecisions?: string | null
+  challenges?: string | null
+  tradeoffs?: string | null
+  outcome?: string | null
+  lessons?: string | null
 }
+
+const EMPTY = {
+  title: '',
+  slug: '',
+  description: '',
+  type: 'Solo',
+  image: '',
+  githubUrl: '',
+  liveUrl: '',
+  tags: '',
+  specs: '',
+  featured: false,
+  order: 0,
+  status: '',
+  caseStudyUrl: '',
+  problem: '',
+  audience: '',
+  context: '',
+  constraints: '',
+  myRole: '',
+  responsibilities: '',
+  approach: '',
+  keyDecisions: '',
+  challenges: '',
+  tradeoffs: '',
+  outcome: '',
+  lessons: '',
+}
+
+type FormData = typeof EMPTY
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    type: 'Solo',
-    image: '',
-    githubUrl: '',
-    liveUrl: '',
-    tags: '',
-    specs: '',
-    featured: false,
-    order: 0,
-  })
+  const [caseStudyOpen, setCaseStudyOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [formData, setFormData] = useState<FormData>(EMPTY)
+
+  const fetchProjects = useCallback(async () => {
+    try {
+      setProjects(await apiRequest<Project[]>('/api/projects'))
+    } catch (error) {
+      toast.error(errorMessage(error, 'Could not load projects'))
+    }
+  }, [])
 
   useEffect(() => {
     fetchProjects()
-  }, [])
+  }, [fetchProjects])
 
-  const fetchProjects = async () => {
-    try {
-      const res = await fetch('/api/projects')
-      const data = await res.json()
-      setProjects(data)
-    } catch (error) {
-      toast.error('Failed to fetch projects')
-    }
-  }
+  const set = <K extends keyof FormData>(key: K, value: FormData[K]) =>
+    setFormData((prev) => ({ ...prev, [key]: value }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSaving(true)
 
     const payload = {
       ...formData,
-      tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+      tags: formData.tags.split(',').map((tag) => tag.trim()).filter(Boolean),
+      // Falls back to the title so a new project always gets a URL.
+      slug: slugify(formData.slug || formData.title),
     }
 
     try {
-      const url = editingProject ? `/api/projects/${editingProject.id}` : '/api/projects'
-      const method = editingProject ? 'PUT' : 'POST'
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-
-      if (!res.ok) throw new Error()
-
-      toast.success(editingProject ? 'Project updated!' : 'Project created!')
-      fetchProjects()
+      await apiRequest(
+        editingProject ? `/api/projects/${editingProject.id}` : '/api/projects',
+        { method: editingProject ? 'PUT' : 'POST', body: JSON.stringify(payload) }
+      )
+      toast.success(editingProject ? 'Project updated' : 'Project created')
+      await fetchProjects()
       resetForm()
     } catch (error) {
-      toast.error('Failed to save project')
+      // A duplicate title or slug now reports itself as a 409 rather than
+      // vanishing behind a generic failure.
+      toast.error(errorMessage(error, 'Could not save project'))
+    } finally {
+      setSaving(false)
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this project?')) return
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return
 
     try {
-      const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error()
-
-      toast.success('Project deleted!')
-      fetchProjects()
+      await apiRequest(`/api/projects/${id}`, { method: 'DELETE' })
+      toast.success('Project deleted')
+      await fetchProjects()
     } catch (error) {
-      toast.error('Failed to delete project')
+      toast.error(errorMessage(error, 'Could not delete project'))
     }
   }
 
@@ -96,6 +149,7 @@ export default function ProjectsPage() {
     setEditingProject(project)
     setFormData({
       title: project.title,
+      slug: project.slug ?? '',
       description: project.description,
       type: project.type,
       image: project.image || '',
@@ -105,24 +159,33 @@ export default function ProjectsPage() {
       specs: project.specs ?? '',
       featured: project.featured,
       order: project.order,
+      status: project.status ?? '',
+      caseStudyUrl: project.caseStudyUrl ?? '',
+      problem: project.problem ?? '',
+      audience: project.audience ?? '',
+      context: project.context ?? '',
+      constraints: project.constraints ?? '',
+      myRole: project.myRole ?? '',
+      responsibilities: project.responsibilities ?? '',
+      approach: project.approach ?? '',
+      keyDecisions: project.keyDecisions ?? '',
+      challenges: project.challenges ?? '',
+      tradeoffs: project.tradeoffs ?? '',
+      outcome: project.outcome ?? '',
+      lessons: project.lessons ?? '',
     })
+    // Open the case-study section straight away if it already has content, so
+    // an edit does not hide what is there.
+    setCaseStudyOpen(
+      CASE_STUDY_FIELDS.some((f) => Boolean(project[f.key as keyof Project]))
+    )
     setIsFormOpen(true)
   }
 
   const resetForm = () => {
-    setFormData({
-      title: '',
-      description: '',
-      type: 'Solo',
-      image: '',
-      githubUrl: '',
-      liveUrl: '',
-      tags: '',
-    specs: '',
-      featured: false,
-      order: 0,
-    })
+    setFormData(EMPTY)
     setEditingProject(null)
+    setCaseStudyOpen(false)
     setIsFormOpen(false)
   }
 
@@ -143,15 +206,15 @@ export default function ProjectsPage() {
         {projects.map((project) => (
           <div key={project.id} className={`${PANEL}`}>
             {project.featured && (
-              <span className="label mb-3 inline-block border border-ink px-2 py-0.5 text-ink">
+              <span className="label mb-3 inline-block border border-foreground px-2 py-0.5 text-foreground">
                 Featured
               </span>
             )}
             <h3 className="font-mono text-base font-medium mb-2">{project.title}</h3>
-            <p className="text-meta text-muted mb-4 line-clamp-3">{project.description}</p>
+            <p className="text-meta text-foreground-muted mb-4 line-clamp-3">{project.description}</p>
             <div className="flex flex-wrap gap-2 mb-4">
               {project.tags.map((tag, idx) => (
-                <span key={idx} className="font-mono text-meta text-muted">
+                <span key={idx} className="font-mono text-meta text-foreground-muted">
                   {tag}
                 </span>
               ))}
@@ -164,7 +227,7 @@ export default function ProjectsPage() {
                 Edit
               </button>
               <button
-                onClick={() => handleDelete(project.id)}
+                onClick={() => handleDelete(project.id, project.title)}
                 className={`${BTN_DANGER}`}
               >
                 Delete
@@ -176,8 +239,8 @@ export default function ProjectsPage() {
 
       {/* Form Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 p-4">
-          <div className="border border-rule bg-panel p-4 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-foreground/40 flex items-center justify-center z-50 p-4">
+          <div className="border border-border bg-surface p-4 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="font-mono text-lg font-semibold">
                 {editingProject ? 'Edit Project' : 'Add New Project'}
@@ -187,7 +250,7 @@ export default function ProjectsPage() {
               <button
                 onClick={resetForm}
                 aria-label="Close"
-                className="p-2 -m-2 text-muted hover:text-ink"
+                className="p-2 -m-2 text-foreground-muted hover:text-foreground"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -197,30 +260,52 @@ export default function ProjectsPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className={`${LABEL}`}>Title</label>
+                <label htmlFor="p-title" className={`${LABEL}`}>Title</label>
                 <input
+                  id="p-title"
                   type="text"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) => set('title', e.target.value)}
                   required
                   className={`${FIELD}`}
                 />
               </div>
 
               <div>
-                <label className={`${LABEL}`}>
+                <label htmlFor="p-slug" className={`${LABEL}`}>URL slug</label>
+                <input
+                  id="p-slug"
+                  type="text"
+                  value={formData.slug}
+                  onChange={(e) => set('slug', e.target.value)}
+                  // Only normalise on blur: doing it per keystroke eats the
+                  // hyphen the moment you type it.
+                  onBlur={(e) => set('slug', slugify(e.target.value))}
+                  placeholder={formData.title ? slugify(formData.title) : 'derived-from-title'}
+                  className={`${FIELD_MONO}`}
+                />
+                <p className="mt-1 text-meta text-foreground-muted">
+                  /projects/{formData.slug || slugify(formData.title) || '…'} — leave blank
+                  to derive from the title.{' '}
+                  {editingProject && 'Changing this changes the project’s URL.'}
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="p-description" className={`${LABEL}`}>
                   Description
                 </label>
                 <textarea
+                  id="p-description"
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) => set('description', e.target.value)}
                   required
                   rows={4}
                   className={`${FIELD}`}
                 />
                 <div className="mt-2">
                   <VoiceRecorder
-                    onTranscription={(text) => setFormData({ ...formData, description: text })}
+                    onTranscription={(text) => set('description', text)}
                     enhance={true}
                   />
                 </div>
@@ -231,7 +316,7 @@ export default function ProjectsPage() {
                   <label className={`${LABEL}`}>Type</label>
                   <select
                     value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    onChange={(e) => set('type', e.target.value)}
                     className={`${FIELD}`}
                   >
                     <option value="Solo">Solo</option>
@@ -244,7 +329,7 @@ export default function ProjectsPage() {
                   <input
                     type="number"
                     value={formData.order}
-                    onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
+                    onChange={(e) => set('order', Number(e.target.value) || 0)}
                     className={`${FIELD}`}
                   />
                 </div>
@@ -255,7 +340,7 @@ export default function ProjectsPage() {
                 <input
                   type="text"
                   value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                  onChange={(e) => set('image', e.target.value)}
                   className={`${FIELD}`}
                 />
               </div>
@@ -265,7 +350,7 @@ export default function ProjectsPage() {
                 <input
                   type="text"
                   value={formData.githubUrl}
-                  onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
+                  onChange={(e) => set('githubUrl', e.target.value)}
                   className={`${FIELD}`}
                 />
               </div>
@@ -275,7 +360,7 @@ export default function ProjectsPage() {
                 <input
                   type="text"
                   value={formData.liveUrl}
-                  onChange={(e) => setFormData({ ...formData, liveUrl: e.target.value })}
+                  onChange={(e) => set('liveUrl', e.target.value)}
                   className={`${FIELD}`}
                 />
               </div>
@@ -287,7 +372,7 @@ export default function ProjectsPage() {
                 <input
                   type="text"
                   value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                  onChange={(e) => set('tags', e.target.value)}
                   placeholder="React, TypeScript, Node.js"
                   className={`${FIELD}`}
                 />
@@ -299,12 +384,12 @@ export default function ProjectsPage() {
                 </label>
                 <textarea
                   value={formData.specs}
-                  onChange={(e) => setFormData({ ...formData, specs: e.target.value })}
+                  onChange={(e) => set('specs', e.target.value)}
                   rows={6}
                   placeholder={'Year: 2026\nRetry: exponential + jitter, 3 attempts\nDedup: name + lat/lon + host'}
                   className={`${FIELD_MONO}`}
                 />
-                <p className="mt-1 text-meta text-muted">
+                <p className="mt-1 text-meta text-foreground-muted">
                   Rendered as the spec grid on the project entry. Lines without a colon are
                   skipped. Leave empty to show none.
                 </p>
@@ -315,25 +400,108 @@ export default function ProjectsPage() {
                   type="checkbox"
                   id="featured"
                   checked={formData.featured}
-                  onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                  className="w-4 h-4 text-ink bg-shelf border-rule rounded focus:"
+                  onChange={(e) => set('featured', e.target.checked)}
+                  className={CHECKBOX}
                 />
-                <label htmlFor="featured" className="ml-2 text-sm text-ink">
+                <label htmlFor="featured" className="ml-2 text-sm text-foreground">
                   Featured Project
                 </label>
               </div>
 
-              <div className="flex gap-4 pt-4">
+              {/* ── Case study ──────────────────────────────────────────
+                  Collapsed by default. Thirteen more textareas would bury the
+                  fields you edit most; every one is optional, and the detail
+                  page hides any block left blank. */}
+              <div className="border-t border-border pt-4">
                 <button
-                  type="submit"
-                  className={`flex-1 ${BTN}`}
+                  type="button"
+                  onClick={() => setCaseStudyOpen((open) => !open)}
+                  aria-expanded={caseStudyOpen}
+                  aria-controls="case-study-fields"
+                  className="flex w-full items-center justify-between gap-4 py-2 text-left"
                 >
-                  {editingProject ? 'Update' : 'Create'} Project
+                  <span className="font-mono text-meta font-medium text-foreground">
+                    Case study
+                    <span className="ml-2 text-foreground-subtle">
+                      {CASE_STUDY_FIELDS.filter(
+                        (f) => formData[f.key as keyof FormData]
+                      ).length}
+                      /{CASE_STUDY_FIELDS.length} filled
+                    </span>
+                  </span>
+                  <span aria-hidden="true" className="text-foreground-muted">
+                    {caseStudyOpen ? '−' : '+'}
+                  </span>
+                </button>
+
+                {caseStudyOpen && (
+                  <div id="case-study-fields" className="mt-3 space-y-4">
+                    <p className="text-meta text-foreground-muted">
+                      All optional. Fill any of these and the project gets a
+                      &ldquo;Read the case study&rdquo; link; leave them blank and it
+                      behaves exactly as it does now.
+                    </p>
+
+                    {CASE_STUDY_FIELDS.map((field) => (
+                      <div key={field.key}>
+                        <label htmlFor={`p-${field.key}`} className={LABEL}>
+                          {field.label}
+                        </label>
+                        <textarea
+                          id={`p-${field.key}`}
+                          value={formData[field.key as keyof FormData] as string}
+                          onChange={(e) =>
+                            set(field.key as keyof FormData, e.target.value as never)
+                          }
+                          rows={field.rows}
+                          className={FIELD}
+                        />
+                        {field.hint && (
+                          <p className="mt-1 text-meta text-foreground-subtle">{field.hint}</p>
+                        )}
+                      </div>
+                    ))}
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div>
+                        <label htmlFor="p-status" className={LABEL}>Status</label>
+                        <input
+                          id="p-status"
+                          type="text"
+                          value={formData.status}
+                          onChange={(e) => set('status', e.target.value)}
+                          placeholder="In production"
+                          className={FIELD}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="p-caseStudyUrl" className={LABEL}>
+                          External write-up
+                        </label>
+                        <input
+                          id="p-caseStudyUrl"
+                          type="url"
+                          value={formData.caseStudyUrl}
+                          onChange={(e) => set('caseStudyUrl', e.target.value)}
+                          placeholder="https://"
+                          className={FIELD_MONO}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button type="submit" disabled={saving} className={`flex-1 ${BTN}`}>
+                  {saving
+                    ? 'Saving…'
+                    : `${editingProject ? 'Update' : 'Create'} Project`}
                 </button>
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-6 py-3 bg-shelf hover:bg-rule text-ink font-medium  transition"
+                  className={BTN_GHOST}
                 >
                   Cancel
                 </button>

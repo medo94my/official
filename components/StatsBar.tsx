@@ -12,7 +12,7 @@ export default function StatsBar({ stats }: { stats: Stat[] }) {
   if (stats.length === 0) return null
 
   return (
-    <dl className="mt-16 grid grid-cols-2 gap-x-8 gap-y-6 border-y border-rule py-6 sm:grid-cols-3">
+    <dl className="mt-16 grid grid-cols-2 gap-x-8 gap-y-6 border-y border-border py-6 sm:grid-cols-3">
       {stats.map((stat) => (
         <div key={stat.id}>
           <dd className="font-mono text-2xl font-semibold tracking-tight tnum">{stat.value}</dd>

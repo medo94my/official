@@ -106,13 +106,13 @@ export default function VoiceRecorder({ onTranscription, enhance = true }: Voice
           onClick={stopRecording}
           className={BTN_GHOST}
         >
-          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-danger animate-pulse" />
+          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-error animate-pulse" />
           Stop recording
         </button>
       )}
 
       {isProcessing && (
-        <div className="flex items-center gap-2 px-4 py-2 border border-rule text-ink ">
+        <div className="flex items-center gap-2 px-4 py-2 border border-border text-foreground ">
           <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
             <path

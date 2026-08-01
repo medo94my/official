@@ -57,7 +57,7 @@ export default function SkillsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
           <div className={`${PANEL} sticky top-8`}>
-            <h2 className="text-xl font-bold text-ink mb-4">{editingId ? 'Edit' : 'Add'} Skill</h2>
+            <h2 className="text-xl font-bold text-foreground mb-4">{editingId ? 'Edit' : 'Add'} Skill</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="text"
@@ -85,7 +85,7 @@ export default function SkillsPage() {
                 className={`${FIELD}`}
               />
               <div>
-                <label className="block text-sm text-ink mb-2">Level: {formData.level}%</label>
+                <label className="block text-sm text-foreground mb-2">Level: {formData.level}%</label>
                 <input
                   type="range"
                   min="0"
@@ -121,15 +121,15 @@ export default function SkillsPage() {
         <div className="lg:col-span-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {skills.map((skill) => (
-              <div key={skill.id} className="bg-panel border border-rule  p-4">
+              <div key={skill.id} className="bg-surface border border-border  p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="text-lg font-bold text-ink">{skill.icon} {skill.name}</h3>
-                    <p className="text-sm text-muted">{skill.category}</p>
+                    <h3 className="text-lg font-bold text-foreground">{skill.icon} {skill.name}</h3>
+                    <p className="text-sm text-foreground-muted">{skill.category}</p>
                   </div>
                 </div>
-                <div className="w-full bg-shelf h-2 mb-4">
-                  <div className="bg-ink h-2 rounded-full" style={{ width: `${skill.level}%` }} />
+                <div className="w-full bg-background-subtle h-2 mb-4">
+                  <div className="bg-foreground h-2 rounded-full" style={{ width: `${skill.level}%` }} />
                 </div>
                 <div className="flex gap-2">
                   <button

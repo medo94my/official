@@ -34,10 +34,6 @@ services:
       # rather than runtime env.
       args:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
-        NEXT_PUBLIC_EMAILJS_SERVICE_ID: ${NEXT_PUBLIC_EMAILJS_SERVICE_ID:-}
-        NEXT_PUBLIC_EMAILJS_TEMPLATE_ID: ${NEXT_PUBLIC_EMAILJS_TEMPLATE_ID:-}
-        NEXT_PUBLIC_EMAILJS_IDEA_TEMPLATE_ID: ${NEXT_PUBLIC_EMAILJS_IDEA_TEMPLATE_ID:-}
-        NEXT_PUBLIC_EMAILJS_PUBLIC_KEY: ${NEXT_PUBLIC_EMAILJS_PUBLIC_KEY:-}
     restart: unless-stopped
     depends_on:
       db:
@@ -49,6 +45,16 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # Contact form. All optional: with none of them set, submissions are
+      # still saved to the Inquiry table and readable at /admin/dashboard/inbox
+      # — only the email notification is skipped. Runtime env, not build args:
+      # these are server-side secrets and must never reach the client bundle.
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      INQUIRY_NOTIFY_TO: ${INQUIRY_NOTIFY_TO:-}
+      INQUIRY_NOTIFY_FROM: ${INQUIRY_NOTIFY_FROM:-}
+      # Salts the stored IP hash. Rotating it makes existing hashes
+      # unlinkable, which is the intent.
+      INQUIRY_IP_SALT: ${INQUIRY_IP_SALT:-}
     ports:
       # Loopback only. Public traffic arrives via the infra-proxy network
       # (Traefik -> Cloudflare Tunnel), so port 3000 does not need to be

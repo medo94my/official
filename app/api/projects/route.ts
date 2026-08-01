@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
+import { contentChanged, handleApiError } from '@/lib/api'
 import { getProjects } from '@/lib/content'
+import { projectFields } from '@/lib/project-fields'
+import { slugify } from '@/lib/slug'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,27 +28,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const project = await prisma.project.create({
       data: {
-        title: body.title,
-        description: body.description,
-        type: body.type,
-        image: body.image,
-        githubUrl: body.githubUrl,
-        liveUrl: body.liveUrl,
-        tags: Array.isArray(body.tags) ? body.tags.join(',') : (body.tags || ''),
-        specs: body.specs || null,
-        featured: body.featured || false,
-        order: body.order || 0,
+        ...projectFields(body),
+        // Falls back to the title so a slug is never absent; the form sends an
+        // explicit one when the owner has overridden it.
+        slug: slugify(body.slug || body.title || ''),
       },
     })
 
-    return NextResponse.json(project, { status: 201 })
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json(
-      { error: 'Failed to create project' },
-      { status: 500 }
-    )
+    return contentChanged(project, { status: 201 })
+  } catch (error) {
+    return handleApiError(error)
   }
 }

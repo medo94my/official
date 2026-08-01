@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import { slugify } from './slug'
 import bcrypt from 'bcryptjs'
 
 /**
@@ -11,6 +12,23 @@ import bcrypt from 'bcryptjs'
  * (shut down with the free tier in Nov 2022) and two GitHub repos that do not
  * exist (medo94my/undertesting, medo94my/wasi-furom). Those are gone rather
  * than kept as 404s.
+ *
+ * ── Two rules this file must keep ────────────────────────────────────────
+ *
+ * 1. NO CASE-STUDY FIELDS HERE. `problem`, `myRole`, `outcome` and the rest
+ *    are the owner's to write. They are absent from these literals on purpose,
+ *    and because `update: project` only sets the keys present in the object,
+ *    that absence is what protects dashboard-entered prose from being erased
+ *    on the next seed run. Do not "tidy" the upsert into spreading a defaults
+ *    object — that would silently wipe every case study.
+ *
+ * 2. Projects upsert on `title`, but `slug` is also UNIQUE. Renaming a project
+ *    in the dashboard and then re-seeding will fail with P2002 rather than
+ *    silently creating a duplicate. Loud is better here; fix it by renaming
+ *    the title back or updating this file.
+ *
+ * `Experience` is deliberately never seeded — employment history is a factual
+ * claim only the owner can make.
  */
 
 // Stable ids for the singleton rows so upsert has something to key on.
@@ -232,18 +250,23 @@ const SERVICES = [
     title: 'Scoping and architecture',
     description:
       'Working out what to build and what to leave out, then choosing a stack that fits the problem, the budget and whoever has to maintain it afterwards.',
+    // Explicit rather than relying on the column default, so the intent is
+    // visible: these render under Engagements, not as a process diagram.
+    kind: 'service',
     order: 0,
   },
   {
     title: 'Build',
     description:
       'Implementation end to end — data model, API, interface — with the failure cases handled rather than discovered in production.',
+    kind: 'service',
     order: 1,
   },
   {
     title: 'Ship and keep it running',
     description:
       'Containerised deploys, migrations that replay safely, and enough logging to answer the question the next time something breaks.',
+    kind: 'service',
     order: 2,
   },
 ]
@@ -288,10 +311,13 @@ async function main() {
   console.log('✓ About section')
 
   for (const project of PROJECTS) {
+    // Derived, not written into each literal: seven hand-typed slugs is seven
+    // chances to diverge from the migration's backfill expression.
+    const data = { ...project, slug: slugify(project.title) }
     await prisma.project.upsert({
       where: { title: project.title },
-      update: project,
-      create: project,
+      update: data,
+      create: data,
     })
   }
   console.log(`✓ Projects (${PROJECTS.length})`)

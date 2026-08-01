@@ -38,12 +38,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="flex min-h-screen items-center justify-center bg-background-subtle px-5">
       <Toaster position="top-right" />
-      <div className="bg-panel p-8 rounded-2xl shadow-2xl w-full max-w-md border border-rule">
+      <div className="w-full max-w-md border border-border bg-surface p-8 shadow-raised">
         <div className="text-center mb-8">
           <h1 className={`${PAGE_TITLE} mb-2`}>Portfolio CMS</h1>
-          <p className="text-muted">Login to manage your portfolio</p>
+          <p className="text-foreground-muted">Login to manage your portfolio</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -57,7 +57,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className={`${FIELD} placeholder-gray-400 focus:outline-none focus:border-ink focus:border-transparent transition`}
+              className={FIELD}
               placeholder="admin@example.com"
             />
           </div>
@@ -72,7 +72,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className={`${FIELD} placeholder-gray-400 focus:outline-none focus:border-ink focus:border-transparent transition`}
+              className={FIELD}
               placeholder="••••••••"
             />
           </div>

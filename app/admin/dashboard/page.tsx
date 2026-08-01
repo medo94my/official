@@ -31,32 +31,32 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className={`${PANEL}`}>
-          <h3 className="text-meta text-muted font-medium mb-2">Projects</h3>
-          <p className="text-4xl font-bold text-ink">{stats.projects}</p>
-          <Link href="/admin/dashboard/projects" className="text-ink hover:text-yellow-400 text-sm mt-4 inline-block">
+          <h3 className="text-meta text-foreground-muted font-medium mb-2">Projects</h3>
+          <p className="text-4xl font-bold text-foreground">{stats.projects}</p>
+          <Link href="/admin/dashboard/projects" className="mt-4 inline-block text-small text-primary underline decoration-border underline-offset-4 transition-colors hover:decoration-primary">
             Manage →
           </Link>
         </div>
 
         <div className={`${PANEL}`}>
-          <h3 className="text-meta text-muted font-medium mb-2">Skills</h3>
-          <p className="text-4xl font-bold text-ink">{stats.skills}</p>
-          <Link href="/admin/dashboard/skills" className="text-ink hover:text-yellow-400 text-sm mt-4 inline-block">
+          <h3 className="text-meta text-foreground-muted font-medium mb-2">Skills</h3>
+          <p className="text-4xl font-bold text-foreground">{stats.skills}</p>
+          <Link href="/admin/dashboard/skills" className="mt-4 inline-block text-small text-primary underline decoration-border underline-offset-4 transition-colors hover:decoration-primary">
             Manage →
           </Link>
         </div>
 
         <div className={`${PANEL}`}>
-          <h3 className="text-meta text-muted font-medium mb-2">Services</h3>
-          <p className="text-4xl font-bold text-ink">{stats.services}</p>
-          <Link href="/admin/dashboard/services" className="text-ink hover:text-yellow-400 text-sm mt-4 inline-block">
+          <h3 className="text-meta text-foreground-muted font-medium mb-2">Services</h3>
+          <p className="text-4xl font-bold text-foreground">{stats.services}</p>
+          <Link href="/admin/dashboard/services" className="mt-4 inline-block text-small text-primary underline decoration-border underline-offset-4 transition-colors hover:decoration-primary">
             Manage →
           </Link>
         </div>
       </div>
 
       <div className={`${PANEL}`}>
-        <h2 className="text-xl font-bold text-ink mb-4">Quick Actions</h2>
+        <h2 className="text-xl font-bold text-foreground mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
             href="/admin/dashboard/projects"
@@ -66,7 +66,7 @@ export default function DashboardPage() {
           </Link>
           <Link
             href="/admin/dashboard/about"
-            className="px-4 py-3 bg-shelf hover:bg-rule text-ink font-medium  transition text-center"
+            className="px-4 py-3 bg-background-subtle hover:bg-border text-foreground font-medium  transition text-center"
           >
             Update Profile
           </Link>

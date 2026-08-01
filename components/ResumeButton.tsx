@@ -24,7 +24,7 @@ export default function ResumeButton({
       download={isLocal ? `${(name || 'resume').replace(/\s+/g, '-')}-CV.pdf` : undefined}
       target={isLocal ? undefined : '_blank'}
       rel={isLocal ? undefined : 'noopener noreferrer'}
-      className="inline-flex min-h-11 items-center gap-2 border border-ink px-4 font-mono text-meta text-ink transition-colors hover:bg-ink hover:text-paper"
+      className="inline-flex min-h-11 items-center gap-2 border border-foreground px-4 font-mono text-meta text-foreground transition-colors hover:bg-foreground hover:text-background"
     >
       Résumé
       <span aria-hidden="true">↓</span>

@@ -8,6 +8,7 @@ export default function HeroPage() {
   const [formData, setFormData] = useState({
     headline: '',
     subheadline: '',
+    valueProp: '',
     ctaText: 'View My Work',
     ctaUrl: '#portfolio',
     background: '',
@@ -57,7 +58,7 @@ export default function HeroPage() {
     <div>
       <h1 className={`${PAGE_TITLE} mb-8`}>Hero Section</h1>
 
-      <div className="border border-rule bg-panel p-6 max-w-2xl">
+      <div className="border border-border bg-surface p-6 max-w-2xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className={`${LABEL}`}>Headline</label>
@@ -72,14 +73,38 @@ export default function HeroPage() {
           </div>
 
           <div>
-            <label className={`${LABEL}`}>Subheadline</label>
+            <label htmlFor="subheadline" className={`${LABEL}`}>Subheadline</label>
             <input
+              id="subheadline"
               type="text"
               value={formData.subheadline}
               onChange={(e) => setFormData({ ...formData, subheadline: e.target.value })}
-              placeholder="e.g., Full Stack Developer"
+              placeholder="Full-stack · automation · self-hosted infrastructure"
               className={`${FIELD}`}
             />
+            <p className="mt-1 text-meta text-foreground-muted">
+              Shown as the eyebrow above the headline, and as the &ldquo;Focus&rdquo;
+              cell in the hero ledger.
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="valueProp" className={`${LABEL}`}>
+              Value proposition
+            </label>
+            <textarea
+              id="valueProp"
+              value={formData.valueProp}
+              onChange={(e) => setFormData({ ...formData, valueProp: e.target.value })}
+              rows={3}
+              placeholder="What you build, who you help, and why it matters — one or two sentences."
+              className={`${FIELD}`}
+            />
+            <p className="mt-1 text-meta text-foreground-muted">
+              The sentence under the headline. This is the single claim the rest
+              of the page has to support. While it is blank the hero shows the
+              headline alone — no placeholder text is invented.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

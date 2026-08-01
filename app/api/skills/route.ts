@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
+import { contentChanged, handleApiError } from '@/lib/api'
 
 export async function GET() {
   try {
@@ -31,14 +32,8 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(skill, { status: 201 })
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json(
-      { error: 'Failed to create skill' },
-      { status: 500 }
-    )
+    return contentChanged(skill, { status: 201 })
+  } catch (error) {
+    return handleApiError(error)
   }
 }

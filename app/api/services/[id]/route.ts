@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
+import { contentChanged, handleApiError } from '@/lib/api'
 
 export async function PUT(
   request: NextRequest,
@@ -20,15 +21,9 @@ export async function PUT(
       },
     })
 
-    return NextResponse.json(service)
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json(
-      { error: 'Failed to update service' },
-      { status: 500 }
-    )
+    return contentChanged(service)
+  } catch (error) {
+    return handleApiError(error)
   }
 }
 
@@ -43,14 +38,8 @@ export async function DELETE(
       where: { id: params.id },
     })
 
-    return NextResponse.json({ message: 'Service deleted successfully' })
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json(
-      { error: 'Failed to delete service' },
-      { status: 500 }
-    )
+    return contentChanged({ message: 'Service deleted successfully' })
+  } catch (error) {
+    return handleApiError(error)
   }
 }

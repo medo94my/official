@@ -1,14 +1,25 @@
-import Link from 'next/link'
-import Contact from '@/components/Contact'
-import IdeaSubmission from '@/components/IdeaSubmission'
-import ProjectEntry from '@/components/ProjectEntry'
-import ResumeButton from '@/components/ResumeButton'
-import Reveal from '@/components/Reveal'
-import SectionHead from '@/components/SectionHead'
-import SiteRail from '@/components/SiteRail'
-import StatsBar from '@/components/StatsBar'
+import JsonLd from '@/components/JsonLd'
+import SiteFooter from '@/components/layout/SiteFooter'
+import SiteNav, { type NavItem } from '@/components/layout/SiteNav'
+import ScrollRail from '@/components/motion/ScrollRail.client'
+import AboutSection from '@/components/sections/AboutSection'
+import ContactSection from '@/components/sections/ContactSection'
+import ExperienceSection from '@/components/sections/ExperienceSection'
+import HeroSection, { type LedgerCell } from '@/components/sections/HeroSection'
+import ProcessSection from '@/components/sections/ProcessSection'
+import ProofBar from '@/components/sections/ProofBar'
+import SelectedWorkSection from '@/components/sections/SelectedWorkSection'
+import ServicesSection from '@/components/sections/ServicesSection'
+import StackSection from '@/components/sections/StackSection'
 import WhatsAppButton from '@/components/WhatsAppButton'
-import { getSiteContent, groupSkillsByCategory, rankProjects } from '@/lib/content'
+import Container from '@/components/ui/Container'
+import {
+  getSiteContent,
+  groupSkillsByCategory,
+  rankProjects,
+  splitServices,
+} from '@/lib/content'
+import { homeSchema } from '@/lib/structured-data'
 
 // Content is edited through the admin dashboard, so the page is rendered per
 // request rather than frozen at build time.
@@ -23,197 +34,114 @@ const FALLBACK = {
   headline: 'I build systems that keep running when things break.',
 }
 
-const INDEX = [
-  { href: '#work', label: 'Selected work' },
-  { href: '#stack', label: 'Stack' },
-  { href: '#services', label: 'Engagements' },
-  { href: '#contact', label: 'Contact' },
-]
-
+/**
+ * This page owns all the data access; no section component touches Prisma.
+ * Sections take plain props, which keeps them server components, trivially
+ * testable, and reusable on /projects and the case-study pages.
+ */
 export default async function HomePage() {
-  const { projects, skills, services, about, hero, stats } = await getSiteContent()
+  const { projects, skills, services, about, hero, stats, experience } =
+    await getSiteContent()
+
   const skillsByCategory = groupSkillsByCategory(skills)
+  const { services: engagements, process } = splitServices(services)
 
   const name = about?.name || FALLBACK.name
   const role = about?.title || FALLBACK.title
 
   const ranked = rankProjects(projects)
   const showcase = ranked.slice(0, SHOWCASE)
-  const remaining = ranked.length - showcase.length
+
+  // Nav entries are built from what actually rendered, so a section that hides
+  // itself (no experience yet, no process steps) does not leave a dead anchor
+  // in the header.
+  const nav: NavItem[] = [
+    { href: '#work', label: 'Work' },
+    engagements.length > 0 && { href: '#services', label: 'Engagements' },
+    skillsByCategory.length > 0 && { href: '#stack', label: 'Stack' },
+    experience.length > 0 && { href: '#experience', label: 'Experience' },
+    about?.bio && { href: '#about', label: 'About' },
+    { href: '#contact', label: 'Contact' },
+  ].filter(Boolean) as NavItem[]
+
+  // The hero ledger states facts. A cell with no value is dropped rather than
+  // filled, so nothing here is a claim the database cannot support.
+  const ledger: LedgerCell[] = [
+    hero?.subheadline && { label: 'Focus', value: hero.subheadline },
+    skillsByCategory.length > 0 && {
+      label: 'Working in',
+      value: skillsByCategory
+        .slice(0, 3)
+        .map(([category]) => category)
+        .join(' · '),
+    },
+    about?.location && { label: 'Based in', value: about.location },
+  ].filter(Boolean) as LedgerCell[]
+
+  // The rail's ticks come from the same list as the nav, so a section that hid
+  // itself never gets a tick pointing at nothing.
+  const sectionIds = nav.map((item) => item.href.replace('#', ''))
 
   return (
-    <div className="mx-auto max-w-5xl px-5 pb-24 sm:px-8">
-      <div className="lg:grid lg:grid-cols-[13rem_1fr] lg:gap-14">
-        <div className="pt-12 sm:pt-16">
-          <SiteRail
-            name={name}
-            role={role}
-            location={about?.location}
+    <>
+      <JsonLd data={homeSchema(about, FALLBACK.name)} />
+
+      <SiteNav
+        name={name}
+        items={nav}
+        cta={{ href: '#contact', label: 'Start a project' }}
+        resume={about?.resume}
+      />
+
+      <ScrollRail sectionIds={sectionIds} />
+
+      <main id="main" tabIndex={-1} className="outline-none">
+        <HeroSection
+          headline={hero?.headline || FALLBACK.headline}
+          valueProp={hero?.valueProp}
+          subheadline={role}
+          ledger={ledger}
+          resume={about?.resume}
+          workHref="#work"
+          contactHref="#contact"
+        />
+
+        <Container>
+          <ProofBar stats={stats} />
+          {/* The positioning line lives in the hero, once. A separate
+              value-proposition band would repeat the same sentence; the detail
+              behind it belongs in Engagements, where it can be specific. */}
+          <SelectedWorkSection projects={showcase} total={ranked.length} />
+          <ServicesSection services={engagements} />
+          <ProcessSection steps={process} />
+          <StackSection groups={skillsByCategory} />
+          <ExperienceSection experience={experience} resume={about?.resume} />
+          <AboutSection bio={about?.bio} location={about?.location} />
+          <ContactSection
             email={about?.email}
+            phone={about?.phone}
+            whatsapp={about?.whatsapp}
+            location={about?.location}
             github={about?.github}
             linkedin={about?.linkedin}
-            twitter={about?.twitter}
-            index={INDEX}
           />
-        </div>
+        </Container>
+      </main>
 
-        <main className="pt-12 sm:pt-16">
-          {/* ── Thesis ─────────────────────────────────────────────── */}
-          <h1 className="max-w-[26ch] font-mono text-[2rem] font-semibold leading-[1.1] tracking-tight sm:text-[2.75rem] lg:text-[3.25rem]">
-            {hero?.headline || FALLBACK.headline}
-          </h1>
-
-          {hero?.subheadline && (
-            <p className="mt-6 font-mono text-meta text-muted">{hero.subheadline}</p>
-          )}
-
-          {about?.bio && (
-            <p className="mt-7 max-w-measure text-[0.9375rem] leading-relaxed text-ink/80">
-              {about.bio}
-            </p>
-          )}
-
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <ResumeButton resume={about?.resume} name={about?.name} />
-            <a
-              href="#work"
-              className="inline-flex min-h-11 items-center font-mono text-meta text-ink underline decoration-rule decoration-1 underline-offset-4 hover:decoration-ink"
-            >
-              {hero?.ctaText || 'See the work'} ↓
-            </a>
-          </div>
-
-          <StatsBar stats={stats} />
-
-          {/* ── Work: a showcase, not the archive ──────────────────── */}
-          <section className="pt-14 sm:pt-16">
-            <SectionHead
-              id="work"
-              title="Selected work"
-              eyebrow={`${showcase.length} of ${ranked.length}`}
-            />
-
-            {showcase.length === 0 ? (
-              <p className="text-meta text-muted">
-                No projects yet. Add them from the dashboard.
-              </p>
-            ) : (
-              <>
-                {showcase.map((project, index) => (
-                  <Reveal key={project.id} index={index}>
-                    <ProjectEntry index={index} {...project} />
-                  </Reveal>
-                ))}
-
-                {remaining > 0 && (
-                  <Link
-                    href="/projects"
-                    className="group flex min-h-14 items-center justify-between gap-4 border-t border-ink pt-5 font-mono text-meta text-ink"
-                  >
-                    <span className="underline decoration-rule decoration-1 underline-offset-4 group-hover:decoration-ink">
-                      All work
-                    </span>
-                    <span className="label tnum">
-                      +{remaining} more
-                      <span
-                        aria-hidden="true"
-                        className="ml-3 inline-block transition-transform group-hover:translate-x-0.5"
-                      >
-                        →
-                      </span>
-                    </span>
-                  </Link>
-                )}
-              </>
-            )}
-          </section>
-
-          {/* ── Stack ──────────────────────────────────────────────── */}
-          {skillsByCategory.length > 0 && (
-            <section className="pt-16 sm:pt-20">
-              <SectionHead id="stack" title="Stack" eyebrow="Day to day" />
-              <dl>
-                {skillsByCategory.map(([category, categorySkills]) => (
-                  <div
-                    key={category}
-                    className="grid gap-1 border-b border-rule py-4 sm:grid-cols-[9rem_1fr] sm:gap-6"
-                  >
-                    <dt className="label pt-1">{category}</dt>
-                    <dd className="font-mono text-meta leading-relaxed text-ink/85">
-                      {categorySkills.map((s) => s.name).join('  ·  ')}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-          )}
-
-          {/* ── Engagements ────────────────────────────────────────── */}
-          {services.length > 0 && (
-            <section className="pt-16 sm:pt-20">
-              <SectionHead id="services" title="Engagements" eyebrow="How I work" />
-              <ol>
-                {services.map((service, i) => (
-                  <li
-                    key={service.id}
-                    className="grid gap-1 border-b border-rule py-5 sm:grid-cols-[3rem_1fr] sm:gap-6"
-                  >
-                    {/* Ordered because this is the actual sequence of a project. */}
-                    <span className="label tnum pt-1">{String(i + 1).padStart(2, '0')}</span>
-                    <div>
-                      <h3 className="font-mono text-[0.9375rem] font-medium">{service.title}</h3>
-                      <p className="mt-2 max-w-measure text-meta leading-relaxed text-ink/75">
-                        {service.description}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </section>
-          )}
-
-          {/* ── Contact ────────────────────────────────────────────── */}
-          {about && (
-            <section className="pt-16 sm:pt-20">
-              <SectionHead id="contact" title="Contact" eyebrow="Get in touch" />
-              <dl>
-                {about.email && (
-                  <div className="grid gap-1 border-b border-rule py-4 sm:grid-cols-[9rem_1fr] sm:gap-6">
-                    <dt className="label pt-1">Email</dt>
-                    <dd>
-                      <a
-                        href={`mailto:${about.email}`}
-                        className="inline-flex min-h-11 items-center font-mono text-meta text-ink underline decoration-rule decoration-1 underline-offset-4 hover:decoration-ink"
-                      >
-                        {about.email}
-                      </a>
-                    </dd>
-                  </div>
-                )}
-                {about.location && (
-                  <div className="grid gap-1 border-b border-rule py-4 sm:grid-cols-[9rem_1fr] sm:gap-6">
-                    <dt className="label pt-1">Based in</dt>
-                    <dd className="font-mono text-meta text-ink/85">{about.location}</dd>
-                  </div>
-                )}
-              </dl>
-            </section>
-          )}
-
-          <IdeaSubmission />
-
-          <Contact email={about?.email} location={about?.location} />
-
-          <footer className="mt-16 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-ink pt-6 sm:mt-20">
-            <p className="label tnum">
-              © {new Date().getFullYear()} {name}
-            </p>
-            <p className="label">Next.js · Postgres · self-hosted</p>
-          </footer>
-        </main>
-      </div>
+      <SiteFooter
+        name={name}
+        role={role}
+        email={about?.email}
+        phone={about?.phone}
+        location={about?.location}
+        github={about?.github}
+        linkedin={about?.linkedin}
+        twitter={about?.twitter}
+        resume={about?.resume}
+        nav={nav}
+      />
 
       <WhatsAppButton number={about?.whatsapp} />
-    </div>
+    </>
   )
 }

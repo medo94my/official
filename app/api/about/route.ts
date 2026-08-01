@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
+import { contentChanged, handleApiError } from '@/lib/api'
 
 // Without this Next statically prerenders the GET at build time and the
 // dashboard would keep reading stale content after every edit.
@@ -65,14 +66,8 @@ export async function PUT(request: NextRequest) {
       })
     }
 
-    return NextResponse.json(about)
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json(
-      { error: 'Failed to update about info' },
-      { status: 500 }
-    )
+    return contentChanged(about)
+  } catch (error) {
+    return handleApiError(error)
   }
 }

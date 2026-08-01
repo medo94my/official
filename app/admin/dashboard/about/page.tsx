@@ -65,7 +65,7 @@ export default function AboutPage() {
     <div>
       <h1 className={`${PAGE_TITLE} mb-8`}>About</h1>
 
-      <div className="border border-rule bg-panel p-6 max-w-3xl">
+      <div className="border border-border bg-surface p-6 max-w-3xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -141,7 +141,7 @@ export default function AboutPage() {
                 placeholder="+90 555 000 0000"
                 className={`${FIELD}`}
               />
-              <p className="mt-1 text-meta text-muted">
+              <p className="mt-1 text-meta text-foreground-muted">
                 Shows the floating WhatsApp button. Leave empty to hide it. Any format works —
                 spaces and the leading + are stripped automatically.
               </p>

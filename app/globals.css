@@ -2,7 +2,134 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Theme tokens
+
+   Values are space-separated RGB channels, not hex, so Tailwind's alpha
+   modifiers work: `rgb(var(--foreground) / <alpha-value>)` makes
+   `text-foreground/80` and `bg-overlay/55` resolve correctly. A plain hex
+   custom property silently drops the `/80`.
+
+   The four brand colours are preserved verbatim as `--brand-*`. Two of them
+   fail contrast in one theme each and carry a derived text-role variant:
+     · Gold on ivory   1.91:1 → --accent light is #6B5620 (5.57:1)
+     · Maroon on onyx  1.90:1 → --primary dark is #D3798A (6.39:1)
+   Both originals survive untouched as fills, where they measure 8.15:1
+   (ivory on maroon) and 8.08:1 (onyx on gold).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @layer base {
+  :root {
+    /* The identity, unmodified. Never referenced directly by a component. */
+    --brand-onyx: 12 12 14;
+    --brand-gold: 194 163 92;
+    --brand-maroon: 126 21 48;
+    --brand-ivory: 236 228 210;
+
+    color-scheme: light;
+
+    /* ── Ground ──────────────────────────────────────────────────────────
+       Chroma falls as lightness rises (R−B spread 30 → 26 → 16 → 11), so the
+       ladder converges to a warm white and never to cream. */
+    --background: 236 228 210; /* #ECE4D2 ivory */
+    --background-subtle: 229 220 199; /* #E5DCC7  recessed */
+    --surface: 244 240 228; /* #F4F0E4 */
+    --surface-elevated: 251 248 240; /* #FBF8F0 */
+
+    /* ── Text ─────────────────────────────────────────────────────────── */
+    --foreground: 12 12 14; /* #0C0C0E  15.44:1 */
+    --foreground-muted: 74 68 56; /* #4A4438   7.63:1 */
+    --foreground-subtle: 110 101 83; /* #6E6553   4.55:1 */
+    --foreground-inverse: 236 228 210; /* #ECE4D2 */
+
+    /* ── Primary: maroon, which passes on ivory ───────────────────────── */
+    --primary: 126 21 48; /* #7E1530   8.15:1 */
+    --primary-hover: 106 17 40; /* #6A1128   9.63:1 */
+    --primary-active: 90 14 34; /* #5A0E22  10.91:1 */
+    --primary-foreground: 236 228 210; /* #ECE4D2   8.15:1 on primary */
+    --primary-surface: 126 21 48; /* fill */
+    --primary-surface-hover: 106 17 40; /* #6A1128   9.63:1 for ivory */
+
+    /* ── Accent: gold. Darkened for text, original kept for fills ─────── */
+    --accent: 107 86 32; /* #6B5620   5.57:1 */
+    --accent-hover: 92 74 27; /* #5C4A1B   6.77:1 */
+    --accent-foreground: 236 228 210; /* on an accent fill */
+    --accent-surface: 194 163 92; /* #C2A35C  the real gold */
+    --accent-surface-foreground: 12 12 14; /* onyx on gold, 8.08:1 */
+
+    /* ── Lines ────────────────────────────────────────────────────────── */
+    --border: 216 205 180; /* #D8CDB4  hairline */
+    --border-strong: 131 120 99; /* #837863   3.43:1, passes 1.4.11 */
+    --focus-ring: 126 21 48; /* #7E1530 */
+
+    /* ── Status. `error` is hue-shifted off maroon so a destructive action
+       is never confusable with a brand action. ───────────────────────── */
+    --success: 23 94 60; /* #175E3C   6.14:1 */
+    --warning: 122 79 8; /* #7A4F08   5.63:1 */
+    --error: 150 32 26; /* #96201A   6.59:1 */
+    --info: 26 83 120; /* #1A5378   6.50:1 */
+
+    --overlay: 12 12 14;
+    --selection: 126 21 48;
+    --selection-foreground: 236 228 210;
+
+    --shadow-color: 60 48 24;
+  }
+
+  [data-theme='dark'] {
+    color-scheme: dark;
+
+    /* ── Ground ──────────────────────────────────────────────────────────
+       Not flat black. Four steps at 1.09× / 1.20× / 1.44× against the base,
+       holding a 240° cast so no step reads as neutral grey. */
+    --background: 12 12 14; /* #0C0C0E onyx */
+    --background-subtle: 10 10 12; /* #0A0A0C  recessed well */
+    --surface: 23 22 26; /* #17161A */
+    --surface-elevated: 32 31 37; /* #201F25 */
+
+    /* ── Text ─────────────────────────────────────────────────────────── */
+    --foreground: 236 228 210; /* #ECE4D2  15.44:1 */
+    --foreground-muted: 183 177 164; /* #B7B1A4   9.16:1 */
+    --foreground-subtle: 143 134 112; /* #8F8670   5.41:1 */
+    --foreground-inverse: 12 12 14;
+
+    /* ── Primary: maroon fails on onyx, so text uses the derived rose and
+       the fill uses the one value that clears both thresholds. ───────── */
+    --primary: 211 121 138; /* #D3798A   6.39:1 */
+    --primary-hover: 222 138 152; /* #DE8A98   7.63:1 */
+    --primary-active: 200 110 128; /* #C86E80   5.58:1 */
+    --primary-foreground: 236 228 210; /* #ECE4D2   5.03:1 on primary-surface */
+    --primary-surface: 183 31 70; /* #B71F46   3.07:1 vs onyx */
+    /* Lightening a fill on a dark ground is a narrow band: too light and the
+       ivory label fails, too dark and the button loses its edge. #C0234B is
+       4.67:1 for ivory and 3.34:1 against onyx. */
+    --primary-surface-hover: 192 35 75; /* #C0234B */
+
+    /* ── Accent: gold passes on onyx, so it is used as supplied ───────── */
+    --accent: 194 163 92; /* #C2A35C   8.08:1 */
+    --accent-hover: 208 180 114; /* #D0B472   9.73:1 */
+    --accent-foreground: 12 12 14;
+    --accent-surface: 194 163 92;
+    --accent-surface-foreground: 12 12 14;
+
+    /* ── Lines ────────────────────────────────────────────────────────── */
+    --border: 46 45 53; /* #2E2D35 */
+    --border-strong: 126 118 99; /* #7E7663   4.34:1 */
+    --focus-ring: 194 163 92; /* #C2A35C */
+
+    /* ── Status ───────────────────────────────────────────────────────── */
+    --success: 92 199 154; /* #5CC79A   9.39:1 */
+    --warning: 224 165 74; /* #E0A54A   8.98:1 */
+    --error: 238 129 117; /* #EE8175   7.48:1 */
+    --info: 120 188 234; /* #78BCEA   9.47:1 */
+
+    --overlay: 0 0 0;
+    --selection: 194 163 92;
+    --selection-foreground: 12 12 14;
+
+    --shadow-color: 0 0 0;
+  }
+
   html {
     scroll-behavior: smooth;
     /* Hairlines must stay hairlines; stop mobile Safari inflating type. */
@@ -10,28 +137,30 @@
   }
 
   body {
-    @apply bg-paper text-ink font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased;
     /* No overflow-x: hidden. It hides overflow bugs instead of preventing
        them — the layout is measured at 320px and must genuinely fit. */
   }
 
-  /* One visible focus treatment, used everywhere. */
+  /* One visible focus treatment, used everywhere. Written against the custom
+     property directly: Tailwind's `theme()` would return the unresolved
+     `rgb(var(--x) / <alpha-value>)` string, which is invalid in `outline`. */
   :focus-visible {
-    outline: 2px solid theme('colors.ink');
+    outline: 2px solid rgb(var(--focus-ring));
     outline-offset: 3px;
   }
 
   ::selection {
-    background: theme('colors.ink');
-    color: theme('colors.paper');
+    background: rgb(var(--selection));
+    color: rgb(var(--selection-foreground));
   }
 }
 
 @layer utilities {
-  /* The instrument voice: small, letterspaced, uppercase mono. Used for
-     eyebrows, spec labels and metadata — never for prose. */
+  /* Small, letterspaced, uppercase mono. Eyebrows, spec labels and metadata —
+     never prose, and never a heading. */
   .label {
-    @apply font-mono text-label uppercase text-muted;
+    @apply font-mono text-label uppercase text-foreground-muted;
   }
 
   /* Tabular figures so spec values and years align down the column. */
@@ -40,15 +169,34 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Reduced motion
+
+   This block deliberately does NOT blanket-kill `transition-duration`. Doing
+   so removes harmless colour fades and the admin drawer's spatial cue, while
+   having no effect at all on the animation that actually causes vestibular
+   symptoms: Motion and GSAP write inline `style.transform` on every frame and
+   never consult a CSS transition.
+
+   The JS side is handled where it can be: <MotionConfig reducedMotion="user">
+   in app/providers.tsx, and a `prefers-reduced-motion: no-preference` guard in
+   gsap.matchMedia() so those timelines are never created.
+
+   What remains for CSS is to (a) flatten keyframe animations and (b) restrict
+   what is allowed to transition to properties that do not move anything.
+   ═══════════════════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
+
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-property: color, background-color, border-color,
+      text-decoration-color, outline-color, fill, stroke, opacity,
+      box-shadow !important;
   }
 }

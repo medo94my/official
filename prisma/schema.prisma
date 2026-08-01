@@ -26,6 +26,9 @@ model Project {
   id          String   @id @default(cuid())
   // Unique so the seed can upsert on it and stay idempotent.
   title       String   @unique
+  /// URL segment for /projects/[slug]. Derived from the title by the seed and
+  /// by the admin form, editable afterwards. Unique because it is a route.
+  slug        String   @unique
   description String
   type        String   // "Solo" or "Team"
   image       String?
@@ -38,8 +41,83 @@ model Project {
   specs       String?
   featured    Boolean  @default(false)
   order       Int      @default(0)
+
+  // ── Case study ───────────────────────────────────────────────────────
+  // Every field is optional and every one starts empty. The detail page
+  // renders only the blocks that have content, and `hasCaseStudy()` in
+  // lib/content.ts decides whether to link to it at all — so a project with
+  // none of this set behaves exactly as it did before the columns existed.
+  //
+  // Free text, never Json: the admin is hand-rolled textareas, and a Json
+  // column becomes a syntax-error trap for the one person who edits it.
+  // Multi-item fields are one item per line (parseLines); label/value fields
+  // reuse the existing "LABEL: value" format (parseSpecs).
+  /// Prose. What was actually wrong before this existed.
+  problem          String?
+  /// Prose, short. Who it is for.
+  audience         String?
+  /// Prose. Where it sits, what it replaced.
+  context          String?
+  /// One per line.
+  constraints      String?
+  /// Prose, short.
+  myRole           String?
+  /// One per line.
+  responsibilities String?
+  /// Prose. How it was approached.
+  approach         String?
+  /// "Decision: rationale", one per line.
+  keyDecisions     String?
+  /// One per line.
+  challenges       String?
+  /// "Gained: …" / "Gave up: …", one per line.
+  tradeoffs        String?
+  /// Prose. What actually happened. Left empty unless it is verifiable.
+  outcome          String?
+  /// One per line.
+  lessons          String?
+  /// Free text, owner-set. Nullable on purpose — an unverified "Shipped"
+  /// badge is a claim, and claims are the owner's to make (same rule as Stat).
+  status           String?
+  /// A longer write-up hosted elsewhere, if one exists.
+  caseStudyUrl     String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([featured, order])
+}
+
+/// Employment history.
+///
+/// Deliberately NOT seeded. An employment record is a factual claim only the
+/// owner can make, so this table ships empty and every consumer hides itself
+/// while it is — the same contract as Stat.
+model Experience {
+  id         String   @id @default(cuid())
+  company    String
+  role       String
+  /// "YYYY-MM". A string, not a DateTime: a CV states month precision, and a
+  /// DateTime would fabricate a day and a time that then round-trip through
+  /// the viewer's timezone — 2023-06-01T00:00:00Z renders as May 2023 west of
+  /// UTC. <input type="month"> produces exactly this format, and zero-padded
+  /// YYYY-MM sorts chronologically as a plain string.
+  startDate  String
+  /// Null means current.
+  endDate    String?
+  location   String?
+  /// Prose, short.
+  summary    String?
+  /// One per line.
+  highlights String?
+  url        String?
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Stops the admin creating an accidental duplicate, and would let a future
+  // seed upsert idempotently — though the seed will not touch this table.
+  @@unique([company, role, startDate])
 }
 
 model Skill {
@@ -63,9 +141,65 @@ model Service {
   title       String   @unique
   description String
   icon        String?
+  /// "service" renders under Engagements; "process" renders in the Process
+  /// section. One model with two presentations rather than a second model:
+  /// the three seeded rows literally are the stages of a project, so a
+  /// separate ProcessStep table would duplicate them and let the two drift.
+  /// Defaults to "service", which preserves the current rendering exactly.
+  kind         String  @default("service")
+  /// Prose, short. Who this is for.
+  audience     String?
+  /// One per line. What the client actually receives.
+  deliverables String?
+  /// Free text — "Fixed scope", "Retainer", "Advisory".
+  engagement   String?
+  /// Free text — "2–6 weeks".
+  duration     String?
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([kind, order])
+}
+
+/// A contact-form submission.
+///
+/// Persisted before any email is attempted, so a delivery failure cannot lose
+/// a message — the route returns success on the strength of this row existing,
+/// not on the notification going out.
+model Inquiry {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  company     String?
+  /// "hire" | "collaborate" | "question" | "other"
+  reason      String?
+  projectType String?
+  budget      String?
+  timeline    String?
+  message     String
+
+  /// "new" | "read" | "replied" | "archived"
+  status    String    @default("new")
+  readAt    DateTime?
+  repliedAt DateTime?
+  /// Owner's private note. Never rendered publicly.
+  notes     String?
+
+  // ── Abuse triage, privacy-minimising by construction ─────────────────
+  /// sha256(ip + INQUIRY_IP_SALT), first 16 hex chars. Enough to group repeat
+  /// submitters and drive the rate limiter; not reversible to an address
+  /// without the salt, and the salt is rotatable. The raw IP is never written.
+  ipHash    String?
+  /// Truncated to 255 chars. Distinguishes a browser from a curl loop.
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  // Serves the inbox's default query: unread first, newest first.
+  @@index([status, createdAt])
+  // Serves the rate-limit count.
+  @@index([ipHash, createdAt])
 }
 
 /// Headline metrics for the stats strip ("5+ Years of Experience").
@@ -104,6 +238,9 @@ model Hero {
   id          String   @id @default(cuid())
   headline    String
   subheadline String?
+  /// The positioning line under the headline: what gets built, and for whom.
+  /// Distinct from About.bio, which is the longer personal introduction.
+  valueProp   String?
   ctaText     String   @default("View My Work")
   ctaUrl      String   @default("#portfolio")
   background  String?  // Background image URL

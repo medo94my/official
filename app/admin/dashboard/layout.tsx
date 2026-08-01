@@ -7,14 +7,18 @@ import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { Toaster } from 'react-hot-toast'
 
+// Ordered as the sections appear on the public page, so the sidebar reads as
+// a map of the site rather than an arbitrary list of tables.
 const NAV_LINKS = [
   { href: '/admin/dashboard', label: 'Dashboard' },
+  { href: '/admin/dashboard/inbox', label: 'Inbox' },
+  { href: '/admin/dashboard/hero', label: 'Hero' },
   { href: '/admin/dashboard/projects', label: 'Projects' },
-  { href: '/admin/dashboard/skills', label: 'Skills' },
   { href: '/admin/dashboard/services', label: 'Services' },
+  { href: '/admin/dashboard/skills', label: 'Skills' },
+  { href: '/admin/dashboard/experience', label: 'Experience' },
   { href: '/admin/dashboard/stats', label: 'Stats' },
   { href: '/admin/dashboard/about', label: 'About' },
-  { href: '/admin/dashboard/hero', label: 'Hero Section' },
 ]
 
 const NAV_ITEM =
@@ -23,8 +27,8 @@ const NAV_ITEM =
 /** Marking the current page is information the old sidebar simply omitted. */
 function navClass(active: boolean) {
   return active
-    ? `${NAV_ITEM} border-ink bg-shelf text-ink`
-    : `${NAV_ITEM} border-transparent text-muted hover:border-rule hover:text-ink`
+    ? `${NAV_ITEM} border-foreground bg-background-subtle text-foreground`
+    : `${NAV_ITEM} border-transparent text-foreground-muted hover:border-border hover:text-foreground`
 }
 
 export default function DashboardLayout({
@@ -51,7 +55,7 @@ export default function DashboardLayout({
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-paper">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="label">Loading…</div>
       </div>
     )
@@ -62,29 +66,32 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-background">
       <Toaster
         position="top-right"
         toastOptions={{
-          // Match the page rather than the library default.
+          // Custom properties, not literal hex: react-hot-toast renders these
+          // as inline styles, which resolve against the document, so the
+          // toast follows the theme. Hardcoded hex here would leave light
+          // toasts sitting on a dark admin.
           style: {
-            background: '#FFFFFF',
-            color: '#16191C',
-            border: '1px solid #DCE0E2',
-            borderRadius: 0,
+            background: 'rgb(var(--surface-elevated))',
+            color: 'rgb(var(--foreground))',
+            border: '1px solid rgb(var(--border))',
+            borderRadius: '0.1875rem',
             fontSize: '0.8125rem',
           },
         }}
       />
 
       {/* Mobile top bar — the only way to reach the nav below lg */}
-      <div className="lg:hidden fixed top-0 inset-x-0 h-14 z-30 flex items-center justify-between px-4 bg-panel border-b border-rule">
+      <div className="lg:hidden fixed top-0 inset-x-0 h-14 z-30 flex items-center justify-between px-4 bg-surface border-b border-border">
         <span className="font-mono text-meta font-semibold uppercase tracking-[0.09em]">Portfolio CMS</span>
         <button
           onClick={() => setNavOpen(true)}
           aria-label="Open menu"
           aria-expanded={navOpen}
-          className="w-11 h-11 -mr-2 flex items-center justify-center text-muted hover:text-ink"
+          className="w-11 h-11 -mr-2 flex items-center justify-center text-foreground-muted hover:text-foreground"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -96,14 +103,14 @@ export default function DashboardLayout({
       {navOpen && (
         <div
           onClick={() => setNavOpen(false)}
-          className="lg:hidden fixed inset-0 bg-ink/40 z-40"
+          className="lg:hidden fixed inset-0 bg-foreground/40 z-40"
           aria-hidden="true"
         />
       )}
 
       {/* Sidebar — off-canvas below lg, static from lg up */}
       <div
-        className={`fixed inset-y-0 left-0 w-64 bg-panel border-r border-rule z-50 overflow-y-auto
+        className={`fixed inset-y-0 left-0 w-64 bg-surface border-r border-border z-50 overflow-y-auto
           transform transition-transform duration-200 ease-in-out lg:translate-x-0
           ${navOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
@@ -113,7 +120,7 @@ export default function DashboardLayout({
             <button
               onClick={() => setNavOpen(false)}
               aria-label="Close menu"
-              className="lg:hidden w-11 h-11 -mr-2 flex items-center justify-center text-muted hover:text-ink"
+              className="lg:hidden w-11 h-11 -mr-2 flex items-center justify-center text-foreground-muted hover:text-foreground"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -134,13 +141,13 @@ export default function DashboardLayout({
             ))}
           </nav>
 
-          <div className="mt-8 border-t border-rule pt-6">
+          <div className="mt-8 border-t border-border pt-6">
             <Link href="/" className={navClass(false)}>
               View site
             </Link>
             <button
               onClick={() => signOut({ callbackUrl: '/admin/login' })}
-              className="w-full border-l-2 border-transparent px-4 py-3 text-left font-mono text-meta text-danger transition-colors hover:border-danger hover:bg-shelf"
+              className="w-full border-l-2 border-transparent px-4 py-3 text-left font-mono text-meta text-error transition-colors hover:border-error hover:bg-background-subtle"
             >
               Sign out
             </button>
@@ -154,7 +161,7 @@ export default function DashboardLayout({
         <div className="pt-20 px-4 pb-8 lg:p-8">
           <div className="mb-6">
             <p className="label">
-              Signed in as <span className="text-ink">{session.user.email}</span>
+              Signed in as <span className="text-foreground">{session.user.email}</span>
             </p>
           </div>
           {children}

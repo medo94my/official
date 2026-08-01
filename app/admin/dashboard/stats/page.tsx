@@ -65,7 +65,7 @@ export default function StatsPage() {
   return (
     <div>
       <h1 className={`${PAGE_TITLE} mb-2`}>Stats</h1>
-      <p className="text-muted mb-8">
+      <p className="text-foreground-muted mb-8">
         The metrics strip on the homepage. It stays hidden while this list is empty — add
         only figures you can stand behind.
       </p>
@@ -73,7 +73,7 @@ export default function StatsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
           <div className={`${PANEL} sticky top-8`}>
-            <h2 className="text-xl font-bold text-ink mb-4">
+            <h2 className="text-xl font-bold text-foreground mb-4">
               {editingId ? 'Edit' : 'Add'} Stat
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -126,7 +126,7 @@ export default function StatsPage() {
 
         <div className="lg:col-span-2">
           {stats.length === 0 ? (
-            <p className="text-muted">No stats yet — the homepage strip is hidden.</p>
+            <p className="text-foreground-muted">No stats yet — the homepage strip is hidden.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {stats.map((stat) => (
@@ -134,8 +134,8 @@ export default function StatsPage() {
                   key={stat.id}
                   className={`${PANEL}`}
                 >
-                  <p className="text-4xl font-bold text-ink mb-1">{stat.value}</p>
-                  <p className="text-meta text-muted mb-4">{stat.label}</p>
+                  <p className="text-4xl font-bold text-foreground mb-1">{stat.value}</p>
+                  <p className="text-meta text-foreground-muted mb-4">{stat.label}</p>
                   <div className="flex gap-2">
                     <button
                       onClick={() => {
