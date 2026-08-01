@@ -158,14 +158,18 @@ export default function DashboardLayout({
       {/* Main Content — pt-20 clears the mobile top bar; px-4 reclaims the
           width phones cannot spare from the old uniform p-8 */}
       <div className="lg:ml-64">
-        <div className="pt-20 px-4 pb-8 lg:p-8">
+        {/* A real main landmark with the id SkipLink targets. The dashboard is
+            the page with the most chrome to tab past — sidebar, drawer trigger,
+            nine nav links — so this is where skipping matters most, and it was
+            the one place the link had no destination. */}
+        <main id="main" tabIndex={-1} className="pt-20 px-4 pb-8 outline-none lg:p-8">
           <div className="mb-6">
             <p className="label">
               Signed in as <span className="text-foreground">{session.user.email}</span>
             </p>
           </div>
           {children}
-        </div>
+        </main>
       </div>
     </div>
   )

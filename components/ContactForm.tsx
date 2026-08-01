@@ -132,12 +132,19 @@ export default function ContactForm({ email }: { email?: string | null }) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field id="name" label="Name" error={errors.name?.message}>
-          <input id="name" autoComplete="name" className={FIELD} {...register('name')}
+          {/* aria-required, not the `required` attribute: `required` hands
+              validation to the browser, which would fire its own native bubble
+              before react-hook-form runs and show a second, differently-worded
+              error. This announces the obligation without taking over the
+              behaviour. The visual convention is the inverse — optional fields
+              are labelled "Optional" — and that label is inside the <label>, so
+              a screen reader hears it too. */}
+          <input id="name" autoComplete="name" aria-required="true" className={FIELD} {...register('name')}
             aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'name-error' : undefined} />
         </Field>
 
         <Field id="email" label="Email" error={errors.email?.message}>
-          <input id="email" type="email" autoComplete="email" className={FIELD} {...register('email')}
+          <input id="email" type="email" autoComplete="email" aria-required="true" className={FIELD} {...register('email')}
             aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'email-error' : undefined} />
         </Field>
       </div>
@@ -177,7 +184,7 @@ export default function ContactForm({ email }: { email?: string | null }) {
 
       <div className="mt-4">
         <Field id="message" label="Message" error={errors.message?.message}>
-          <textarea id="message" rows={6} className={`${FIELD} resize-y`}
+          <textarea id="message" rows={6} aria-required="true" className={`${FIELD} resize-y`}
             placeholder="What you are trying to build or solve, and anything that constrains it."
             {...register('message')}
             aria-invalid={Boolean(errors.message)}

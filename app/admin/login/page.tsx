@@ -38,7 +38,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background-subtle px-5">
+    // `main` with the id, not a bare div: SkipLink lives in the root layout and
+    // therefore renders here too, and it targets #main. Without this the skip
+    // link is present, focusable and goes nowhere — worse than absent, because
+    // a keyboard user presses it and loses their place.
+    <main
+      id="main"
+      tabIndex={-1}
+      className="flex min-h-screen items-center justify-center bg-background-subtle px-5 outline-none"
+    >
       <Toaster position="top-right" />
       <div className="w-full max-w-md border border-border bg-surface p-8 shadow-raised">
         <div className="text-center mb-8">
@@ -51,12 +59,17 @@ export default function LoginPage() {
             <label htmlFor="email" className={`${LABEL}`}>
               Email
             </label>
+            {/* autoComplete is what lets a password manager recognise this as
+                a sign-in pair and offer to fill it. Without the tokens, some
+                managers guess and some do nothing, and the person with the only
+                account on this site ends up typing a long password by hand. */}
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="username"
               className={FIELD}
               placeholder="admin@example.com"
             />
@@ -72,6 +85,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
               className={FIELD}
               placeholder="••••••••"
             />
@@ -86,6 +100,6 @@ export default function LoginPage() {
           </button>
         </form>
       </div>
-    </div>
+    </main>
   )
 }
