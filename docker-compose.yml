@@ -63,6 +63,36 @@ services:
     volumes:
       # Résumé PDF and project images can be swapped without a rebuild.
       - ./public/resume:/app/public/resume:ro
+    # ── Routing ───────────────────────────────────────────────────────────
+    # Traefik discovers this container over infra-proxy and reads these.
+    #
+    # Previously the route lived in Traefik's own file provider, pointing at
+    # `http://official-app-1:3000` — a container name derived from this
+    # directory's name. Renaming the directory, or setting a different compose
+    # project name, silently changed the container name and left Traefik
+    # pointing at nothing, with no clue in this repo to explain the 502.
+    # Declared here, the route moves with the service whatever it is called.
+    #
+    # The matching blocks were removed from
+    # ~/infra/reverse-proxy/dynamic/services.yml in the same change. Both at
+    # once would give Traefik two routers matching the same Host rule —
+    # `portfolio@docker` and `portfolio@file` — and which one wins is not
+    # something to leave to chance.
+    labels:
+      # The provider runs with exposedByDefault: false, so this is required.
+      traefik.enable: "true"
+      traefik.http.routers.portfolio.rule: Host(`portfolio.craftspace.space`)
+      traefik.http.routers.portfolio.entrypoints: web
+      # `@file` is load-bearing: the middleware is defined in Traefik's file
+      # provider, and an unqualified name resolves within the *docker*
+      # provider, where it does not exist — the router would fail to start.
+      # It sets X-Forwarded-Proto: https, which is how NextAuth knows the
+      # original scheme was https despite this hop being plain HTTP. Without
+      # it, auth callbacks redirect to http:// and sign-in breaks.
+      traefik.http.routers.portfolio.middlewares: sec-headers@file
+      # Which container port to reach. The published 127.0.0.1:3000 mapping is
+      # for host-local access only and is not what Traefik uses.
+      traefik.http.services.portfolio.loadbalancer.server.port: "3000"
     networks:
       - default
       - infra-proxy
