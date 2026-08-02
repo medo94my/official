@@ -1,5 +1,6 @@
 import type { Inquiry } from '@prisma/client'
 import { stripControlChars } from '@/lib/schemas/contact'
+import { getSettings } from '@/lib/settings'
 
 /**
  * Outbound notification for a new inquiry.
@@ -19,12 +20,26 @@ export type MailResult =
   | { sent: true }
   | { sent: false; reason: 'unconfigured' | 'failed' }
 
-export function isMailerConfigured() {
-  return Boolean(
-    process.env.RESEND_API_KEY &&
-      process.env.INQUIRY_NOTIFY_TO &&
-      process.env.INQUIRY_NOTIFY_FROM
-  )
+const MAILER_KEYS = [
+  'RESEND_API_KEY',
+  'INQUIRY_NOTIFY_TO',
+  'INQUIRY_NOTIFY_FROM',
+] as const
+
+/**
+ * Async because these are now settings rather than environment variables — a
+ * value typed into the dashboard has to take effect without a restart, and that
+ * means a database read. `getSettings` caches for 30 seconds, so the contact
+ * path does not pay for a query per submission.
+ *
+ * All three are required together. Two out of three is not a partially working
+ * mailer, it is a misconfiguration that would fail at Resend after the inquiry
+ * had already been saved — so it is reported as "not configured", which the
+ * inbox already surfaces as a banner.
+ */
+export async function isMailerConfigured() {
+  const settings = await getSettings(MAILER_KEYS)
+  return MAILER_KEYS.every((key) => Boolean(settings[key]))
 }
 
 function renderInquiryText(inquiry: Inquiry) {
@@ -55,19 +70,27 @@ function renderInquiryText(inquiry: Inquiry) {
  * unhandled rejection.
  */
 export async function sendInquiryNotification(inquiry: Inquiry): Promise<MailResult> {
-  if (!isMailerConfigured()) return { sent: false, reason: 'unconfigured' }
+  // Read once and reused below, rather than calling isMailerConfigured() and
+  // then re-resolving each value: two reads could straddle a settings change
+  // and send with a key from before it and a from-address from after.
+  const { RESEND_API_KEY, INQUIRY_NOTIFY_FROM, INQUIRY_NOTIFY_TO } =
+    await getSettings(MAILER_KEYS)
+
+  if (!RESEND_API_KEY || !INQUIRY_NOTIFY_FROM || !INQUIRY_NOTIFY_TO) {
+    return { sent: false, reason: 'unconfigured' }
+  }
 
   try {
     // Dynamic so the SDK is never loaded when the feature is switched off.
     const { Resend } = await import('resend')
-    const resend = new Resend(process.env.RESEND_API_KEY)
+    const resend = new Resend(RESEND_API_KEY)
 
     const who = stripControlChars(inquiry.name)
     const org = inquiry.company ? ` (${stripControlChars(inquiry.company)})` : ''
 
     await resend.emails.send({
-      from: process.env.INQUIRY_NOTIFY_FROM!,
-      to: process.env.INQUIRY_NOTIFY_TO!,
+      from: INQUIRY_NOTIFY_FROM,
+      to: INQUIRY_NOTIFY_TO,
       // Replying goes straight to the human rather than to the from-address,
       // which is what makes the notification usable as an inbox.
       replyTo: inquiry.email,

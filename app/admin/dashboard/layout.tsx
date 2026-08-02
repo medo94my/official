@@ -19,6 +19,8 @@ const NAV_LINKS = [
   { href: '/admin/dashboard/experience', label: 'Experience' },
   { href: '/admin/dashboard/stats', label: 'Stats' },
   { href: '/admin/dashboard/about', label: 'About' },
+  // Last, and separated in the sidebar: configuration rather than content.
+  { href: '/admin/dashboard/settings', label: 'Settings' },
 ]
 
 const NAV_ITEM =

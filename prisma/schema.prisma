@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   // The Docker image is Alpine (musl + OpenSSL 3). Without this the engine
   // built on the host will not load inside the container.
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
@@ -23,24 +23,24 @@ model User {
 }
 
 model Project {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   // Unique so the seed can upsert on it and stay idempotent.
-  title       String   @unique
+  title       String  @unique
   /// URL segment for /projects/[slug]. Derived from the title by the seed and
   /// by the admin form, editable afterwards. Unique because it is a route.
-  slug        String   @unique
+  slug        String  @unique
   description String
-  type        String   // "Solo" or "Team"
+  type        String // "Solo" or "Team"
   image       String?
   githubUrl   String?
   liveUrl     String?
-  tags        String   @default("") // Comma-separated technologies
+  tags        String  @default("") // Comma-separated technologies
   /// Engineering properties shown as a spec grid, one per line as
   /// "LABEL: value" — e.g. "RETRY: exponential + jitter, 3 attempts".
   /// Plain text rather than JSON so it stays editable in a textarea.
   specs       String?
-  featured    Boolean  @default(false)
-  order       Int      @default(0)
+  featured    Boolean @default(false)
+  order       Int     @default(0)
 
   // ── Case study ───────────────────────────────────────────────────────
   // Every field is optional and every one starts empty. The detail page
@@ -82,8 +82,8 @@ model Project {
   /// A longer write-up hosted elsewhere, if one exists.
   caseStudyUrl     String?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([featured, order])
 }
@@ -121,14 +121,14 @@ model Experience {
 }
 
 model Skill {
-  id          String   @id @default(cuid())
-  name        String
-  category    String   // "Frontend", "Backend", "Tools", etc.
-  icon        String?  // Icon name or URL
-  level       Int      @default(50) // 0-100
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  category  String // "Frontend", "Backend", "Tools", etc.
+  icon      String? // Icon name or URL
+  level     Int      @default(50) // 0-100
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // The same skill name can appear under different categories, so identity is
   // the pair. Lets the seed upsert instead of duplicating on every run.
@@ -136,17 +136,17 @@ model Skill {
 }
 
 model Service {
-  id          String   @id @default(cuid())
+  id           String   @id @default(cuid())
   // Unique so the seed can upsert on it and stay idempotent.
-  title       String   @unique
-  description String
-  icon        String?
+  title        String   @unique
+  description  String
+  icon         String?
   /// "service" renders under Engagements; "process" renders in the Process
   /// section. One model with two presentations rather than a second model:
   /// the three seeded rows literally are the stages of a project, so a
   /// separate ProcessStep table would duplicate them and let the two drift.
   /// Defaults to "service", which preserves the current rendering exactly.
-  kind         String  @default("service")
+  kind         String   @default("service")
   /// Prose, short. Who this is for.
   audience     String?
   /// One per line. What the client actually receives.
@@ -155,9 +155,9 @@ model Service {
   engagement   String?
   /// Free text — "2–6 weeks".
   duration     String?
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([kind, order])
 }
@@ -168,7 +168,7 @@ model Service {
 /// a message — the route returns success on the strength of this row existing,
 /// not on the notification going out.
 model Inquiry {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
   email       String
   company     String?
@@ -217,23 +217,23 @@ model Stat {
 }
 
 model About {
-  id          String   @id @default(cuid())
-  name        String
-  title       String
-  bio         String
-  email       String?
-  phone       String?
+  id        String   @id @default(cuid())
+  name      String
+  title     String
+  bio       String
+  email     String?
+  phone     String?
   /// Number behind the floating WhatsApp button. Stored as typed; the button
   /// strips everything but digits, since wa.me rejects '+' and spaces.
-  whatsapp    String?
-  location    String?
-  avatar      String?
-  resume      String?  // URL to resume
-  github      String?
-  linkedin    String?
-  twitter     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  whatsapp  String?
+  location  String?
+  avatar    String?
+  resume    String? // URL to resume
+  github    String?
+  linkedin  String?
+  twitter   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Hero {
@@ -245,7 +245,31 @@ model Hero {
   valueProp   String?
   ctaText     String   @default("View My Work")
   ctaUrl      String   @default("#portfolio")
-  background  String?  // Background image URL
+  background  String? // Background image URL
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+/// Application configuration editable from /admin/dashboard/settings.
+///
+/// Exists so changing a Resend key or adding a GitHub token does not mean
+/// editing .env on the host and restarting the container. A row here takes
+/// precedence over the matching environment variable, which stays as the
+/// bootstrap and fallback — see lib/settings.ts for the resolution order.
+///
+/// Not everything can live here. DATABASE_URL is needed to read this table,
+/// NEXTAUTH_SECRET validates the session that guards the page that edits it,
+/// and NEXT_PUBLIC_SITE_URL is inlined at build time. Those stay in .env by
+/// necessity, not by preference.
+model Setting {
+  /// The environment-variable name it shadows, e.g. "RESEND_API_KEY".
+  key       String   @id
+  /// Ciphertext when `encrypted`, plain UTF-8 otherwise. Never returned to the
+  /// browser for an encrypted row — the settings API sends only a masked hint.
+  value     String
+  /// Whether `value` is AES-256-GCM ciphertext. Stored rather than inferred
+  /// from the key, so a row written before a key was reclassified still
+  /// decrypts correctly instead of being handed back as garbage.
+  encrypted Boolean  @default(false)
+  updatedAt DateTime @updatedAt
 }

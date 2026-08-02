@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
   if (values.fax) return accepted()
   if (values.elapsedMs !== undefined && values.elapsedMs < MIN_DWELL_MS) return accepted()
 
-  const ipHash = hashIp(request)
+  const ipHash = await hashIp(request)
 
   const limit = await checkInquiryRateLimit(ipHash)
   if (!limit.allowed) {

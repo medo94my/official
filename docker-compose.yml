@@ -45,6 +45,15 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # Encrypts every secret written from /admin/dashboard/settings. Without
+      # it that screen still runs but refuses to store secrets, rather than
+      # quietly writing API keys into Postgres as plain text — which would put
+      # them in every pg_dump and make the settings screen a downgrade dressed
+      # up as a convenience.
+      SETTINGS_KEY: ${SETTINGS_KEY:-}
+      # Lets the project importer list repositories. Optional, and settable
+      # from the settings screen instead — a value stored there wins over this.
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       # Contact form. All optional: with none of them set, submissions are
       # still saved to the Inquiry table and readable at /admin/dashboard/inbox
       # — only the email notification is skipped. Runtime env, not build args:

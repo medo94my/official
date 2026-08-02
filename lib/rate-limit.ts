@@ -1,5 +1,6 @@
 import { createHmac, randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
+import { getSetting } from '@/lib/settings'
 
 /**
  * Two-layer rate limiting, without adding Redis.
@@ -27,26 +28,47 @@ const HOURLY_WINDOW_MS = 60 * 60 * 1000
 const hits = new Map<string, number[]>()
 
 /**
- * Resolved once at module load, not per request, since a fallback random salt
- * has to stay the same for the life of the process or every request would hash
- * to a different key and the limiter would never see a repeat submitter.
+ * The fallback salt, generated once per process.
  *
- * `docker-compose.yml` declares this variable as `${INQUIRY_IP_SALT:-}`, which
- * evaluates to an empty string when unset — falsy, but not `undefined`, so a
- * plain `||` fallback is not enough to catch it. `.trim()` also treats
- * whitespace-only values as absent.
+ * Generated eagerly rather than on first use so it is unconditionally stable:
+ * a salt that changed between requests would hash the same address to a
+ * different key every time, and the hourly limiter would never recognise a
+ * repeat submitter. It is never a hardcoded constant — a known salt over the
+ * 2^32 IPv4 space is trivially reversible, which would defeat the entire point
+ * of storing a hash rather than an address.
  */
-const configuredSalt = process.env.INQUIRY_IP_SALT?.trim()
+const processSalt = randomBytes(32).toString('hex')
 
-if (!configuredSalt) {
-  console.warn(
-    '[rate-limit] INQUIRY_IP_SALT is unset; using a random per-process salt. ' +
-      'Source hashes will not correlate across restarts. Set INQUIRY_IP_SALT ' +
-      '(e.g. `openssl rand -hex 32`) to keep them stable.'
-  )
+let warnedAboutFallback = false
+
+/**
+ * The configured salt, or the per-process fallback.
+ *
+ * Async because this is now a setting: a value entered in the dashboard has to
+ * take effect without a restart. `getSetting` resolves database-then-environment
+ * and caches for 30 seconds, so the contact path does not pay for a query per
+ * submission.
+ *
+ * Deliberately resolved per call rather than captured once at module load.
+ * Rotating the salt is documented as making existing hashes unrecognisable, so
+ * picking up a new value mid-process is the stated behaviour rather than a bug
+ * — and caching it here would mean a rotation only took effect on the next
+ * deploy, which is precisely the friction this screen exists to remove.
+ */
+async function resolveSalt() {
+  const configured = await getSetting('INQUIRY_IP_SALT')
+
+  if (!configured && !warnedAboutFallback) {
+    warnedAboutFallback = true
+    console.warn(
+      '[rate-limit] No INQUIRY_IP_SALT configured; using a random per-process ' +
+        'salt. Source hashes will not correlate across restarts. Set one in ' +
+        'the dashboard settings, or in .env, to keep them stable.'
+    )
+  }
+
+  return configured || processSalt
 }
-
-const salt = configuredSalt || randomBytes(32).toString('hex')
 
 /**
  * Derives a stable, non-reversible key from the client address.
@@ -54,15 +76,14 @@ const salt = configuredSalt || randomBytes(32).toString('hex')
  * The raw IP never leaves this function and is never written to disk, and the
  * hash cannot be inverted back to an address without the salt. HMAC, not a
  * concatenated hash, is what makes that hold: hashing `ip + salt` directly is
- * vulnerable to length-extension and is simply the wrong primitive for keyed
- * hashing.
+ * the wrong primitive for keyed hashing.
  */
-export function hashIp(request: Request) {
+export async function hashIp(request: Request) {
   // Traefik terminates TLS and forwards, so the left-most entry is the client.
   const forwarded = request.headers.get('x-forwarded-for')
   const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || ''
 
-  return createHmac('sha256', salt).update(ip).digest('hex').slice(0, 16)
+  return createHmac('sha256', await resolveSalt()).update(ip).digest('hex').slice(0, 16)
 }
 
 /** In-memory burst check. Returns false when the caller should be rejected. */

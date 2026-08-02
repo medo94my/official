@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import OpenAI from 'openai'
+import { getSetting } from '@/lib/settings'
 
 // Constructed per request rather than at module scope: the OpenAI client throws
 // when the key is missing, which would fail `next build` on every deploy that
-// doesn't use the optional voice feature.
-function getOpenAI() {
-  const apiKey = process.env.OPENAI_API_KEY
+// doesn't use the optional voice feature. Now also async, because the key is a
+// setting — entering one in the dashboard has to work without a restart.
+async function getOpenAI() {
+  const apiKey = await getSetting('OPENAI_API_KEY')
   if (!apiKey) return null
   return new OpenAI({ apiKey })
 }
@@ -15,10 +17,10 @@ export async function POST(request: NextRequest) {
   try {
     await requireAuth()
 
-    const openai = getOpenAI()
+    const openai = await getOpenAI()
     if (!openai) {
       return NextResponse.json(
-        { error: 'Voice input is not configured — OPENAI_API_KEY is unset.' },
+        { error: 'Voice input is not configured — add an OpenAI API key in Settings.' },
         { status: 503 }
       )
     }

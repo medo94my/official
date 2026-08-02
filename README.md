@@ -92,19 +92,42 @@ npm run dev
 
 ## Configuration
 
-All configuration is environment variables — see `.env.example`. Required:
-`DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, and `ADMIN_EMAIL` /
-`ADMIN_PASSWORD` for the seed (which refuses to run without them).
+Most configuration is edited at **`/admin/dashboard/settings`** rather than in a
+file. A value saved there is stored in the database, overrides the matching
+environment variable, and takes effect immediately — no restart, no rebuild. The
+screen shows which source each value is coming from, so the precedence is never
+a guess.
 
-Everything else is optional, and each feature degrades rather than breaking:
+Secrets saved there are encrypted at rest with AES-256-GCM. Without
+`SETTINGS_KEY` the screen still works but refuses to store secrets, rather than
+quietly writing API keys into Postgres as plain text where they would end up in
+every `pg_dump`.
 
-| Unset | Effect |
+### Must stay in `.env`
+
+These are needed before the database or the session exists, so they cannot be
+moved into the settings screen:
+
+| Variable | Why it cannot move |
 |---|---|
-| `NEXT_PUBLIC_SITE_URL` | Sitemap and OG cards fall back to `localhost` |
-| `OPENAI_API_KEY` | Voice input returns 503; the rest of the dashboard works |
+| `DATABASE_URL` | Needed to read the settings table |
+| `NEXTAUTH_SECRET` / `NEXTAUTH_URL` | Validate the session guarding the page that would edit them |
+| `NEXT_PUBLIC_SITE_URL` | Inlined into the client bundle at build time |
+| `SETTINGS_KEY` | Encrypts everything else — storing it there is circular. `openssl rand -hex 32` |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Seed-time only. Change the password from Settings → Account instead |
+
+### Settable from either
+
+Environment variables remain the bootstrap and the fallback. Each feature
+degrades rather than breaking when its value is absent from both:
+
+| Unset in both | Effect |
+|---|---|
 | `RESEND_API_KEY` | Messages are still saved and readable in the inbox; no email is sent, and the inbox says so |
 | `INQUIRY_NOTIFY_TO` / `INQUIRY_NOTIFY_FROM` | Same as above. `FROM` must be on a Resend-verified domain |
-| `INQUIRY_IP_SALT` | Rate limiting still works; a random salt is generated per process instead, so stored source hashes no longer correlate across restarts. Set it (`openssl rand -hex 32`) to keep them stable |
+| `OPENAI_API_KEY` | The voice-to-text button reports the feature is unavailable; nothing else changes |
+| `GITHUB_TOKEN` | The project importer shows public repositories only, limited to 60 requests an hour |
+| `INQUIRY_IP_SALT` | Rate limiting still works; a random salt is generated per process instead, so stored source hashes no longer correlate across restarts |
 
 The WhatsApp number is not configured here — it lives on the About record, so it
 is edited in the dashboard and needs no rebuild.

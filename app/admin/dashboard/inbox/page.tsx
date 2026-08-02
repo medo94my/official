@@ -40,7 +40,7 @@ export default async function InboxPage({
   ])
 
   const unread = counts.find((c) => c.status === 'new')?._count ?? 0
-  const mailerReady = isMailerConfigured()
+  const mailerReady = await isMailerConfigured()
 
   return (
     <div>
