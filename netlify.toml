@@ -1,0 +1,34 @@
+# Netlify is parked. This repo deploys via Docker — see docker-compose.yml.
+#
+# The Netlify site (`ahmedtawfik`) predates this repo becoming a Next.js app.
+# Its last successful deploy was June 2020, and every build since has failed,
+# including production builds, so it was emailing a failure on every push.
+#
+# `ignore` is Netlify's build-skip hook: exit 0 means "nothing changed, skip
+# the build". Exiting 0 unconditionally cancels every build, so no deploy is
+# attempted and none can fail. The existing 2020 static deploy stays live and
+# untouched.
+#
+# To revive Netlify as a real deployment target:
+#   1. Delete the [build] block below.
+#   2. Restore the build command and the Next.js runtime plugin:
+#        [build]
+#          command = "npx prisma generate && npm run build"
+#        [[plugins]]
+#          package = "@netlify/plugin-nextjs"
+#      and reinstall it: npm i -D @netlify/plugin-nextjs
+#   3. Add "rhel-openssl-3.0.x" to binaryTargets in prisma/schema.prisma —
+#      Netlify Functions run on Amazon Linux and the Alpine engine will not
+#      load there.
+#   4. Make output: 'standalone' in next.config.js conditional on NETLIFY
+#      being unset; Netlify's runtime manages its own output.
+#   5. Set DATABASE_URL, NEXTAUTH_URL and NEXTAUTH_SECRET in the Netlify UI,
+#      then migrate and seed that database once.
+#      (The build itself does not need a reachable database.)
+#
+#   Note: the 2020 site settings in the Netlify UI are the likely reason builds
+#   fail even with the plugin configured — check Base/Publish directory there
+#   first, since UI settings can conflict with this file.
+
+[build]
+  ignore = "exit 0"

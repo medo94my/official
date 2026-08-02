@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import OpenAI from 'openai'
 
 // Constructed per request rather than at module scope: the OpenAI client throws
@@ -77,15 +77,15 @@ export async function POST(request: NextRequest) {
       enhanced: enhanceContent ? result : null,
       final: result,
     })
-  } catch (error: any) {
-    console.error('Whisper API error:', error)
-
-    if (error.message === 'Unauthorized') {
+  } catch (error) {
+    // Not handleApiError: an OpenAI failure message is useful to the one
+    // authenticated person who sees it, and this route is admin-only.
+    if (error instanceof UnauthorizedError) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
+    console.error('Whisper API error:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to transcribe audio' },
+      { error: error instanceof Error ? error.message : 'Failed to transcribe audio' },
       { status: 500 }
     )
   }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import VoiceRecorder from '@/components/VoiceRecorder'
 import toast from 'react-hot-toast'
+import { BTN, FIELD, LABEL, PAGE_TITLE } from '@/app/admin/ui'
 
 export default function AboutPage() {
   const [formData, setFormData] = useState({
@@ -62,45 +63,45 @@ export default function AboutPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-8">About Information</h1>
+      <h1 className={`${PAGE_TITLE} mb-8`}>About</h1>
 
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-8 max-w-3xl">
+      <div className="border border-border bg-surface p-6 max-w-3xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
+              <label className={`${LABEL}`}>Name</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Title/Role</label>
+              <label className={`${LABEL}`}>Title/Role</label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className={`${LABEL}`}>
               Bio
-              <span className="text-gray-500 ml-2">(Use voice input!)</span>
+              
             </label>
             <textarea
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               required
               rows={4}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+              className={`${FIELD}`}
             />
             <div className="mt-2">
               <VoiceRecorder
@@ -112,107 +113,107 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+              <label className={`${LABEL}`}>Email</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Phone</label>
+              <label className={`${LABEL}`}>Phone</label>
               <input
                 type="text"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">WhatsApp</label>
+              <label className={`${LABEL}`}>WhatsApp</label>
               <input
                 type="text"
                 value={formData.whatsapp}
                 onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
                 placeholder="+90 555 000 0000"
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-meta text-foreground-muted">
                 Shows the floating WhatsApp button. Leave empty to hide it. Any format works —
                 spaces and the leading + are stripped automatically.
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
+              <label className={`${LABEL}`}>Location</label>
               <input
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Avatar URL</label>
+              <label className={`${LABEL}`}>Avatar URL</label>
               <input
                 type="text"
                 value={formData.avatar}
                 onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Resume URL</label>
+              <label className={`${LABEL}`}>Resume URL</label>
               <input
                 type="text"
                 value={formData.resume}
                 onChange={(e) => setFormData({ ...formData, resume: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">GitHub</label>
+              <label className={`${LABEL}`}>GitHub</label>
               <input
                 type="text"
                 value={formData.github}
                 onChange={(e) => setFormData({ ...formData, github: e.target.value })}
                 placeholder="https://github.com/username"
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">LinkedIn</label>
+              <label className={`${LABEL}`}>LinkedIn</label>
               <input
                 type="text"
                 value={formData.linkedin}
                 onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
                 placeholder="https://linkedin.com/in/username"
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Twitter</label>
+              <label className={`${LABEL}`}>Twitter</label>
               <input
                 type="text"
                 value={formData.twitter}
                 onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}
                 placeholder="https://twitter.com/username"
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full px-6 py-3 bg-primary hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg transition"
+            className={`${BTN} w-full transition`}
           >
             Save Changes
           </button>

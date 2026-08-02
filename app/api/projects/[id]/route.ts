@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
+import { contentChanged, handleApiError } from '@/lib/api'
+import { projectFields } from '@/lib/project-fields'
+import { slugify } from '@/lib/slug'
 
 // GET single project
 export async function GET(
@@ -46,27 +49,16 @@ export async function PUT(
     const project = await prisma.project.update({
       where: { id: params.id },
       data: {
-        title: body.title,
-        description: body.description,
-        type: body.type,
-        image: body.image,
-        githubUrl: body.githubUrl,
-        liveUrl: body.liveUrl,
-        tags: Array.isArray(body.tags) ? body.tags.join(',') : (body.tags || ''),
-        featured: body.featured,
-        order: body.order,
+        ...projectFields(body),
+        // Only when explicitly sent. A project's slug is its URL, so it must
+        // not silently change every time the title is edited.
+        ...(body.slug ? { slug: slugify(String(body.slug)) } : {}),
       },
     })
 
-    return NextResponse.json(project)
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json(
-      { error: 'Failed to update project' },
-      { status: 500 }
-    )
+    return contentChanged(project)
+  } catch (error) {
+    return handleApiError(error)
   }
 }
 
@@ -82,14 +74,8 @@ export async function DELETE(
       where: { id: params.id },
     })
 
-    return NextResponse.json({ message: 'Project deleted successfully' })
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json(
-      { error: 'Failed to delete project' },
-      { status: 500 }
-    )
+    return contentChanged({ message: 'Project deleted successfully' })
+  } catch (error) {
+    return handleApiError(error)
   }
 }

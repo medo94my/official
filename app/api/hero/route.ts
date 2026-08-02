@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
+import { contentChanged, handleApiError } from '@/lib/api'
 
 // Without this Next statically prerenders the GET at build time and the
 // dashboard would keep reading stale content after every edit.
@@ -11,10 +12,7 @@ export async function GET() {
     const hero = await prisma.hero.findFirst()
     return NextResponse.json(hero)
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to fetch hero info' },
-      { status: 500 }
-    )
+    return handleApiError(error)
   }
 }
 
@@ -33,6 +31,7 @@ export async function PUT(request: NextRequest) {
         data: {
           headline: body.headline,
           subheadline: body.subheadline,
+          valueProp: body.valueProp || null,
           ctaText: body.ctaText,
           ctaUrl: body.ctaUrl,
           background: body.background,
@@ -43,6 +42,7 @@ export async function PUT(request: NextRequest) {
         data: {
           headline: body.headline,
           subheadline: body.subheadline,
+          valueProp: body.valueProp || null,
           ctaText: body.ctaText || 'View My Work',
           ctaUrl: body.ctaUrl || '#portfolio',
           background: body.background,
@@ -50,14 +50,8 @@ export async function PUT(request: NextRequest) {
       })
     }
 
-    return NextResponse.json(hero)
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json(
-      { error: 'Failed to update hero info' },
-      { status: 500 }
-    )
+    return contentChanged(hero)
+  } catch (error) {
+    return handleApiError(error)
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
+import { contentChanged, handleApiError } from '@/lib/api'
 
 export async function PUT(
   request: NextRequest,
@@ -21,15 +22,9 @@ export async function PUT(
       },
     })
 
-    return NextResponse.json(skill)
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json(
-      { error: 'Failed to update skill' },
-      { status: 500 }
-    )
+    return contentChanged(skill)
+  } catch (error) {
+    return handleApiError(error)
   }
 }
 
@@ -44,14 +39,8 @@ export async function DELETE(
       where: { id: params.id },
     })
 
-    return NextResponse.json({ message: 'Skill deleted successfully' })
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json(
-      { error: 'Failed to delete skill' },
-      { status: 500 }
-    )
+    return contentChanged({ message: 'Skill deleted successfully' })
+  } catch (error) {
+    return handleApiError(error)
   }
 }

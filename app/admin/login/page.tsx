@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import toast, { Toaster } from 'react-hot-toast'
+import { BTN, FIELD, LABEL, PAGE_TITLE } from '@/app/admin/ui'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -37,32 +38,45 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    // `main` with the id, not a bare div: SkipLink lives in the root layout and
+    // therefore renders here too, and it targets #main. Without this the skip
+    // link is present, focusable and goes nowhere — worse than absent, because
+    // a keyboard user presses it and loses their place.
+    <main
+      id="main"
+      tabIndex={-1}
+      className="flex min-h-screen items-center justify-center bg-background-subtle px-5 outline-none"
+    >
       <Toaster position="top-right" />
-      <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-700">
+      <div className="w-full max-w-md border border-border bg-surface p-8 shadow-raised">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Portfolio CMS</h1>
-          <p className="text-gray-400">Login to manage your portfolio</p>
+          <h1 className={`${PAGE_TITLE} mb-2`}>Portfolio CMS</h1>
+          <p className="text-foreground-muted">Login to manage your portfolio</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="email" className={`${LABEL}`}>
               Email
             </label>
+            {/* autoComplete is what lets a password manager recognise this as
+                a sign-in pair and offer to fill it. Without the tokens, some
+                managers guess and some do nothing, and the person with the only
+                account on this site ends up typing a long password by hand. */}
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+              autoComplete="username"
+              className={FIELD}
               placeholder="admin@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="password" className={`${LABEL}`}>
               Password
             </label>
             <input
@@ -71,7 +85,8 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+              autoComplete="current-password"
+              className={FIELD}
               placeholder="••••••••"
             />
           </div>
@@ -79,12 +94,12 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-yellow-500 text-gray-900 font-semibold py-3 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`${BTN} w-full`}
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
       </div>
-    </div>
+    </main>
   )
 }

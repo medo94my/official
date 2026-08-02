@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { BTN, FIELD, LABEL, PAGE_TITLE } from '@/app/admin/ui'
 
 export default function HeroPage() {
   const [formData, setFormData] = useState({
     headline: '',
     subheadline: '',
+    valueProp: '',
     ctaText: 'View My Work',
     ctaUrl: '#portfolio',
     background: '',
@@ -54,69 +56,93 @@ export default function HeroPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-8">Hero Section</h1>
+      <h1 className={`${PAGE_TITLE} mb-8`}>Hero Section</h1>
 
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-8 max-w-2xl">
+      <div className="border border-border bg-surface p-6 max-w-2xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Headline</label>
+            <label className={`${LABEL}`}>Headline</label>
             <input
               type="text"
               value={formData.headline}
               onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
               required
               placeholder="e.g., Hi, I'm John Doe"
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+              className={`${FIELD}`}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Subheadline</label>
+            <label htmlFor="subheadline" className={`${LABEL}`}>Subheadline</label>
             <input
+              id="subheadline"
               type="text"
               value={formData.subheadline}
               onChange={(e) => setFormData({ ...formData, subheadline: e.target.value })}
-              placeholder="e.g., Full Stack Developer"
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+              placeholder="Full-stack · automation · self-hosted infrastructure"
+              className={`${FIELD}`}
             />
+            <p className="mt-1 text-meta text-foreground-muted">
+              Shown as the eyebrow above the headline, and as the &ldquo;Focus&rdquo;
+              cell in the hero ledger.
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="valueProp" className={`${LABEL}`}>
+              Value proposition
+            </label>
+            <textarea
+              id="valueProp"
+              value={formData.valueProp}
+              onChange={(e) => setFormData({ ...formData, valueProp: e.target.value })}
+              rows={3}
+              placeholder="What you build, who you help, and why it matters — one or two sentences."
+              className={`${FIELD}`}
+            />
+            <p className="mt-1 text-meta text-foreground-muted">
+              The sentence under the headline. This is the single claim the rest
+              of the page has to support. While it is blank the hero shows the
+              headline alone — no placeholder text is invented.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">CTA Button Text</label>
+              <label className={`${LABEL}`}>CTA Button Text</label>
               <input
                 type="text"
                 value={formData.ctaText}
                 onChange={(e) => setFormData({ ...formData, ctaText: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">CTA URL</label>
+              <label className={`${LABEL}`}>CTA URL</label>
               <input
                 type="text"
                 value={formData.ctaUrl}
                 onChange={(e) => setFormData({ ...formData, ctaUrl: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+                className={`${FIELD}`}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Background Image URL</label>
+            <label className={`${LABEL}`}>Background Image URL</label>
             <input
               type="text"
               value={formData.background}
               onChange={(e) => setFormData({ ...formData, background: e.target.value })}
               placeholder="Optional background image"
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary"
+              className={`${FIELD}`}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full px-6 py-3 bg-primary hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg transition"
+            className={`${BTN} w-full transition`}
           >
             Save Changes
           </button>

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import toast from 'react-hot-toast'
+import { BTN_GHOST } from '@/app/admin/ui'
 
 interface VoiceRecorderProps {
   onTranscription: (text: string) => void
@@ -84,7 +85,10 @@ export default function VoiceRecorder({ onTranscription, enhance = true }: Voice
       {!isRecording && !isProcessing && (
         <button
           onClick={startRecording}
-          className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+          // Not a destructive action, so not the danger treatment. The red dot
+          // appears once recording is actually live, which is the state worth
+          // signalling.
+          className={BTN_GHOST}
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
@@ -100,15 +104,15 @@ export default function VoiceRecorder({ onTranscription, enhance = true }: Voice
       {isRecording && (
         <button
           onClick={stopRecording}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition animate-pulse"
+          className={BTN_GHOST}
         >
-          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-          Stop Recording
+          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-error animate-pulse" />
+          Stop recording
         </button>
       )}
 
       {isProcessing && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg">
+        <div className="flex items-center gap-2 px-4 py-2 border border-border text-foreground ">
           <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
             <path

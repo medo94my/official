@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import { slugify } from './slug'
 import bcrypt from 'bcryptjs'
 
 /**
@@ -11,6 +12,23 @@ import bcrypt from 'bcryptjs'
  * (shut down with the free tier in Nov 2022) and two GitHub repos that do not
  * exist (medo94my/undertesting, medo94my/wasi-furom). Those are gone rather
  * than kept as 404s.
+ *
+ * ── Two rules this file must keep ────────────────────────────────────────
+ *
+ * 1. NO CASE-STUDY FIELDS HERE. `problem`, `myRole`, `outcome` and the rest
+ *    are the owner's to write. They are absent from these literals on purpose,
+ *    and because `update: project` only sets the keys present in the object,
+ *    that absence is what protects dashboard-entered prose from being erased
+ *    on the next seed run. Do not "tidy" the upsert into spreading a defaults
+ *    object — that would silently wipe every case study.
+ *
+ * 2. Projects upsert on `title`, but `slug` is also UNIQUE. Renaming a project
+ *    in the dashboard and then re-seeding will fail with P2002 rather than
+ *    silently creating a duplicate. Loud is better here; fix it by renaming
+ *    the title back or updating this file.
+ *
+ * `Experience` is deliberately never seeded — employment history is a factual
+ * claim only the owner can make.
  */
 
 // Stable ids for the singleton rows so upsert has something to key on.
@@ -43,10 +61,12 @@ const ABOUT = {
 }
 
 const HERO = {
-  headline: 'Hello, I am Ahmet Yilmaz',
-  subheadline: 'Full-Stack Developer',
-  ctaText: 'SEE PORTFOLIO',
-  ctaUrl: '#portfolio',
+  // The thesis, not a greeting. It is the through-line of the actual work:
+  // checkpointing, retry with backoff, healthchecks, idempotent seeds.
+  headline: 'I build systems that keep running when things break.',
+  subheadline: 'Full-stack · automation · self-hosted infrastructure',
+  ctaText: 'See the work',
+  ctaUrl: '#work',
 }
 
 type SeedProject = {
@@ -56,6 +76,8 @@ type SeedProject = {
   tags: string
   featured: boolean
   order: number
+  /** "LABEL: value" per line — rendered as the spec grid on each entry. */
+  specs?: string
   image?: string
   githubUrl?: string
   liveUrl?: string
@@ -74,6 +96,16 @@ const PROJECTS: SeedProject[] = [
     tags: 'Python,Playwright,Docker,Web Scraping',
     featured: true,
     order: 0,
+    // Every value here is from the repo's README or source — nothing inferred.
+    specs: [
+      'Year: 2026',
+      'Concurrency: bounded prompt workers, default 1',
+      'Retry: exponential back-off + jitter, 3 attempts',
+      'Dedup: name + lat/lon + website host, global',
+      'Resume: append-only JSONL status journal',
+      'Extraction: two-stage, collect URLs then open each place',
+      'Output: normalised JSONL',
+    ].join('\n'),
     githubUrl: 'https://github.com/medo94my/MapsScraper',
   },
   {
@@ -87,6 +119,15 @@ const PROJECTS: SeedProject[] = [
     tags: 'Python,Flask,Playwright,Docker,Security',
     featured: true,
     order: 1,
+    specs: [
+      'Year: 2026',
+      'SSRF: private-IP blocking, DNS validation, IP pinning',
+      'Rebinding: request interception on redirects + subresources',
+      'Blocked: localhost, AWS + GCP metadata endpoints',
+      'Rate limit: 30 req/min per IP, token bucket',
+      'Cache: disk, SHA256 key, 300s TTL',
+      'Limits: 2 concurrent renders, 8 MB response, 30s nav',
+    ].join('\n'),
     githubUrl: 'https://github.com/medo94my/screenshot-api',
   },
   {
@@ -100,6 +141,14 @@ const PROJECTS: SeedProject[] = [
     tags: 'Python,GitHub API,AST,Automation',
     featured: false,
     order: 2,
+    specs: [
+      'Year: 2026',
+      'Ingest: polls the issue tracker every 5 minutes',
+      'Match: keyword + code-snippet patterns, scored',
+      'Locate: AST walk to file, function and line',
+      'Output: patch + generated tests, opened as a PR',
+      'Gate: <60% flag only, 60–80% draft, >80% auto + review',
+    ].join('\n'),
     githubUrl: 'https://github.com/medo94my/crawl4ai-root-cause-analysis',
   },
 
@@ -114,6 +163,7 @@ const PROJECTS: SeedProject[] = [
     tags: 'PHP,Laravel,MySQL,E-commerce',
     featured: false,
     order: 3,
+    specs: ['Year: 2020', 'Role: solo, final-year project'].join('\n'),
     githubUrl: 'https://github.com/medo94my/martify-v1.2',
     // The martifyapp.herokuapp.com demo died with Heroku's free tier.
   },
@@ -126,6 +176,7 @@ const PROJECTS: SeedProject[] = [
     tags: 'React,Python,Flask,MongoDB',
     featured: false,
     order: 4,
+    specs: ['Year: 2022', 'Role: team'].join('\n'),
     image: '/projects/bookify.webp',
     githubUrl: 'https://github.com/medo94my/E-commerce_front_end',
     liveUrl: 'https://sprightly-smakager-12110c.netlify.app',
@@ -139,6 +190,7 @@ const PROJECTS: SeedProject[] = [
     tags: 'JavaScript,Python,Flask,MongoDB',
     featured: false,
     order: 5,
+    specs: ['Year: 2019', 'Role: team'].join('\n'),
     image: '/projects/guess-game.webp',
     githubUrl: 'https://github.com/medo94my/game-dev',
     // mastermind-me.herokuapp.com is dead.
@@ -153,55 +205,68 @@ const PROJECTS: SeedProject[] = [
     tags: 'Python,Flask,Folium,GIS',
     featured: false,
     order: 6,
+    specs: ['Year: 2020', 'Role: solo', 'Source: private repository'].join('\n'),
     // TODO(owner): medo94my/gis-Project is private — make it public to link it.
     // maps-dev.herokuapp.com is dead.
   },
 ]
 
-// TODO(owner): the level percentages are inherited from the old portfolio and
-// are self-assessed. Review them, or consider dropping the numbers entirely.
+// No `icon` and no `level`. The emoji were standing in for iconography and read
+// as a hobby project, and self-assessed percentages ("HTML 95%") are the single
+// clearest amateur tell on a developer portfolio — unverifiable, and a reader
+// who disagrees with one number distrusts the rest. The page now lists what is
+// used, grouped, and lets the project entries carry the evidence.
 const SKILLS = [
-  { name: 'HTML', category: 'Frontend', level: 95, icon: '📄', order: 0 },
-  { name: 'CSS3', category: 'Frontend', level: 90, icon: '🎨', order: 1 },
-  { name: 'JavaScript', category: 'Frontend', level: 90, icon: '⚡', order: 2 },
-  { name: 'TypeScript', category: 'Frontend', level: 80, icon: '📘', order: 3 },
-  { name: 'React', category: 'Frontend', level: 85, icon: '⚛️', order: 4 },
-  { name: 'Next.js', category: 'Frontend', level: 80, icon: '▲', order: 5 },
+  { name: 'TypeScript', category: 'Languages', order: 0 },
+  { name: 'Python', category: 'Languages', order: 1 },
+  { name: 'PHP', category: 'Languages', order: 2 },
+  { name: 'JavaScript', category: 'Languages', order: 3 },
+  { name: 'SQL', category: 'Languages', order: 4 },
 
-  { name: 'Python', category: 'Backend', level: 90, icon: '🐍', order: 6 },
-  { name: 'PHP', category: 'Backend', level: 85, icon: '🐘', order: 7 },
-  { name: 'Node.js', category: 'Backend', level: 80, icon: '🟢', order: 8 },
+  { name: 'Next.js', category: 'Frontend', order: 5 },
+  { name: 'React', category: 'Frontend', order: 6 },
+  { name: 'Tailwind CSS', category: 'Frontend', order: 7 },
 
-  { name: 'Flask', category: 'Frameworks', level: 90, icon: '🌶️', order: 9 },
-  { name: 'Django', category: 'Frameworks', level: 85, icon: '🦄', order: 10 },
-  { name: 'Laravel', category: 'Frameworks', level: 80, icon: '🔧', order: 11 },
+  { name: 'Flask', category: 'Backend', order: 8 },
+  { name: 'Django', category: 'Backend', order: 9 },
+  { name: 'Laravel', category: 'Backend', order: 10 },
+  { name: 'Node.js', category: 'Backend', order: 11 },
 
-  { name: 'MySQL', category: 'Database', level: 85, icon: '🗄️', order: 12 },
-  { name: 'PostgreSQL', category: 'Database', level: 80, icon: '🐘', order: 13 },
-  { name: 'MongoDB', category: 'Database', level: 80, icon: '🍃', order: 14 },
+  { name: 'PostgreSQL', category: 'Data', order: 12 },
+  { name: 'MySQL', category: 'Data', order: 13 },
+  { name: 'MongoDB', category: 'Data', order: 14 },
+  { name: 'Prisma', category: 'Data', order: 15 },
 
-  { name: 'Docker', category: 'Tools', level: 80, icon: '🐳', order: 15 },
-  { name: 'Playwright', category: 'Tools', level: 85, icon: '🎭', order: 16 },
-  { name: 'Git', category: 'Tools', level: 90, icon: '🌿', order: 17 },
+  { name: 'Docker', category: 'Infrastructure', order: 16 },
+  { name: 'Traefik', category: 'Infrastructure', order: 17 },
+  { name: 'Playwright', category: 'Infrastructure', order: 18 },
+  { name: 'Git', category: 'Infrastructure', order: 19 },
 ]
 
+// Named as the stages of a real engagement, in the order they happen — which is
+// what makes numbering them meaningful rather than decorative.
 const SERVICES = [
   {
-    title: 'Technology Planning',
-    description: 'Choosing the stack and architecture that actually fit the problem and the budget.',
-    icon: '🎯',
+    title: 'Scoping and architecture',
+    description:
+      'Working out what to build and what to leave out, then choosing a stack that fits the problem, the budget and whoever has to maintain it afterwards.',
+    // Explicit rather than relying on the column default, so the intent is
+    // visible: these render under Engagements, not as a process diagram.
+    kind: 'service',
     order: 0,
   },
   {
-    title: 'UI/UX Design',
-    description: 'Designing the interface and building it out as a responsive, accessible front end.',
-    icon: '🎨',
+    title: 'Build',
+    description:
+      'Implementation end to end — data model, API, interface — with the failure cases handled rather than discovered in production.',
+    kind: 'service',
     order: 1,
   },
   {
-    title: 'Application Development',
-    description: 'Building, testing and shipping the application end to end, then keeping it running.',
-    icon: '💻',
+    title: 'Ship and keep it running',
+    description:
+      'Containerised deploys, migrations that replay safely, and enough logging to answer the question the next time something breaks.',
+    kind: 'service',
     order: 2,
   },
 ]
@@ -246,14 +311,22 @@ async function main() {
   console.log('✓ About section')
 
   for (const project of PROJECTS) {
+    // Derived, not written into each literal: seven hand-typed slugs is seven
+    // chances to diverge from the migration's backfill expression.
+    const data = { ...project, slug: slugify(project.title) }
     await prisma.project.upsert({
       where: { title: project.title },
-      update: project,
-      create: project,
+      update: data,
+      create: data,
     })
   }
   console.log(`✓ Projects (${PROJECTS.length})`)
 
+  // Skills and services are an authoritative curated list, so the seed prunes
+  // rows it no longer contains. Without this, renaming a category leaves the
+  // old row orphaned and the page renders both — which is exactly what happened
+  // when "Frontend/Backend/Tools" became "Languages/Frontend/Data/…".
+  // Projects are deliberately NOT pruned: those are the owner's own additions.
   for (const skill of SKILLS) {
     await prisma.skill.upsert({
       where: { name_category: { name: skill.name, category: skill.category } },
@@ -261,7 +334,12 @@ async function main() {
       create: skill,
     })
   }
-  console.log(`✓ Skills (${SKILLS.length})`)
+  const staleSkills = await prisma.skill.deleteMany({
+    where: { NOT: SKILLS.map((s) => ({ name: s.name, category: s.category })) },
+  })
+  console.log(
+    `✓ Skills (${SKILLS.length}${staleSkills.count ? `, pruned ${staleSkills.count}` : ''})`
+  )
 
   for (const service of SERVICES) {
     await prisma.service.upsert({
@@ -270,7 +348,12 @@ async function main() {
       create: service,
     })
   }
-  console.log(`✓ Services (${SERVICES.length})`)
+  const staleServices = await prisma.service.deleteMany({
+    where: { title: { notIn: SERVICES.map((s) => s.title) } },
+  })
+  console.log(
+    `✓ Services (${SERVICES.length}${staleServices.count ? `, pruned ${staleServices.count}` : ''})`
+  )
 
   console.log('\n✅ Seed complete.')
   console.log(`   Sign in at /admin/login as ${adminEmail}`)

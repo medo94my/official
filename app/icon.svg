@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Portfolio">
+  <!--
+    The hero's keystone bar, reduced to a mark.
+
+    No monogram: two initials at 16px are a smudge, and every developer
+    portfolio has them. This is the same gold rule that sits under the headline,
+    plus the ivory rule that follows it — the site's own signature, legible as
+    two distinct strokes down to favicon size because the bars are 4px on a
+    32px grid and separated by 5px.
+
+    Onyx ground in both themes, deliberately: a favicon has no media query, and
+    gold on onyx (8.08:1) is the pairing that survives a dark browser tab.
+  -->
+  <rect width="32" height="32" rx="5" fill="#0C0C0E"/>
+  <rect x="7" y="11" width="18" height="4" fill="#C2A35C"/>
+  <rect x="7" y="20" width="9" height="4" fill="#ECE4D2"/>
+</svg>

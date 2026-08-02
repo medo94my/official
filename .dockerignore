@@ -16,3 +16,4 @@ old-portfolio
 Dockerfile
 .dockerignore
 docker-compose.yml
+netlify.toml
