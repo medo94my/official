@@ -187,9 +187,11 @@ model Inquiry {
   notes     String?
 
   // ── Abuse triage, privacy-minimising by construction ─────────────────
-  /// sha256(ip + INQUIRY_IP_SALT), first 16 hex chars. Enough to group repeat
-  /// submitters and drive the rate limiter; not reversible to an address
-  /// without the salt, and the salt is rotatable. The raw IP is never written.
+  /// HMAC-SHA256(ip, INQUIRY_IP_SALT), first 16 hex chars. Enough to group
+  /// repeat submitters and drive the rate limiter; not reversible to an
+  /// address without the salt. The raw IP is never written. If the salt env
+  /// var is unset, a random one is generated per process, so hashes then only
+  /// correlate within a single process lifetime rather than across restarts.
   ipHash    String?
   /// Truncated to 255 chars. Distinguishes a browser from a curl loop.
   userAgent String?

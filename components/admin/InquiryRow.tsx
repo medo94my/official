@@ -183,8 +183,8 @@ export default function InquiryRow({ inquiry }: { inquiry: Inquiry }) {
 
         {inquiry.ipHash && (
           <p className="mt-4 font-mono text-meta text-foreground-subtle">
-            {/* Not an address — a salted hash. Enough to spot a repeat sender,
-                not enough to identify anyone. */}
+            {/* Not an address — an HMAC of it. Enough to spot a repeat sender,
+                not reversible back to the IP without the server-side salt. */}
             source {inquiry.ipHash}
           </p>
         )}

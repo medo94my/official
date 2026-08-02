@@ -1,4 +1,4 @@
-import { createHash } from 'crypto'
+import { createHmac, randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
 
 /**
@@ -27,21 +27,42 @@ const HOURLY_WINDOW_MS = 60 * 60 * 1000
 const hits = new Map<string, number[]>()
 
 /**
+ * Resolved once at module load, not per request, since a fallback random salt
+ * has to stay the same for the life of the process or every request would hash
+ * to a different key and the limiter would never see a repeat submitter.
+ *
+ * `docker-compose.yml` declares this variable as `${INQUIRY_IP_SALT:-}`, which
+ * evaluates to an empty string when unset — falsy, but not `undefined`, so a
+ * plain `||` fallback is not enough to catch it. `.trim()` also treats
+ * whitespace-only values as absent.
+ */
+const configuredSalt = process.env.INQUIRY_IP_SALT?.trim()
+
+if (!configuredSalt) {
+  console.warn(
+    '[rate-limit] INQUIRY_IP_SALT is unset; using a random per-process salt. ' +
+      'Source hashes will not correlate across restarts. Set INQUIRY_IP_SALT ' +
+      '(e.g. `openssl rand -hex 32`) to keep them stable.'
+  )
+}
+
+const salt = configuredSalt || randomBytes(32).toString('hex')
+
+/**
  * Derives a stable, non-reversible key from the client address.
  *
- * The raw IP never leaves this function and is never written to disk. With the
- * salt rotated, previously stored hashes become meaningless, which is the
- * point: enough to group repeat submitters, not enough to identify anyone.
+ * The raw IP never leaves this function and is never written to disk, and the
+ * hash cannot be inverted back to an address without the salt. HMAC, not a
+ * concatenated hash, is what makes that hold: hashing `ip + salt` directly is
+ * vulnerable to length-extension and is simply the wrong primitive for keyed
+ * hashing.
  */
 export function hashIp(request: Request) {
   // Traefik terminates TLS and forwards, so the left-most entry is the client.
   const forwarded = request.headers.get('x-forwarded-for')
   const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || ''
 
-  // No address available: fall back to a constant key so the limiter degrades
-  // to a global cap rather than to no cap at all.
-  const salt = process.env.INQUIRY_IP_SALT || 'unsalted-development-only'
-  return createHash('sha256').update(`${ip}${salt}`).digest('hex').slice(0, 16)
+  return createHmac('sha256', salt).update(ip).digest('hex').slice(0, 16)
 }
 
 /** In-memory burst check. Returns false when the caller should be rejected. */

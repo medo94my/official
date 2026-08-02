@@ -104,7 +104,7 @@ Everything else is optional, and each feature degrades rather than breaking:
 | `OPENAI_API_KEY` | Voice input returns 503; the rest of the dashboard works |
 | `RESEND_API_KEY` | Messages are still saved and readable in the inbox; no email is sent, and the inbox says so |
 | `INQUIRY_NOTIFY_TO` / `INQUIRY_NOTIFY_FROM` | Same as above. `FROM` must be on a Resend-verified domain |
-| `INQUIRY_IP_SALT` | Rate limiting still works; the stored source hash is unsalted |
+| `INQUIRY_IP_SALT` | Rate limiting still works; a random salt is generated per process instead, so stored source hashes no longer correlate across restarts. Set it (`openssl rand -hex 32`) to keep them stable |
 
 The WhatsApp number is not configured here — it lives on the About record, so it
 is edited in the dashboard and needs no rebuild.
