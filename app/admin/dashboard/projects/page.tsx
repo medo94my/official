@@ -5,6 +5,8 @@ import VoiceRecorder from '@/components/VoiceRecorder'
 import toast from 'react-hot-toast'
 import { BTN, BTN_DANGER, BTN_GHOST, CHECKBOX, FIELD, FIELD_MONO, LABEL, PAGE_TITLE, PANEL } from '@/app/admin/ui'
 import { apiRequest, errorMessage } from '@/app/admin/client'
+import { GithubCompare, GithubRepoPicker } from '@/components/admin/GithubImport'
+import { repoPrefill, type FieldDiff, type RepoSummary } from '@/lib/repo-import'
 import { slugify } from '@/lib/slug'
 
 /** The thirteen case-study fields, in the order they render on the detail page. */
@@ -89,6 +91,9 @@ export default function ProjectsPage() {
   const [caseStudyOpen, setCaseStudyOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState<FormData>(EMPTY)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  /** Shown above the title so the review-before-save contract is visible. */
+  const [prefillSource, setPrefillSource] = useState<string | null>(null)
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -185,21 +190,52 @@ export default function ProjectsPage() {
   const resetForm = () => {
     setFormData(EMPTY)
     setEditingProject(null)
+    setPrefillSource(null)
     setCaseStudyOpen(false)
     setIsFormOpen(false)
   }
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <h1 className={`${PAGE_TITLE}`}>Projects</h1>
-        <button
-          onClick={() => setIsFormOpen(true)}
-          className={`${BTN}`}
-        >
-          Add New Project
-        </button>
+        {/* Hidden while the form is open, which is the whole guard against
+            overwriting a half-typed project: the picker is unreachable from
+            inside the form, so there is never a dirty form to clobber. */}
+        {!isFormOpen && (
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => setIsFormOpen(true)} className={`${BTN}`}>
+              Add New Project
+            </button>
+            <button onClick={() => setPickerOpen(true)} className={BTN_GHOST}>
+              Import from GitHub
+            </button>
+          </div>
+        )}
       </div>
+
+      <GithubRepoPicker
+        open={pickerOpen}
+        projects={projects}
+        onClose={() => setPickerOpen(false)}
+        onSelect={(repo: RepoSummary) => {
+          // Spread over EMPTY, not over the current form: importing is starting
+          // a new project, and leftovers from a previous edit would be silently
+          // carried in.
+          setFormData({ ...EMPTY, ...repoPrefill(repo) })
+          setEditingProject(null)
+          setCaseStudyOpen(false)
+          setPrefillSource(repo.fullName)
+          setPickerOpen(false)
+          setIsFormOpen(true)
+        }}
+        onEditExisting={(projectId: string) => {
+          const project = projects.find((p) => p.id === projectId)
+          if (!project) return
+          setPickerOpen(false)
+          handleEdit(project)
+        }}
+      />
 
       {/* Projects List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -259,6 +295,13 @@ export default function ProjectsPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+          {prefillSource && (
+            <p className="border-l-2 border-accent bg-background-subtle px-3 py-2 text-meta text-foreground-muted">
+              Prefilled from{' '}
+              <span className="font-mono text-foreground">github.com/{prefillSource}</span>. Nothing
+              is saved until you press Create.
+            </p>
+          )}
               <div>
                 <label htmlFor="p-title" className={`${LABEL}`}>Title</label>
                 <input
@@ -491,6 +534,22 @@ export default function ProjectsPage() {
                   </div>
                 )}
               </div>
+
+              {/* Only when editing something already saved that is linked to a
+                  repository. Nothing here writes: each row is applied to the
+                  form and still needs Update. */}
+              {editingProject && formData.githubUrl && (
+                <GithubCompare
+                  githubUrl={formData.githubUrl}
+                  current={{
+                    description: formData.description,
+                    githubUrl: formData.githubUrl,
+                    liveUrl: formData.liveUrl,
+                    tags: formData.tags,
+                  }}
+                  onApply={(diff: FieldDiff) => set(diff.field, diff.incoming)}
+                />
+              )}
 
               <div className="flex gap-4 pt-4">
                 <button type="submit" disabled={saving} className={`flex-1 ${BTN}`}>
