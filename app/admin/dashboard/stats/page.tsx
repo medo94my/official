@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { BTN, BTN_DANGER, BTN_GHOST, FIELD, PAGE_TITLE, PANEL } from '@/app/admin/ui'
+import { apiRequest, errorMessage } from '@/app/admin/client'
+import ListState from '@/components/admin/ListState'
 
 interface Stat {
   id: string
@@ -15,51 +17,52 @@ const EMPTY = { label: '', value: '', order: 0 }
 
 export default function StatsPage() {
   const [stats, setStats] = useState<Stat[]>([])
+  const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState(EMPTY)
   const [editingId, setEditingId] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchStats()
+  // This page did check res.ok, but then threw the server's message away and
+  // toasted a generic one — so a 409 on a duplicate label read the same as a
+  // database being down. apiRequest keeps the message that says which.
+  const fetchStats = useCallback(async () => {
+    try {
+      setStats(await apiRequest<Stat[]>('/api/stats'))
+    } catch (error) {
+      toast.error(errorMessage(error, 'Could not load stats'))
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
-  const fetchStats = async () => {
-    const res = await fetch('/api/stats')
-    if (!res.ok) {
-      toast.error('Failed to load stats')
-      return
-    }
-    setStats(await res.json())
-  }
+  useEffect(() => {
+    fetchStats()
+  }, [fetchStats])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const url = editingId ? `/api/stats/${editingId}` : '/api/stats'
-      const method = editingId ? 'PUT' : 'POST'
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
+      await apiRequest(editingId ? `/api/stats/${editingId}` : '/api/stats', {
+        method: editingId ? 'PUT' : 'POST',
         body: JSON.stringify(formData),
       })
-      if (!res.ok) throw new Error(await res.text())
-      toast.success(editingId ? 'Stat updated!' : 'Stat created!')
-      fetchStats()
+      toast.success(editingId ? 'Stat updated' : 'Stat created')
+      await fetchStats()
       setFormData(EMPTY)
       setEditingId(null)
     } catch (error) {
-      toast.error('Failed to save stat')
+      toast.error(errorMessage(error, 'Could not save stat'))
     }
   }
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this stat?')) return
-    const res = await fetch(`/api/stats/${id}`, { method: 'DELETE' })
-    if (!res.ok) {
-      toast.error('Failed to delete stat')
-      return
+    try {
+      await apiRequest(`/api/stats/${id}`, { method: 'DELETE' })
+      toast.success('Stat deleted')
+      await fetchStats()
+    } catch (error) {
+      toast.error(errorMessage(error, 'Could not delete stat'))
     }
-    toast.success('Stat deleted!')
-    fetchStats()
   }
 
   return (
@@ -126,7 +129,12 @@ export default function StatsPage() {
 
         <div className="lg:col-span-2">
           {stats.length === 0 ? (
-            <p className="text-foreground-muted">No stats yet — the homepage strip is hidden.</p>
+            <ListState
+              loading={loading}
+              count={stats.length}
+              empty="No stats yet."
+              consequence="The metrics strip on the homepage stays hidden until at least one exists."
+            />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {stats.map((stat) => (

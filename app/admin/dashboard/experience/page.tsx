@@ -13,6 +13,7 @@ import {
   PANEL,
 } from '@/app/admin/ui'
 import { apiRequest, errorMessage } from '@/app/admin/client'
+import ListState from '@/components/admin/ListState'
 
 interface Experience {
   id: string
@@ -49,6 +50,7 @@ function formatMonth(value?: string | null) {
 
 export default function ExperiencePage() {
   const [entries, setEntries] = useState<Experience[]>([])
+  const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState(EMPTY)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -58,6 +60,8 @@ export default function ExperiencePage() {
       setEntries(await apiRequest<Experience[]>('/api/experience'))
     } catch (error) {
       toast.error(errorMessage(error, 'Could not load experience'))
+    } finally {
+      setLoading(false)
     }
   }, [])
 
@@ -246,7 +250,9 @@ export default function ExperiencePage() {
         </div>
 
         <div className="lg:col-span-2">
-          {entries.length === 0 ? (
+          {loading ? (
+            <ListState loading count={0} empty="" />
+          ) : entries.length === 0 ? (
             <div className={PANEL}>
               <p className="text-meta text-foreground-muted">
                 No roles yet. The Experience section stays hidden on the site

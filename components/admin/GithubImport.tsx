@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BTN, BTN_GHOST, CHECKBOX, FIELD_MONO, PANEL } from '@/app/admin/ui'
 import { apiRequest, errorMessage } from '@/app/admin/client'
+import Modal from '@/components/ui/Modal'
 import {
   diffRepoFields,
   repoIdentity,
@@ -51,18 +52,6 @@ function useRepos(active: boolean) {
   return { data, error, loading, load }
 }
 
-/** Escape and backdrop close, without the focus trap a shared Modal would give. */
-function useDismiss(open: boolean, onClose: () => void) {
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [open, onClose])
-}
-
 type PickerProps = {
   open: boolean
   /** Already-saved projects, so imported repos can be marked rather than re-offered. */
@@ -92,7 +81,6 @@ export function GithubRepoPicker({
   const [showForks, setShowForks] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  useDismiss(open, onClose)
   useEffect(() => {
     if (open) searchRef.current?.focus()
   }, [open, data])
@@ -121,32 +109,14 @@ export function GithubRepoPicker({
       )
   }, [data, query, showForks])
 
-  if (!open) return null
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
-      // mousedown, not click: a click fires when a drag that began inside the
-      // panel ends on the backdrop, closing the dialog mid text-selection.
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Import from GitHub"
+      description="Pick a repository to prefill a new project. Nothing is saved until you press Create."
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="gh-picker-title"
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-border bg-surface p-4 sm:p-8"
-      >
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <h2 id="gh-picker-title" className="font-mono text-lg font-semibold">
-            Import from GitHub
-          </h2>
-          <button onClick={onClose} aria-label="Close" className="-m-2 p-2 text-foreground-muted hover:text-foreground">
-            ✕
-          </button>
-        </div>
-
+      <>
         {data && !data.authenticated && (
           <div className="mb-4 border border-warning/40 bg-background-subtle p-4">
             <p className="label text-warning">Public repositories only</p>
@@ -256,8 +226,8 @@ export function GithubRepoPicker({
             </div>
           </>
         )}
-      </div>
-    </div>
+      </>
+    </Modal>
   )
 }
 

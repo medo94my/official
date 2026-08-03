@@ -14,6 +14,7 @@ import {
   PANEL,
 } from '@/app/admin/ui'
 import { apiRequest, errorMessage } from '@/app/admin/client'
+import ListState from '@/components/admin/ListState'
 
 interface Service {
   id: string
@@ -42,6 +43,7 @@ const EMPTY = {
 
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([])
+  const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState(EMPTY)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -51,6 +53,8 @@ export default function ServicesPage() {
       setServices(await apiRequest<Service[]>('/api/services'))
     } catch (error) {
       toast.error(errorMessage(error, 'Could not load services'))
+    } finally {
+      setLoading(false)
     }
   }, [])
 
@@ -230,6 +234,12 @@ export default function ServicesPage() {
 
         <div className="lg:col-span-2">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <ListState
+              loading={loading}
+              count={services.length}
+              empty="No services yet."
+              consequence="The Services section on the homepage stays hidden until at least one exists."
+            />
             {services.map((service) => (
               <div key={service.id} className={PANEL}>
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">

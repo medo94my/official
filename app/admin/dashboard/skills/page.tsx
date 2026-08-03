@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { BTN, BTN_DANGER, BTN_GHOST, FIELD, PAGE_TITLE, PANEL } from '@/app/admin/ui'
+import { apiRequest, errorMessage } from '@/app/admin/client'
+import ListState from '@/components/admin/ListState'
 
 interface Skill {
   id: string
@@ -15,39 +17,53 @@ interface Skill {
 
 export default function SkillsPage() {
   const [skills, setSkills] = useState<Skill[]>([])
+  const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({ name: '', category: 'Frontend', icon: '', level: 75, order: 0 })
   const [editingId, setEditingId] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchSkills()
+  // Every call below went through a bare `fetch` with no `res.ok` check, so a
+  // rejected save still toasted "Skill created!" and the row simply never
+  // appeared. `apiRequest` surfaces the real status and message, which is how
+  // the rest of the dashboard already behaves.
+  const fetchSkills = useCallback(async () => {
+    try {
+      setSkills(await apiRequest<Skill[]>('/api/skills'))
+    } catch (error) {
+      toast.error(errorMessage(error, 'Could not load skills'))
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
-  const fetchSkills = async () => {
-    const res = await fetch('/api/skills')
-    const data = await res.json()
-    setSkills(data)
-  }
+  useEffect(() => {
+    fetchSkills()
+  }, [fetchSkills])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const url = editingId ? `/api/skills/${editingId}` : '/api/skills'
-      const method = editingId ? 'PUT' : 'POST'
-      await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) })
-      toast.success(editingId ? 'Skill updated!' : 'Skill created!')
-      fetchSkills()
+      await apiRequest(editingId ? `/api/skills/${editingId}` : '/api/skills', {
+        method: editingId ? 'PUT' : 'POST',
+        body: JSON.stringify(formData),
+      })
+      toast.success(editingId ? 'Skill updated' : 'Skill created')
+      await fetchSkills()
       setFormData({ name: '', category: 'Frontend', icon: '', level: 75, order: 0 })
       setEditingId(null)
     } catch (error) {
-      toast.error('Failed to save skill')
+      toast.error(errorMessage(error, 'Could not save skill'))
     }
   }
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this skill?')) return
-    await fetch(`/api/skills/${id}`, { method: 'DELETE' })
-    toast.success('Skill deleted!')
-    fetchSkills()
+    try {
+      await apiRequest(`/api/skills/${id}`, { method: 'DELETE' })
+      toast.success('Skill deleted')
+      await fetchSkills()
+    } catch (error) {
+      toast.error(errorMessage(error, 'Could not delete skill'))
+    }
   }
 
   return (
@@ -119,6 +135,12 @@ export default function SkillsPage() {
         </div>
 
         <div className="lg:col-span-2">
+          <ListState
+            loading={loading}
+            count={skills.length}
+            empty="No skills yet."
+            consequence="The Stack section on the homepage stays hidden until at least one exists."
+          />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {skills.map((skill) => (
               <div key={skill.id} className="bg-surface border border-border  p-4">

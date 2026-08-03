@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { FormLoading } from '@/components/admin/ListState'
 import { BTN, FIELD, LABEL, PAGE_TITLE } from '@/app/admin/ui'
 
 export default function HeroPage() {
@@ -13,6 +14,7 @@ export default function HeroPage() {
     ctaUrl: '#portfolio',
     background: '',
   })
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchHero()
@@ -32,7 +34,11 @@ export default function HeroPage() {
         )
       }
     } catch (error) {
-      console.error('Failed to fetch hero info')
+      // Was console.error only, so a failed load looked exactly like a record
+      // that has never been filled in — an empty form either way.
+      toast.error('Could not load the current values. Saving now would overwrite them with blanks.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -59,6 +65,11 @@ export default function HeroPage() {
       <h1 className={`${PAGE_TITLE} mb-8`}>Hero Section</h1>
 
       <div className="border border-border bg-surface p-6 max-w-2xl">
+        {/* The form stays out of the DOM until the record arrives. It used
+            to render blank and backfill a moment later, so anything typed in
+            that window was silently overwritten by the response. */}
+        <FormLoading loading={loading} />
+        {!loading && (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className={`${LABEL}`}>Headline</label>
@@ -147,6 +158,7 @@ export default function HeroPage() {
             Save Changes
           </button>
         </form>
+        )}
       </div>
     </div>
   )

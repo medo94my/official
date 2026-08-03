@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import VoiceRecorder from '@/components/VoiceRecorder'
 import toast from 'react-hot-toast'
+import { FormLoading } from '@/components/admin/ListState'
 import { BTN, FIELD, LABEL, PAGE_TITLE } from '@/app/admin/ui'
 
 export default function AboutPage() {
@@ -20,6 +21,7 @@ export default function AboutPage() {
     linkedin: '',
     twitter: '',
   })
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchAbout()
@@ -39,7 +41,11 @@ export default function AboutPage() {
         )
       }
     } catch (error) {
-      console.error('Failed to fetch about info')
+      // Was console.error only, so a failed load looked exactly like a record
+      // that has never been filled in — an empty form either way.
+      toast.error('Could not load the current values. Saving now would overwrite them with blanks.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -66,6 +72,11 @@ export default function AboutPage() {
       <h1 className={`${PAGE_TITLE} mb-8`}>About</h1>
 
       <div className="border border-border bg-surface p-6 max-w-3xl">
+        {/* The form stays out of the DOM until the record arrives. It used
+            to render blank and backfill a moment later, so anything typed in
+            that window was silently overwritten by the response. */}
+        <FormLoading loading={loading} />
+        {!loading && (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -218,6 +229,7 @@ export default function AboutPage() {
             Save Changes
           </button>
         </form>
+        )}
       </div>
     </div>
   )

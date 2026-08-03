@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # `postinstall` runs `prisma generate`, which reads the schema and needs no
+      # database connection — only a query would.
+      - run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          # Never connected to. Next evaluates route config at build time and
+          # every page that reads the database is dynamic, so nothing queries —
+          # but Prisma's client refuses to initialise without the variable set.
+          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+          NEXTAUTH_SECRET: ci-build-only-not-a-real-secret
+          NEXTAUTH_URL: http://localhost:3000
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000

@@ -5,9 +5,11 @@ import VoiceRecorder from '@/components/VoiceRecorder'
 import toast from 'react-hot-toast'
 import { BTN, BTN_DANGER, BTN_GHOST, CHECKBOX, FIELD, FIELD_MONO, LABEL, PAGE_TITLE, PANEL } from '@/app/admin/ui'
 import { apiRequest, errorMessage } from '@/app/admin/client'
+import ListState from '@/components/admin/ListState'
 import { GithubCompare, GithubRepoPicker } from '@/components/admin/GithubImport'
 import { CaseStudyDraft } from '@/components/admin/CaseStudyDraft'
 import MediaManager, { type MediaItem } from '@/components/admin/MediaManager'
+import Modal from '@/components/ui/Modal'
 import { repoPrefill, type FieldDiff, type RepoSummary } from '@/lib/repo-import'
 import { slugify } from '@/lib/slug'
 
@@ -89,6 +91,7 @@ type FormData = typeof EMPTY
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(true)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [caseStudyOpen, setCaseStudyOpen] = useState(false)
@@ -107,6 +110,8 @@ export default function ProjectsPage() {
       setProjects(await apiRequest<Project[]>('/api/projects'))
     } catch (error) {
       toast.error(errorMessage(error, 'Could not load projects'))
+    } finally {
+      setLoading(false)
     }
   }, [])
 
@@ -248,6 +253,12 @@ export default function ProjectsPage() {
 
       {/* Projects List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ListState
+          loading={loading}
+          count={projects.length}
+          empty="No projects yet."
+          consequence="The Selected work section on the homepage stays hidden until at least one exists."
+        />
         {projects.map((project) => (
           <div key={project.id} className={`${PANEL}`}>
             {project.featured && (
@@ -282,27 +293,13 @@ export default function ProjectsPage() {
         ))}
       </div>
 
-      {/* Form Modal */}
-      {isFormOpen && (
-        <div className="fixed inset-0 bg-foreground/40 flex items-center justify-center z-50 p-4">
-          <div className="border border-border bg-surface p-4 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-mono text-lg font-semibold">
-                {editingProject ? 'Edit Project' : 'Add New Project'}
-              </h2>
-              {/* p-2 -m-2 widens the touch target to 40px without changing the
-                  visible icon size */}
-              <button
-                onClick={resetForm}
-                aria-label="Close"
-                className="p-2 -m-2 text-foreground-muted hover:text-foreground"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
+      {/* Was a bare `fixed inset-0` div: no role, no name, no Escape, and Tab
+          walked straight out into the list behind it. Modal supplies all four. */}
+      <Modal
+        open={isFormOpen}
+        onClose={resetForm}
+        title={editingProject ? 'Edit Project' : 'Add New Project'}
+      >
             <form onSubmit={handleSubmit} className="space-y-4">
           {prefillSource && (
             <p className="border-l-2 border-accent bg-background-subtle px-3 py-2 text-meta text-foreground-muted">
@@ -602,9 +599,7 @@ export default function ProjectsPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   )
 }
