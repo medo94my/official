@@ -62,23 +62,39 @@ The download button is hidden until that field is set.
 Each of these hides itself when unconfigured, so nothing on the page is ever
 broken:
 
-| Variable | Enables |
-|---|---|
-| `OPENAI_API_KEY` | Voice input on the Projects/Services/About forms |
-| `NEXT_PUBLIC_EMAILJS_*` | Contact form and idea form (otherwise: mailto link) |
+Most of these are set at **`/admin/dashboard/settings`** rather than in `.env`,
+and take effect immediately — no restart, no rebuild.
 
-The floating **WhatsApp button** is not in this table — set **About → WhatsApp**
-in the dashboard and it appears immediately, no rebuild needed.
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Floating WhatsApp button |
+| Setting | Enables |
+|---|---|
+| `OPENROUTER_API_KEY` + `MODEL_TEXT` | Case-study drafting from a repository |
+| `OPENROUTER_API_KEY` + `MODEL_STT` | Voice input on the Projects/Services/About forms |
+| `GITHUB_TOKEN` | Private repositories in the project importer |
+| `RESEND_API_KEY` + notify addresses | Email when someone uses the contact form |
+
+The contact form itself needs no configuration — messages are always saved and
+readable at **Dashboard → Inbox**. Email notification is the only optional part.
+
+The floating **WhatsApp button** is not configured here either: set
+**About → WhatsApp** in the dashboard and it appears immediately.
 
 `NEXT_PUBLIC_*` values are compiled into the browser bundle, so changing one
-needs a rebuild: `docker compose up -d --build`.
+needs a rebuild: `docker compose up -d --build`. Everything above is read at
+runtime.
 
 ### AI voice input
 
-On forms with a microphone button: record, stop, and Whisper transcribes and
-rewrites the text for you. Without `OPENAI_API_KEY` the endpoint returns 503
-and everything else keeps working.
+On forms with a microphone button: record, stop, and the transcript is tidied
+into prose. With no speech-to-text model chosen the endpoint returns 503 and
+everything else keeps working.
+
+### Drafting a case study
+
+Edit a project that has a GitHub URL, open **Case study**, and press **Draft
+from repository**. It reads the README and drafts five fields, each shown with
+the heading it came from. It refuses when the README is too thin to draft from
+without inventing, and it never drafts Problem, Outcome, Lessons or your role —
+nothing in a repository supports those.
 
 ## Troubleshooting
 
