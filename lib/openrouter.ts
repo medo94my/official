@@ -42,7 +42,22 @@ export type ModelRole = 'text' | 'stt' | 'tts' | 'image'
  * audio input": that is true of today's four models and would silently exclude a
  * pure text→audio TTS model the day one appears.
  */
-const MUSIC_FAMILIES = ['lyria', 'suno', 'udio', 'musicgen']
+const MUSIC_FAMILIES = new Set(['lyria', 'suno', 'udio', 'musicgen'])
+
+/**
+ * Whole name-segments, never a substring.
+ *
+ * `openai/gpt-audio` contains "udio" inside "a-udio", so a naive
+ * `id.includes(family)` filtered out both real speech models and left the
+ * dropdown empty. Splitting on non-alphanumerics and comparing whole tokens is
+ * what makes "udio" match udio and not audio.
+ */
+function isMusicModel(id: string) {
+  return id
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .some((token) => MUSIC_FAMILIES.has(token))
+}
 
 export type ModelRoleDefinition = {
   role: ModelRole
@@ -78,9 +93,7 @@ export const MODEL_ROLES: ModelRoleDefinition[] = [
     label: 'Text-to-speech model',
     wired: false,
     help: 'No feature uses this yet — it is here so the choice is already made when one does. Music generators are filtered out; only speech models are listed.',
-    matches: (m) =>
-      m.outputs.includes('audio') &&
-      !MUSIC_FAMILIES.some((family) => m.id.toLowerCase().includes(family)),
+    matches: (m) => m.outputs.includes('audio') && !isMusicModel(m.id),
   },
   {
     role: 'image',
