@@ -201,8 +201,13 @@ should not have been, that is the window.
 2. In the dashboard, set **About → Resume** to its path, e.g. `/resume/cv.pdf`.
 
 The download button stays hidden until that field is set, so it can never 404.
-Under Docker, `public/resume` is mounted read-only, so swapping the file does
-not need a rebuild.
+
+> **Swapping the file does need a rebuild.** This previously claimed otherwise.
+> `public/resume` is bind-mounted, so the new file reaches the container — but
+> Next's standalone server fixes the public directory at build time and returns
+> 404 for anything added afterwards. Measured, not assumed. Run
+> `docker compose up -d --build` after replacing it, and check the file is
+> mode 644: an upload arriving as 600 is unreadable by the container's user.
 
 ## Managing content
 
