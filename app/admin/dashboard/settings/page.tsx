@@ -25,15 +25,26 @@ import { apiRequest, errorMessage } from '@/app/admin/client'
 type SettingStatus = {
   key: string
   label: string
-  group: 'email' | 'integrations' | 'privacy'
+  group: 'email' | 'integrations' | 'privacy' | 'models'
   secret: boolean
   help: string
   placeholder?: string
   danger?: string
+  /** Present on model choices — renders a catalogue dropdown, not a text input. */
+  modelRole?: string
   configured: boolean
   source: 'database' | 'environment' | null
   hint: string | null
   updatedAt: string | null
+}
+
+type CatalogueModel = {
+  id: string
+  name: string
+  contextLength: number | null
+  promptPrice: number | null
+  completionPrice: number | null
+  structured: boolean
 }
 
 type StatusResponse = {
@@ -53,6 +64,12 @@ const GROUPS: { id: SettingStatus['group']; title: string; blurb: string }[] = [
     title: 'Integrations',
     blurb:
       'Optional services. Each feature reports that it is unavailable rather than failing when its key is absent.',
+  },
+  {
+    id: 'models',
+    title: 'Models',
+    blurb:
+      'One OpenRouter key in front of every provider, so switching model is a choice here rather than a deploy. The lists are read from OpenRouter live — a model released today appears without an update.',
   },
   {
     id: 'privacy',
@@ -195,24 +212,36 @@ export default function SettingsPage() {
                     )}
 
                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <input
-                        id={setting.key}
-                        type={setting.secret ? 'password' : 'text'}
-                        autoComplete="off"
-                        disabled={locked}
-                        className={`${setting.secret ? FIELD_MONO : FIELD} flex-1 disabled:opacity-50`}
-                        placeholder={
-                          locked
-                            ? 'Unavailable until SETTINGS_KEY is set'
-                            : setting.configured
-                              ? 'Enter a new value to replace it'
-                              : (setting.placeholder ?? '')
-                        }
-                        value={drafts[setting.key] ?? ''}
-                        onChange={(e) =>
-                          setDrafts((prev) => ({ ...prev, [setting.key]: e.target.value }))
-                        }
-                      />
+                      {setting.modelRole ? (
+                        <ModelSelect
+                          id={setting.key}
+                          role={setting.modelRole}
+                          current={setting.hint}
+                          draft={drafts[setting.key] ?? ''}
+                          onChange={(value) =>
+                            setDrafts((prev) => ({ ...prev, [setting.key]: value }))
+                          }
+                        />
+                      ) : (
+                        <input
+                          id={setting.key}
+                          type={setting.secret ? 'password' : 'text'}
+                          autoComplete="off"
+                          disabled={locked}
+                          className={`${setting.secret ? FIELD_MONO : FIELD} flex-1 disabled:opacity-50`}
+                          placeholder={
+                            locked
+                              ? 'Unavailable until SETTINGS_KEY is set'
+                              : setting.configured
+                                ? 'Enter a new value to replace it'
+                                : (setting.placeholder ?? '')
+                          }
+                          value={drafts[setting.key] ?? ''}
+                          onChange={(e) =>
+                            setDrafts((prev) => ({ ...prev, [setting.key]: e.target.value }))
+                          }
+                        />
+                      )}
                       {setting.source === 'database' && (
                         <button
                           type="button"
@@ -264,6 +293,91 @@ export default function SettingsPage() {
       <PasswordSection />
     </div>
   )
+}
+
+/**
+ * A model chooser fed by the live OpenRouter catalogue.
+ *
+ * A native `<select>` rather than a search-and-filter combobox: the text role
+ * has around 330 entries, which sounds like a lot until you notice every browser
+ * already gives a select type-ahead, keyboard navigation and a screen-reader
+ * contract for free. A hand-rolled listbox would have to re-earn all three.
+ *
+ * Options are cheapest first. Price is the axis most likely to be regretted
+ * later, and putting it in the label means the choice is informed rather than a
+ * name recognised from somewhere.
+ */
+function ModelSelect({
+  id,
+  role,
+  current,
+  draft,
+  onChange,
+}: {
+  id: string
+  role: string
+  current: string | null
+  draft: string
+  onChange: (value: string) => void
+}) {
+  const [models, setModels] = useState<CatalogueModel[] | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    apiRequest<{ models: CatalogueModel[] }>(`/api/models?role=${role}`)
+      .then((r) => !cancelled && setModels(r.models))
+      .catch((e) => !cancelled && setError(errorMessage(e, 'Could not load models')))
+    return () => {
+      cancelled = true
+    }
+  }, [role])
+
+  if (error) {
+    return (
+      <p className="flex-1 text-meta text-error">
+        {error} The model can still be set by name in <code className="font-mono">.env</code>.
+      </p>
+    )
+  }
+
+  if (!models) {
+    return <p className="flex-1 text-meta text-foreground-muted">Loading models…</p>
+  }
+
+  // A stored model that is no longer in the catalogue must stay selectable, or
+  // opening this screen would silently reset a working configuration to blank.
+  const missing = current && !models.some((m) => m.id === current)
+
+  return (
+    <select
+      id={id}
+      className={`${FIELD_MONO} flex-1`}
+      value={draft || current || ''}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      {/* Display-only. An empty draft means "unchanged" to the save handler, so
+          a selectable blank would look like clearing and do nothing. Remove is
+          the clearing path here, exactly as it is for every other setting. */}
+      <option value="" disabled>
+        — none chosen —
+      </option>
+      {missing && <option value={current}>{current} (no longer listed)</option>}
+      {models.map((model) => (
+        <option key={model.id} value={model.id}>
+          {model.id}
+          {model.promptPrice !== null && ` · $${formatPrice(model.promptPrice)}/M in`}
+          {model.structured ? '' : ' · no structured output'}
+        </option>
+      ))}
+    </select>
+  )
+}
+
+/** Sub-cent prices need the decimals; dollar prices do not. */
+function formatPrice(perMillion: number) {
+  if (perMillion === 0) return '0'
+  return perMillion < 1 ? perMillion.toFixed(3).replace(/0+$/, '') : perMillion.toFixed(2)
 }
 
 /** Where the effective value comes from — the thing most likely to confuse. */

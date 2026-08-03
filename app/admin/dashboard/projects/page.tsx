@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import { BTN, BTN_DANGER, BTN_GHOST, CHECKBOX, FIELD, FIELD_MONO, LABEL, PAGE_TITLE, PANEL } from '@/app/admin/ui'
 import { apiRequest, errorMessage } from '@/app/admin/client'
 import { GithubCompare, GithubRepoPicker } from '@/components/admin/GithubImport'
+import { CaseStudyDraft } from '@/components/admin/CaseStudyDraft'
 import { repoPrefill, type FieldDiff, type RepoSummary } from '@/lib/repo-import'
 import { slugify } from '@/lib/slug'
 
@@ -484,6 +485,17 @@ export default function ProjectsPage() {
                       &ldquo;Read the case study&rdquo; link; leave them blank and it
                       behaves exactly as it does now.
                     </p>
+
+                    {/* Inside the section it fills, not beside it: the drafter
+                        writes five of these fields, and the seven it refuses are
+                        on screen while it says so. */}
+                    {formData.githubUrl && (
+                      <CaseStudyDraft
+                        githubUrl={formData.githubUrl}
+                        current={formData as unknown as Record<string, string>}
+                        onApply={(field, value) => set(field as keyof FormData, value as never)}
+                      />
+                    )}
 
                     {CASE_STUDY_FIELDS.map((field) => (
                       <div key={field.key}>

@@ -39,7 +39,7 @@ import {
  *   env var is only read by `lib/migrate-old-data.ts` on a fresh install.
  */
 
-export type SettingGroup = 'email' | 'integrations' | 'privacy'
+export type SettingGroup = 'email' | 'integrations' | 'privacy' | 'models'
 
 export type SettingDefinition = {
   key: string
@@ -55,6 +55,16 @@ export type SettingDefinition = {
    * so the UI requires a second confirmation.
    */
   danger?: string
+  /**
+   * Renders as a model dropdown fed by /api/models?role=… rather than a text
+   * input.
+   *
+   * A bare string, not the `ModelRole` union, on purpose: `lib/openrouter.ts`
+   * imports this module for `getSetting`, so importing its types back here
+   * would be a cycle. The roles are declared there and reference these keys;
+   * this field is only the UI hint that points at them.
+   */
+  modelRole?: string
 }
 
 export const SETTINGS: SettingDefinition[] = [
@@ -91,12 +101,44 @@ export const SETTINGS: SettingDefinition[] = [
     help: 'Lets the project importer list your repositories, including private ones, and raises the rate limit from 60 to 5,000 requests an hour. A fine-grained token needs Repository permissions → Metadata: read, or every call is refused.',
   },
   {
-    key: 'OPENAI_API_KEY',
-    label: 'OpenAI API key',
-    group: 'integrations',
+    key: 'OPENROUTER_API_KEY',
+    label: 'OpenRouter API key',
+    group: 'models',
     secret: true,
-    placeholder: 'sk-…',
-    help: 'Powers the voice-to-text button on the description fields. Without it that button reports the feature is unavailable; nothing else changes.',
+    placeholder: 'sk-or-v1-…',
+    help: 'One key for every model provider. Powers case-study drafting and the voice button. Without it both report the feature is unavailable; nothing else changes.',
+  },
+  {
+    key: 'MODEL_TEXT',
+    label: 'Text model',
+    group: 'models',
+    secret: false,
+    modelRole: 'text',
+    help: 'Drafts case-study fields from a repository and rewrites voice transcriptions.',
+  },
+  {
+    key: 'MODEL_STT',
+    label: 'Speech-to-text model',
+    group: 'models',
+    secret: false,
+    modelRole: 'stt',
+    help: 'Transcribes the voice button. These are multimodal chat models that accept audio, not dedicated transcription endpoints.',
+  },
+  {
+    key: 'MODEL_TTS',
+    label: 'Text-to-speech model',
+    group: 'models',
+    secret: false,
+    modelRole: 'tts',
+    help: 'Nothing uses this yet — set it now and it is ready when something does. Music generators are filtered out of the list.',
+  },
+  {
+    key: 'MODEL_IMAGE',
+    label: 'Image model',
+    group: 'models',
+    secret: false,
+    modelRole: 'image',
+    help: 'Nothing uses this yet. Generating a screenshot of a real project would misrepresent it, so the plausible use is social-card artwork rather than project imagery.',
   },
   {
     key: 'INQUIRY_IP_SALT',

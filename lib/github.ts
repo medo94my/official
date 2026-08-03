@@ -62,6 +62,11 @@ export function loginFromProfileUrl(value: string | null | undefined): string | 
   return /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(candidate) ? candidate : null
 }
 
+/** The configured token, or undefined for the unauthenticated public path. */
+export async function getGithubToken(): Promise<string | undefined> {
+  return (await getSetting('GITHUB_TOKEN'))?.trim() || undefined
+}
+
 type RawRepo = {
   id: number
   name: string
@@ -143,12 +148,16 @@ function describeFailure(response: Response): GithubError {
   return new GithubError(`GitHub returned ${response.status}.`, 502)
 }
 
-async function fetchPage(url: string, token: string | undefined): Promise<RawRepo[]> {
+async function request(
+  url: string,
+  token: string | undefined,
+  accept = 'application/vnd.github+json'
+): Promise<Response> {
   let response: Response
   try {
     response = await fetch(url, {
       headers: {
-        Accept: 'application/vnd.github+json',
+        Accept: accept,
         'X-GitHub-Api-Version': '2022-11-28',
         // Without a User-Agent GitHub answers 403 with a body that reads like a
         // permissions problem. Hours of debugging live in that gap.
@@ -166,8 +175,80 @@ async function fetchPage(url: string, token: string | undefined): Promise<RawRep
     throw new GithubError('Could not reach GitHub.', 502)
   }
 
+  return response
+}
+
+async function fetchPage(url: string, token: string | undefined): Promise<RawRepo[]> {
+  const response = await request(url, token)
   if (!response.ok) throw describeFailure(response)
   return (await response.json()) as RawRepo[]
+}
+
+/**
+ * The README as markdown, or null when the repository has none.
+ *
+ * `application/vnd.github.raw` returns the file itself rather than a JSON
+ * envelope with base64 in it — one fewer decode step, and no chance of the
+ * content field being truncated on a large file.
+ *
+ * A 404 is a real answer here, not a failure: two of the six repositories this
+ * was built against have no README at all, and the drafter needs to say so
+ * rather than surface an error the owner cannot act on.
+ */
+export async function fetchReadme(
+  fullName: string,
+  token: string | undefined
+): Promise<string | null> {
+  const response = await request(
+    `${API}/repos/${fullName}/readme`,
+    token,
+    'application/vnd.github.raw'
+  )
+  if (response.status === 404) return null
+  if (!response.ok) throw describeFailure(response)
+  return await response.text()
+}
+
+type RawTree = {
+  tree?: { path: string; type: string }[]
+  truncated?: boolean
+}
+
+/**
+ * Blob paths from the default branch.
+ *
+ * Two calls, not one: the tree endpoint needs a ref, and the default branch is
+ * not always `main` — `game-dev` and `E-commerce_front_end` are both `master`.
+ * Hardcoding either would 404 on half the account.
+ *
+ * A failure returns an empty list rather than throwing. The tree is supplementary
+ * evidence; losing it degrades the draft, whereas losing the README makes it
+ * impossible, and taking the whole feature down over the lesser of the two would
+ * be the wrong trade.
+ */
+export async function fetchTree(
+  fullName: string,
+  token: string | undefined
+): Promise<string[]> {
+  try {
+    const repoResponse = await request(`${API}/repos/${fullName}`, token)
+    if (!repoResponse.ok) return []
+    const { default_branch: branch } = (await repoResponse.json()) as {
+      default_branch?: string
+    }
+    if (!branch) return []
+
+    const treeResponse = await request(
+      `${API}/repos/${fullName}/git/trees/${encodeURIComponent(branch)}?recursive=1`,
+      token
+    )
+    if (!treeResponse.ok) return []
+
+    const body = (await treeResponse.json()) as RawTree
+    return (body.tree ?? []).filter((e) => e.type === 'blob').map((e) => e.path)
+  } catch {
+    return []
+  }
 }
 
 export type RepoListResult = {
@@ -194,7 +275,7 @@ let cached: { key: string; expiresAt: number; value: RepoListResult } | null = n
 const TTL_MS = 5 * 60_000
 
 export async function listRepos({ refresh = false } = {}): Promise<RepoListResult> {
-  const token = (await getSetting('GITHUB_TOKEN'))?.trim() || undefined
+  const token = await getGithubToken()
 
   // Read directly rather than through getSiteContent(): that cache exists to
   // collapse seven queries for a public page render, and coupling this to the

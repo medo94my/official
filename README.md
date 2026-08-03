@@ -15,7 +15,11 @@ nothing on the site is hardcoded in a component.
 - **Working contact form** — server-validated, rate-limited, saved to Postgres,
   readable in an admin inbox, with optional email notification
 - **Authenticated admin** — NextAuth credentials, guarded at the edge by middleware
-- **AI voice input** *(optional)* — Whisper transcribes and rewrites descriptions
+- **AI voice input** *(optional)* — dictate a description and have it tidied
+- **Case-study drafting** *(optional)* — drafts five case-study fields from a
+  project's GitHub README, each shown with the heading it came from. It drafts
+  only what the repository supports and refuses when there is too little to go
+  on; Problem, Outcome, Lessons and role are never drafted
 
 ## Tech stack
 
@@ -26,7 +30,9 @@ nothing on the site is hardcoded in a component.
 - **Database**: PostgreSQL with Prisma
 - **Auth**: NextAuth.js (credentials)
 - **Validation**: Zod, shared between the client form and the route handler
-- **Optional**: OpenAI Whisper (voice input), Resend (contact notifications)
+- **Models**: OpenRouter — one key in front of every provider, chosen per role
+  (text, speech-to-text) from the settings screen rather than in code
+- **Optional**: Resend (contact notifications)
 
 ## Running it
 
@@ -125,7 +131,8 @@ degrades rather than breaking when its value is absent from both:
 |---|---|
 | `RESEND_API_KEY` | Messages are still saved and readable in the inbox; no email is sent, and the inbox says so |
 | `INQUIRY_NOTIFY_TO` / `INQUIRY_NOTIFY_FROM` | Same as above. `FROM` must be on a Resend-verified domain |
-| `OPENAI_API_KEY` | The voice-to-text button reports the feature is unavailable; nothing else changes |
+| `OPENROUTER_API_KEY` | Case-study drafting and the voice button report they are unavailable; nothing else changes |
+| `MODEL_TEXT` / `MODEL_STT` | Same as above — a key with no model chosen cannot call anything. Set both from Settings → Models |
 | `GITHUB_TOKEN` | The project importer shows public repositories only, limited to 60 requests an hour |
 | `INQUIRY_IP_SALT` | Rate limiting still works; a random salt is generated per process instead, so stored source hashes no longer correlate across restarts |
 
@@ -246,8 +253,16 @@ a toast. If the save succeeded, the route is likely returning
 **A `NEXT_PUBLIC_*` change had no effect** — those are baked in at build time.
 Rebuild.
 
-**Voice input does nothing** — `OPENAI_API_KEY` is unset (the route returns 503)
-or the account has no credits.
+**Voice input does nothing** — no speech-to-text model is chosen in
+Settings → Models (the route returns 503), or the OpenRouter key has no credit.
+
+**Voice input returns an unsupported-format error** — browsers record WebM/Opus
+(MP4 on Safari), and not every model accepts those. Pick a different
+speech-to-text model; the message is the model's own.
+
+**"Draft from repository" refuses** — the repository's README is under 120 words
+or missing. That is the gate working: a file tree shows the stack but never the
+reasoning, so drafting from one would mean inventing it.
 
 **Contact form succeeds but no email arrives** — expected without
 `RESEND_API_KEY`. The message is in `/admin/dashboard/inbox`.

@@ -60,21 +60,25 @@ export default function VoiceRecorder({ onTranscription, enhance = true }: Voice
       formData.append('audio', audioBlob, 'recording.webm')
       formData.append('enhance', enhance.toString())
 
-      const response = await fetch('/api/whisper', {
+      const response = await fetch('/api/transcribe', {
         method: 'POST',
         body: formData,
       })
 
+      const data = await response.json().catch(() => ({}))
+
       if (!response.ok) {
-        throw new Error('Failed to transcribe audio')
+        // The server's message says which model to choose, which format was
+        // refused, or that the key has no credit. Replacing it with "Failed to
+        // process audio" throws away the only actionable part.
+        throw new Error(data.error || `Transcription failed (${response.status})`)
       }
 
-      const data = await response.json()
       onTranscription(data.final)
-      toast.success(enhance ? 'Content enhanced with AI!' : 'Transcription complete!')
+      toast.success(enhance ? 'Transcribed and tidied' : 'Transcription complete')
     } catch (error) {
       console.error('Error processing audio:', error)
-      toast.error('Failed to process audio')
+      toast.error(error instanceof Error ? error.message : 'Failed to process audio')
     } finally {
       setIsProcessing(false)
     }
