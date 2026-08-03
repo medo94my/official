@@ -7,6 +7,7 @@ import { BTN, BTN_DANGER, BTN_GHOST, CHECKBOX, FIELD, FIELD_MONO, LABEL, PAGE_TI
 import { apiRequest, errorMessage } from '@/app/admin/client'
 import { GithubCompare, GithubRepoPicker } from '@/components/admin/GithubImport'
 import { CaseStudyDraft } from '@/components/admin/CaseStudyDraft'
+import MediaManager, { type MediaItem } from '@/components/admin/MediaManager'
 import { repoPrefill, type FieldDiff, type RepoSummary } from '@/lib/repo-import'
 import { slugify } from '@/lib/slug'
 
@@ -41,6 +42,7 @@ interface Project {
   order: number
   status?: string | null
   caseStudyUrl?: string | null
+  media?: MediaItem[]
   problem?: string | null
   audience?: string | null
   context?: string | null
@@ -95,6 +97,10 @@ export default function ProjectsPage() {
   const [pickerOpen, setPickerOpen] = useState(false)
   /** Shown above the title so the review-before-save contract is visible. */
   const [prefillSource, setPrefillSource] = useState<string | null>(null)
+  // Media lives outside formData: it is saved the moment it is uploaded, so
+  // carrying it through the form's submit payload would be a second, and
+  // conflicting, source of truth.
+  const [media, setMedia] = useState<MediaItem[]>([])
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -153,6 +159,7 @@ export default function ProjectsPage() {
 
   const handleEdit = (project: Project) => {
     setEditingProject(project)
+    setMedia(project.media ?? [])
     setFormData({
       title: project.title,
       slug: project.slug ?? '',
@@ -190,6 +197,7 @@ export default function ProjectsPage() {
 
   const resetForm = () => {
     setFormData(EMPTY)
+    setMedia([])
     setEditingProject(null)
     setPrefillSource(null)
     setCaseStudyOpen(false)
@@ -561,6 +569,22 @@ export default function ProjectsPage() {
                   }}
                   onApply={(diff: FieldDiff) => set(diff.field, diff.incoming)}
                 />
+              )}
+
+              {/* Editing only: a file has to belong to something, and the slug
+                  is what names it on disk. Unlike the rest of this form these
+                  actions take effect immediately — the server names the file
+                  and returns its URL, so there is nothing to defer to Update. */}
+              {editingProject ? (
+                <MediaManager
+                  projectId={editingProject.id}
+                  items={media}
+                  onChange={setMedia}
+                />
+              ) : (
+                <p className="border-t border-border pt-4 text-meta text-foreground-subtle">
+                  Screenshots and clips can be added once the project is created.
+                </p>
               )}
 
               <div className="flex gap-4 pt-4">

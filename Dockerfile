@@ -41,6 +41,21 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Image optimisation. Next refuses to resize or re-encode anything in standalone
+# mode without this and logs "'sharp' is required" on every request — which it
+# was doing, silently serving every screenshot at full size to every phone.
+# Copied explicitly because it is a native module: the alpine/musl binary is the
+# one built in the deps stage, and it must not be replaced by a host build.
+#
+# Its exact runtime tree, not a guess: `sharp` requires @img/colour, detect-libc
+# and semver, and @img also holds the platform binary. Standalone tracing does
+# not pick any of it up because Next resolves sharp at runtime rather than
+# importing it.
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/sharp ./node_modules/sharp
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@img ./node_modules/@img
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/detect-libc ./node_modules/detect-libc
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/semver ./node_modules/semver
+
 # Needed at container start to apply migrations and (optionally) seed. The
 # standalone bundle does not include the CLI or the seed's dependencies.
 # --chown throughout: the Prisma CLI writes into its own package directory on
@@ -63,6 +78,16 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules/resolve-pkg-maps ./n
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Uploaded screenshots and clips. Created here, owned by the runtime user, so
+# the named volume mounted over it inherits that ownership — Docker seeds an
+# empty named volume from the image path, permissions included. Without this the
+# volume would be root-owned and every upload would fail with EACCES.
+#
+# Deliberately not under public/: the standalone server fixes that directory at
+# build time and will not serve anything written to it later. These are served
+# by app/media/[name]/route.ts.
+RUN mkdir -p /app/media && chown nextjs:nodejs /app/media
 
 USER nextjs
 EXPOSE 3000

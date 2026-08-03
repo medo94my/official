@@ -166,6 +166,35 @@ the reasoning and the measured ratios are in `lib/tokens.ts`.
 There is intentionally **no `app/loading.tsx`**; see the note in
 `app/layout.tsx` before adding one, as it silently breaks 404 status codes.
 
+## Uploaded media
+
+Screenshots and short clips are uploaded per project at
+**Projects → edit → Screens and clips**. PNG, JPEG or WebP up to 5 MB; MP4 or
+WebM up to 25 MB. A clip should be ten to fifteen seconds, silent, and loop
+cleanly — it autoplays when scrolled to and pauses when it leaves the screen.
+
+Alt text is required on images. Without it a screenshot is announced to a screen
+reader as nothing at all, and it doubles as the caption underneath.
+
+> **These live in a Docker named volume (`media`), and nothing else backs them
+> up.** `docker compose down -v` destroys them along with the database. Back up
+> with:
+>
+> ```bash
+> docker run --rm -v official_media:/m -v "$PWD:/backup" alpine \
+>   tar czf /backup/media.tgz -C /m .
+> ```
+
+They are **not** in `public/`. Next's standalone server fixes that directory at
+build time and will not serve anything written to it afterwards — verified, not
+assumed — so uploads are served by `app/media/[name]/route.ts` instead. That
+route is also where path traversal is stopped: a filename that does not match
+the shape the uploader generates never reaches the filesystem.
+
+Deleting media removes the row and the file immediately, but a CDN may keep
+serving it for up to an hour (`s-maxage=3600`). If something was published that
+should not have been, that is the window.
+
 ## Adding a résumé
 
 1. Put the PDF in `public/resume/`.

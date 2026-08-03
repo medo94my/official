@@ -1,6 +1,6 @@
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { cache } from 'react'
-import type { Project, Service } from '@prisma/client'
+import type { Project, ProjectMedia, Service } from '@prisma/client'
 import { prisma } from './prisma'
 
 /**
@@ -11,13 +11,34 @@ import { prisma } from './prisma'
  * yet) and costs a round trip at runtime.
  */
 
+/**
+ * A gallery item as the public components see it.
+ *
+ * `createdAt` is dropped here rather than at the call site. `getSiteContent`
+ * runs through `unstable_cache`, and a Date does not survive that serialisation
+ * boundary — it comes back a string and every consumer that treats it as a Date
+ * breaks at runtime rather than at compile time. Removing the column is the only
+ * reliable way to stop that happening again.
+ */
+export type PublicMedia = Omit<ProjectMedia, 'createdAt' | 'projectId'>
+
+function toPublicMedia(media: ProjectMedia): PublicMedia {
+  const { createdAt: _createdAt, projectId: _projectId, ...rest } = media
+  return rest
+}
+
 /** `tags` is a comma-separated column; every consumer wants an array. */
-export function withTagArray(project: Project) {
+export function withTagArray(project: Project & { media?: ProjectMedia[] }) {
+  const { media, ...rest } = project
   return {
-    ...project,
+    ...rest,
     tags: project.tags ? project.tags.split(',').filter(Boolean) : [],
+    media: (media ?? []).map(toPublicMedia),
   }
 }
+
+/** Media ordering is the owner's, set in the dashboard. */
+const MEDIA_INCLUDE = { media: { orderBy: { order: 'asc' } } } as const
 
 export type ProjectWithTags = ReturnType<typeof withTagArray>
 
@@ -32,7 +53,10 @@ export type ProjectWithTags = ReturnType<typeof withTagArray>
 export type PublicProject = Omit<ProjectWithTags, 'createdAt' | 'updatedAt'>
 
 export async function getProjects() {
-  const projects = await prisma.project.findMany({ orderBy: { order: 'asc' } })
+  const projects = await prisma.project.findMany({
+    orderBy: { order: 'asc' },
+    include: MEDIA_INCLUDE,
+  })
   return projects.map(withTagArray)
 }
 
@@ -78,7 +102,10 @@ export async function getExperience() {
  * before the response starts streaming — see the comment there.
  */
 export const getProjectBySlug = cache(async (slug: string) => {
-  const project = await prisma.project.findUnique({ where: { slug } })
+  const project = await prisma.project.findUnique({
+    where: { slug },
+    include: MEDIA_INCLUDE,
+  })
   return project ? withTagArray(project) : null
 })
 

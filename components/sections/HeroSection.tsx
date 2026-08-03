@@ -38,8 +38,13 @@ export default function HeroSection({
   return (
     <section className="pt-14 sm:pt-20 lg:pt-28">
       <Container>
+        {/* Staged, and the indices are the running order. The accent bar used to
+            sit at the default index 0, so it landed simultaneously with the
+            eyebrow above the headline rather than after it — the sequence read
+            as two things happening at once and then a gap. `loose` because this
+            is the one place on the site where the arrival is the point. */}
         {subheadline && (
-          <Reveal>
+          <Reveal gap="loose">
             <p className="label mb-6">{subheadline}</p>
           </Reveal>
         )}
@@ -50,17 +55,17 @@ export default function HeroSection({
 
         {/* The keystone. `accent` resolves to bronze on ivory (5.6:1) and to
             gold on onyx (8.1:1), so one token carries both themes. */}
-        <Reveal distance="nudge" className="mt-7">
+        <Reveal index={2} gap="loose" distance="nudge" className="mt-7">
           <span aria-hidden="true" className="block h-[3px] w-16 bg-accent" />
         </Reveal>
 
         {valueProp && (
-          <Reveal index={1} className="mt-7">
+          <Reveal index={3} gap="loose" className="mt-7">
             <p className="max-w-measure text-body-lg text-foreground/85">{valueProp}</p>
           </Reveal>
         )}
 
-        <Reveal index={2} className="mt-9">
+        <Reveal index={4} gap="loose" className="mt-9">
           <div className="flex flex-wrap items-center gap-3">
             <ButtonLink href={contactHref}>Start a project</ButtonLink>
             <ButtonLink href={workHref} variant="secondary">
@@ -76,7 +81,7 @@ export default function HeroSection({
         </Reveal>
 
         {ledger.length > 0 && (
-          <Reveal index={3} className="mt-14 sm:mt-20">
+          <Reveal index={5} gap="loose" className="mt-14 sm:mt-20">
             <dl className="grid grid-cols-1 gap-px border-y border-border bg-border sm:grid-cols-3">
               {/* gap-px over a border-coloured ground draws the separators, so
                   the cells stay a real grid instead of a stack of bordered

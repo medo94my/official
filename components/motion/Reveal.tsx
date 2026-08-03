@@ -18,7 +18,7 @@ type RevealProps = {
   index?: number
   /** Which stagger interval to use for `index`. */
   gap?: StaggerToken
-  /** How far it travels. Defaults to the 8px house rise. */
+  /** How far it travels. Defaults to the house rise. */
   distance?: DistanceToken
   /** How early it triggers relative to the viewport edge. */
   viewport?: ViewportToken

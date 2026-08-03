@@ -81,6 +81,16 @@ services:
     volumes:
       # Résumé PDF and project images can be swapped without a rebuild.
       - ./public/resume:/app/public/resume:ro
+      # Uploaded screenshots and clips.
+      #
+      # A named volume, not a bind mount: the container runs as uid 1001 while a
+      # host directory here would be owned by uid 1000, and there is no setfacl
+      # on this host to bridge that without root. Docker seeds a named volume
+      # from the image directory including its ownership, so writes just work.
+      #
+      # The cost is that `docker compose down -v` destroys every upload, and
+      # nothing else backs this up. See "Uploaded media" in the README.
+      - media:/app/media
     # ── Routing ───────────────────────────────────────────────────────────
     # Traefik discovers this container over infra-proxy and reads these.
     #
@@ -117,6 +127,7 @@ services:
 
 volumes:
   pgdata:
+  media:
 
 networks:
   # Shared reverse-proxy network. Traefik resolves this container by name over

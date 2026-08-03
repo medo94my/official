@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
 import { contentChanged, handleApiError } from '@/lib/api'
 import { projectFields } from '@/lib/project-fields'
+import { removeMediaFile } from '@/lib/media-store'
 import { slugify } from '@/lib/slug'
 
 // GET single project
@@ -70,9 +71,23 @@ export async function DELETE(
   try {
     await requireAuth()
 
+    // Read the media before the delete. The rows cascade, but the *files* do
+    // not — and once the rows are gone nothing knows which files to unlink, so
+    // every deleted project would silently leak its screenshots into the volume
+    // forever.
+    const media = await prisma.projectMedia.findMany({
+      where: { projectId: params.id },
+      select: { url: true, poster: true },
+    })
+
     await prisma.project.delete({
       where: { id: params.id },
     })
+
+    for (const item of media) {
+      await removeMediaFile(item.url)
+      await removeMediaFile(item.poster)
+    }
 
     return contentChanged({ message: 'Project deleted successfully' })
   } catch (error) {

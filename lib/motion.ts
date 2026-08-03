@@ -2,10 +2,14 @@
  * Motion tokens.
  *
  * Every animated value on the site resolves to something here, so timing stays
- * one decision rather than fifty. The numbers are not invented: the standard
- * curve, the 0.06s stagger, the 8px rise and the -64px viewport margin are the
- * values the site already shipped with, kept so the redesign does not silently
- * change how motion feels.
+ * one decision rather than fifty.
+ *
+ * These began as the values the site already shipped with — an 8px rise over
+ * 0.32s with a 0.06s stagger — preserved so a redesign would not silently change
+ * how motion felt. That turned out to be preserving a mistake: at 8px the
+ * reveals were below the threshold of noticing, and the site was fairly
+ * described as having no animation. The travel and timing were raised
+ * deliberately; the curves are unchanged.
  *
  * `transitionTimingFunction` in tailwind.config.ts mirrors these curves. The
  * two must agree — a CSS hover and a Motion entrance on the same element
@@ -19,6 +23,14 @@ export const duration = {
   fast: 0.2,
   /** The default for anything entering. */
   base: 0.32,
+  /**
+   * Scroll reveals specifically.
+   *
+   * Separate from `base` on purpose. `base` also drives hovers and toggles,
+   * where 0.55s would feel like lag — the two wants are genuinely different and
+   * one number cannot serve both.
+   */
+  reveal: 0.55,
   /** Section reveals, modals. */
   slow: 0.5,
   /** Hero and other once-per-page moments. */
@@ -41,9 +53,9 @@ export const spring = {
 } as const
 
 export const stagger = {
-  tight: 0.04,
-  base: 0.06,
-  loose: 0.1,
+  tight: 0.06,
+  base: 0.09,
+  loose: 0.14,
   /**
    * Delay ceiling, in items. Without it a 30-item list leaves the last entry
    * waiting 1.8s, which reads as broken rather than choreographed.
@@ -51,13 +63,23 @@ export const stagger = {
   maxIndex: 6,
 } as const
 
-/** Travel distances in px. Restraint is the point — nothing flies in. */
+/**
+ * Travel distances in px.
+ *
+ * `rise` was 8px, paired with a 0.32s fade, and the honest verdict on it is that
+ * nobody could see it — the site read as having no motion at all, most starkly
+ * on a phone, where the decorative scroll rail is hidden and the reveal is the
+ * only motion there is. 24px over 0.55s is still a settle rather than a
+ * performance, but it is a settle you notice.
+ *
+ * `nudge` stays at 4: it is a hover affordance on an arrow, not an entrance.
+ */
 export const distance = {
   /** Arrow nudge on hover. Matches Tailwind's translate-x-0.5. */
   nudge: 4,
-  rise: 8,
-  lift: 16,
-  sweep: 32,
+  rise: 24,
+  lift: 40,
+  sweep: 64,
 } as const
 
 export const viewport = {
@@ -67,9 +89,11 @@ export const viewport = {
 } as const
 
 export const transition = {
-  reveal: { duration: duration.base, ease: ease.standard },
+  reveal: { duration: duration.reveal, ease: ease.entrance },
   hero: { duration: duration.slower, ease: ease.entrance },
   ui: { duration: duration.fast, ease: ease.standard },
+  /** Media settling in: a slight scale alongside the fade. */
+  media: { duration: duration.slower, ease: ease.entrance },
 } as const
 
 export type DistanceToken = keyof typeof distance

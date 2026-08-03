@@ -85,7 +85,46 @@ model Project {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  media ProjectMedia[]
+
   @@index([featured, order])
+}
+
+/// Screenshots and short silent clips for a project.
+///
+/// Separate from `Project.image`, which stays the single cover used by the list
+/// entry and the case-study header. This is the gallery: additional stills and
+/// the screen recordings that are the only honest way to show a CLI or an API
+/// actually working.
+///
+/// A relation rather than two more text columns on a model that already carries
+/// twenty-four — ordering and per-item alt text both need a row of their own.
+model ProjectMedia {
+  id        String  @id @default(cuid())
+  projectId String
+  /// Cascade so deleting a project cannot strand rows pointing at files that
+  /// the delete handler then has no way to find and unlink.
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  /// "image" or "video". Free text rather than an enum, matching how `type` and
+  /// `status` are already handled on Project.
+  kind      String
+  /// Site-relative and server-generated, e.g. /media/martify-a1b2c3.webp.
+  /// Never a value the browser supplied — see lib/media.ts.
+  url       String
+  /// Required for images. An empty alt has to be a decision, not a default.
+  alt       String  @default("")
+  /// Video only: the frame shown before playback, and the whole of what a
+  /// reduced-motion visitor sees.
+  poster    String?
+  /// Intrinsic dimensions, captured at upload so the space is reserved before
+  /// the file loads and the page does not jump.
+  width     Int?
+  height    Int?
+  order     Int     @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([projectId, order])
 }
 
 /// Employment history.

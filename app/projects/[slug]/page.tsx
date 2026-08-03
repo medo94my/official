@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import CaseStudyBlock from '@/components/CaseStudyBlock'
 import JsonLd from '@/components/JsonLd'
+import ProjectGallery from '@/components/ProjectGallery'
 import SiteFooter from '@/components/layout/SiteFooter'
 import SiteNav from '@/components/layout/SiteNav'
 import ScrollRail from '@/components/motion/ScrollRail.client'
@@ -193,6 +194,11 @@ export default async function CaseStudyPage({
           </div>
 
           <div className="mt-12 sm:mt-16">
+            {/* Above the written blocks on purpose. Someone who opens a case
+                study wants to see the thing before they read about it, and for
+                a CLI tool the clip is the only evidence a still cannot give. */}
+            <ProjectGallery media={project.media} />
+
             {blocks.map((block) => (
               <CaseStudyBlock key={block.id} {...block} />
             ))}
