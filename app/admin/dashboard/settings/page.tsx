@@ -42,8 +42,8 @@ type CatalogueModel = {
   id: string
   name: string
   contextLength: number | null
-  promptPrice: number | null
-  completionPrice: number | null
+  /** Preformatted by the server — see formatPerMillion in lib/openrouter.ts. */
+  priceLabel: string | null
   structured: boolean
 }
 
@@ -366,18 +366,12 @@ function ModelSelect({
       {models.map((model) => (
         <option key={model.id} value={model.id}>
           {model.id}
-          {model.promptPrice !== null && ` · $${formatPrice(model.promptPrice)}/M in`}
+          {model.priceLabel && ` · ${model.priceLabel} in`}
           {model.structured ? '' : ' · no structured output'}
         </option>
       ))}
     </select>
   )
-}
-
-/** Sub-cent prices need the decimals; dollar prices do not. */
-function formatPrice(perMillion: number) {
-  if (perMillion === 0) return '0'
-  return perMillion < 1 ? perMillion.toFixed(3).replace(/0+$/, '') : perMillion.toFixed(2)
 }
 
 /** Where the effective value comes from — the thing most likely to confuse. */

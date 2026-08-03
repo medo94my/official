@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
+import { UPSTREAM_FAILED } from '@/lib/http'
 import {
   MODEL_ROLES,
   OpenRouterError,
@@ -49,6 +50,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: error.status })
     }
     console.error('[models]', error)
-    return NextResponse.json({ error: 'Could not reach OpenRouter.' }, { status: 502 })
+    return NextResponse.json({ error: 'Could not reach OpenRouter.' }, { status: UPSTREAM_FAILED })
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
+import { UPSTREAM_FAILED } from '@/lib/http'
 import { GithubError, listRepos } from '@/lib/github'
 
 /**
@@ -34,6 +35,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: error.status })
     }
     console.error('[github]', error)
-    return NextResponse.json({ error: 'Could not reach GitHub.' }, { status: 502 })
+    return NextResponse.json({ error: 'Could not reach GitHub.' }, { status: UPSTREAM_FAILED })
   }
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
-import { OpenRouterError, chat, getRoleModel } from '@/lib/openrouter'
+import { OpenRouterError, audioFormat, chat, getRoleModel } from '@/lib/openrouter'
 
 /**
  * Voice input for the description fields.
@@ -19,30 +19,6 @@ export const dynamic = 'force-dynamic'
 
 /** Roughly 20 MB of audio; several minutes of Opus, far more than a description. */
 const MAX_BYTES = 20 * 1024 * 1024
-
-/**
- * The container the browser actually produced.
- *
- * MediaRecorder gives `audio/webm;codecs=opus` on Chrome and Firefox and
- * `audio/mp4` on Safari. Support for these varies by model — OpenAI's
- * `input_audio` documents wav and mp3, while Gemini accepts considerably more —
- * so the real format is passed through and a rejection is surfaced verbatim
- * rather than being retried as a lie about what the bytes are.
- */
-function audioFormat(mimeType: string) {
-  const base = mimeType.split(';')[0].trim().toLowerCase()
-  const known: Record<string, string> = {
-    'audio/webm': 'webm',
-    'audio/ogg': 'ogg',
-    'audio/mp4': 'mp4',
-    'audio/mpeg': 'mp3',
-    'audio/mp3': 'mp3',
-    'audio/wav': 'wav',
-    'audio/x-wav': 'wav',
-    'audio/flac': 'flac',
-  }
-  return known[base] ?? 'webm'
-}
 
 const TRANSCRIBE_INSTRUCTION =
   'Transcribe the audio verbatim. Return only the transcription, with no preamble, no commentary and no quotation marks. If the audio contains no speech, return an empty string.'

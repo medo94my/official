@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { UPSTREAM_FAILED } from '@/lib/http'
 import { getSetting } from '@/lib/settings'
 import type { RepoSummary } from '@/lib/repo-import'
 
@@ -130,13 +131,13 @@ function describeFailure(response: Response): GithubError {
   if (response.status === 401) {
     return new GithubError(
       'GitHub rejected the token. Check it has not expired, in Settings.',
-      502
+      UPSTREAM_FAILED
     )
   }
   if (response.status === 403) {
     return new GithubError(
       'GitHub refused the request. A fine-grained token needs Repository permissions → Metadata: read.',
-      502
+      UPSTREAM_FAILED
     )
   }
   if (response.status === 404) {
@@ -145,7 +146,7 @@ function describeFailure(response: Response): GithubError {
       404
     )
   }
-  return new GithubError(`GitHub returned ${response.status}.`, 502)
+  return new GithubError(`GitHub returned ${response.status}.`, UPSTREAM_FAILED)
 }
 
 async function request(
@@ -172,7 +173,7 @@ async function request(
       signal: AbortSignal.timeout(10_000),
     })
   } catch {
-    throw new GithubError('Could not reach GitHub.', 502)
+    throw new GithubError('Could not reach GitHub.', UPSTREAM_FAILED)
   }
 
   return response

@@ -1,4 +1,5 @@
 import { getSetting } from '@/lib/settings'
+import { UPSTREAM_FAILED } from '@/lib/http'
 
 /**
  * OpenRouter — one key and one base URL in front of every model provider.
@@ -121,9 +122,11 @@ export type CatalogueModel = {
   inputs: string[]
   outputs: string[]
   contextLength: number | null
-  /** Dollars per million prompt tokens, or null when the model is free. */
+  /** Dollars per million prompt tokens, or null when the catalogue omits it. */
   promptPrice: number | null
   completionPrice: number | null
+  /** `promptPrice` ready to display, so the client formats nothing. */
+  priceLabel: string | null
   /** Advertises `response_format` or `structured_outputs`. */
   structured: boolean
 }
@@ -140,21 +143,60 @@ type RawModel = {
   supported_parameters?: string[]
 }
 
-/** Per-million-token dollars. The catalogue quotes per-token, which reads as 0.00. */
+/**
+ * Per-million-token dollars, or null when there is no fixed price.
+ *
+ * The catalogue quotes per-token, which renders as 0.00 unless scaled.
+ *
+ * **`-1` is a sentinel, not a price.** OpenRouter uses it for models whose cost
+ * depends on where the request is routed — `openrouter/fusion`,
+ * `pareto-code` and `bodybuilder` all carry it. Multiplied out that becomes
+ * −1,000,000, which sorted them to the head of every dropdown as the cheapest
+ * models available and printed a negative price beside them.
+ */
 function perMillion(value: string | undefined): number | null {
+  // Number(undefined) and Number('abc') are NaN; Number('') is 0, which would
+  // claim a model is free. Only a non-empty numeric string is a price.
+  if (typeof value !== 'string' || value.trim() === '') return null
   const n = Number(value)
-  return Number.isFinite(n) ? n * 1_000_000 : null
+  if (!Number.isFinite(n) || n < 0) return null
+  return n * 1_000_000
+}
+
+/**
+ * A price a person can read, formatted where it can be tested.
+ *
+ * Server-side rather than in the settings page because a client component
+ * importing this module would pull `lib/settings.ts`, and therefore Prisma, into
+ * the browser bundle. The dropdown renders the string it is given.
+ */
+export function formatPerMillion(perMillionDollars: number): string {
+  if (perMillionDollars === 0) return 'free'
+  // Below the resolution of three decimals, "$0.000" reads as free and a naive
+  // trailing-zero strip leaves the string "0." — say what is actually meant.
+  if (perMillionDollars < 0.001) return '<$0.001/M'
+  const fixed =
+    perMillionDollars < 1
+      ? perMillionDollars.toFixed(3)
+      : perMillionDollars.toFixed(2)
+  // toFixed always leaves a decimal point, so stripping it with the zeros is
+  // safe: "0.150" → "0.15", "2.00" → "2", "10.00" → "10".
+  return `$${fixed.replace(/\.?0+$/, '')}/M`
 }
 
 function normalise(raw: RawModel): CatalogueModel {
   const params = raw.supported_parameters ?? []
+  const promptPrice = perMillion(raw.pricing?.prompt)
   return {
     id: raw.id,
     name: raw.name ?? raw.id,
     inputs: raw.architecture?.input_modalities ?? [],
     outputs: raw.architecture?.output_modalities ?? [],
     contextLength: raw.context_length ?? null,
-    promptPrice: perMillion(raw.pricing?.prompt),
+    promptPrice,
+    // Never blank: a model with no price shown reads as free, and three of these
+    // are routers whose cost depends on where the request lands.
+    priceLabel: promptPrice === null ? 'price varies' : formatPerMillion(promptPrice),
     completionPrice: perMillion(raw.pricing?.completion),
     structured:
       params.includes('response_format') || params.includes('structured_outputs'),
@@ -182,15 +224,23 @@ export async function listModels({ refresh = false } = {}): Promise<CatalogueMod
       signal: AbortSignal.timeout(10_000),
     })
   } catch {
-    throw new OpenRouterError('Could not reach OpenRouter.', 502)
+    throw new OpenRouterError('Could not reach OpenRouter.', UPSTREAM_FAILED)
   }
 
   if (!response.ok) {
-    throw new OpenRouterError(`OpenRouter returned ${response.status}.`, 502)
+    throw new OpenRouterError(`OpenRouter returned ${response.status}.`, UPSTREAM_FAILED)
   }
 
   const body = (await response.json()) as { data?: RawModel[] }
-  const value = (body.data ?? [])
+
+  // An empty catalogue is a malformed response, not a real answer — OpenRouter
+  // always has models. Caching it would leave every dropdown blank for five
+  // minutes with no way out, which is the same trap as caching a failure.
+  if (!Array.isArray(body.data) || body.data.length === 0) {
+    throw new OpenRouterError('OpenRouter returned no models.', UPSTREAM_FAILED)
+  }
+
+  const value = body.data
     // `openrouter/auto` is a router that reports every modality at once, so it
     // matches every filter below and would head each dropdown as though it were
     // a specific model. It is not one, and it makes the chosen model unknowable.
@@ -213,7 +263,9 @@ export async function modelsForRole(
   const all = await listModels(options)
   return all
     .filter(definition.matches)
-    .sort((a, b) => (a.promptPrice ?? 0) - (b.promptPrice ?? 0))
+    // Unpriced sorts last, not first: `?? 0` would put every model whose cost is
+    // unknown above the genuinely free ones, at the top of the list.
+    .sort((a, b) => (a.promptPrice ?? Infinity) - (b.promptPrice ?? Infinity))
 }
 
 /**
@@ -247,7 +299,75 @@ async function requireKey(): Promise<string> {
   return key
 }
 
-function describeFailure(status: number, body: string): OpenRouterError {
+/**
+ * The container the browser actually produced.
+ *
+ * MediaRecorder gives `audio/webm;codecs=opus` on Chrome and Firefox and
+ * `audio/mp4` on Safari. Support varies by model — OpenAI's `input_audio`
+ * documents wav and mp3, Gemini accepts considerably more — so the real format
+ * is passed through and a rejection surfaced, rather than retried as a lie about
+ * what the bytes are.
+ *
+ * Lives here rather than in the route because a `route.ts` may only export HTTP
+ * methods and segment config; an extra export fails Next's route type check.
+ */
+export function audioFormat(mimeType: string): string {
+  const base = (mimeType ?? '').split(';')[0].trim().toLowerCase()
+  const known: Record<string, string> = {
+    'audio/webm': 'webm',
+    'video/webm': 'webm',
+    'audio/ogg': 'ogg',
+    'audio/mp4': 'mp4',
+    'audio/x-m4a': 'mp4',
+    'audio/mpeg': 'mp3',
+    'audio/mp3': 'mp3',
+    'audio/wav': 'wav',
+    'audio/x-wav': 'wav',
+    'audio/wave': 'wav',
+    'audio/flac': 'flac',
+    'audio/x-flac': 'flac',
+  }
+  return known[base] ?? 'webm'
+}
+
+/**
+ * A model's reply, parsed as JSON.
+ *
+ * Separated from the request so it can be tested without a network call, since
+ * this is where a well-behaved model and a chatty one diverge. Models wrap JSON
+ * in fences often enough that a bare `JSON.parse` fails on output that is
+ * otherwise perfectly good, and `response_format` is only a hint — 52 of the 337
+ * models in the catalogue do not advertise it at all.
+ */
+export function parseModelJson<T>(raw: string): T {
+  const cleaned = raw
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/, '')
+    .trim()
+
+  try {
+    return JSON.parse(cleaned) as T
+  } catch {
+    // Last resort: the outermost braces. Some models prepend a sentence of
+    // commentary despite being told to return only JSON.
+    const start = cleaned.indexOf('{')
+    const end = cleaned.lastIndexOf('}')
+    if (start !== -1 && end > start) {
+      try {
+        return JSON.parse(cleaned.slice(start, end + 1)) as T
+      } catch {
+        /* fall through */
+      }
+    }
+    throw new OpenRouterError(
+      'The model did not return usable JSON. Try a model marked as supporting structured output.',
+      UPSTREAM_FAILED
+    )
+  }
+}
+
+export function describeFailure(status: number, body: string): OpenRouterError {
   // OpenRouter puts the useful part in error.message; the rest is envelope.
   let detail = ''
   try {
@@ -259,7 +379,7 @@ function describeFailure(status: number, body: string): OpenRouterError {
   if (status === 401) {
     return new OpenRouterError(
       'OpenRouter rejected the key. Check it has not been revoked, in Settings.',
-      502
+      UPSTREAM_FAILED
     )
   }
   // Distinct from 401 on purpose: a valid key with an empty balance otherwise
@@ -267,13 +387,13 @@ function describeFailure(status: number, body: string): OpenRouterError {
   if (status === 402) {
     return new OpenRouterError(
       'OpenRouter reports no credit remaining on this key.',
-      502
+      UPSTREAM_FAILED
     )
   }
   if (status === 404) {
     return new OpenRouterError(
       `OpenRouter has no such model. Choose another in Settings → Models.${detail ? ` (${detail})` : ''}`,
-      502
+      UPSTREAM_FAILED
     )
   }
   if (status === 429) {
@@ -281,7 +401,7 @@ function describeFailure(status: number, body: string): OpenRouterError {
   }
   return new OpenRouterError(
     detail || `OpenRouter returned ${status}.`,
-    status >= 500 ? 502 : 400
+    status >= 500 ? UPSTREAM_FAILED : 400
   )
 }
 
@@ -325,7 +445,7 @@ export async function chat(options: ChatOptions): Promise<string> {
       signal: AbortSignal.timeout(options.timeoutMs ?? 60_000),
     })
   } catch {
-    throw new OpenRouterError('Could not reach OpenRouter.', 502)
+    throw new OpenRouterError('Could not reach OpenRouter.', UPSTREAM_FAILED)
   }
 
   if (!response.ok) throw describeFailure(response.status, await response.text())
@@ -335,45 +455,12 @@ export async function chat(options: ChatOptions): Promise<string> {
   }
   const content = body.choices?.[0]?.message?.content
   if (!content?.trim()) {
-    throw new OpenRouterError('The model returned an empty response.', 502)
+    throw new OpenRouterError('The model returned an empty response.', UPSTREAM_FAILED)
   }
   return content
 }
 
-/**
- * A completion parsed as JSON.
- *
- * Models wrap JSON in ``` fences often enough that a bare `JSON.parse` fails on
- * a response that is otherwise perfectly good, and `json: true` is only a hint —
- * 52 of the 337 models in the catalogue do not advertise `response_format` at
- * all. Stripping the fence is the difference between the feature working on any
- * model and working on some of them.
- */
+/** One completion, parsed as JSON. See `parseModelJson` for the recovery rules. */
 export async function chatJson<T>(options: ChatOptions): Promise<T> {
-  const raw = await chat({ ...options, json: true })
-  const cleaned = raw
-    .trim()
-    .replace(/^```(?:json)?\s*/i, '')
-    .replace(/\s*```$/, '')
-    .trim()
-
-  try {
-    return JSON.parse(cleaned) as T
-  } catch {
-    // Last resort: the outermost braces. Some models prepend a sentence of
-    // commentary despite being told not to.
-    const start = cleaned.indexOf('{')
-    const end = cleaned.lastIndexOf('}')
-    if (start !== -1 && end > start) {
-      try {
-        return JSON.parse(cleaned.slice(start, end + 1)) as T
-      } catch {
-        /* fall through to the error below */
-      }
-    }
-    throw new OpenRouterError(
-      'The model did not return usable JSON. Try a model marked as supporting structured output.',
-      502
-    )
-  }
+  return parseModelJson<T>(await chat({ ...options, json: true }))
 }
