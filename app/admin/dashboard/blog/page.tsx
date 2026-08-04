@@ -1,5 +1,6 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { BTN, BTN_DANGER, BTN_GHOST, FIELD, FIELD_MONO, LABEL, PAGE_TITLE, PANEL } from '@/app/admin/ui'
@@ -7,6 +8,17 @@ import { apiRequest, errorMessage } from '@/app/admin/client'
 import BlogWriter from '@/components/admin/BlogWriter'
 import ListState from '@/components/admin/ListState'
 import Modal from '@/components/ui/Modal'
+
+/**
+ * Loaded on demand, so the markdown parser is an async chunk fetched the first
+ * time Preview is pressed rather than part of this page's initial bundle.
+ * `ssr: false` because there is nothing to render on the server — the body it
+ * previews only exists in this component's state.
+ */
+const MarkdownPreview = dynamic(() => import('@/components/admin/MarkdownPreview'), {
+  ssr: false,
+  loading: () => <p className="text-meta text-foreground-muted">Loading preview…</p>,
+})
 import { formatPostDate, readingMinutes } from '@/lib/blog'
 import type { DraftedPost } from '@/lib/blog-writer'
 import { slugify } from '@/lib/slug'
@@ -361,12 +373,10 @@ export default function BlogPage() {
             </div>
 
             {preview ? (
-              // A plain rendering, not the site's own: PostBody is a server
-              // component and importing it here would drag the markdown parser
-              // into the admin bundle. This is close enough to check structure.
-              <pre className="max-h-[28rem] overflow-auto whitespace-pre-wrap border border-border bg-background-subtle p-4 font-mono text-meta">
-                {formData.body || 'Nothing to preview yet.'}
-              </pre>
+              // The real renderer, through the same plugins and overrides as the
+              // public page — so this shows what will actually publish rather
+              // than where the asterisks are.
+              <MarkdownPreview markdown={formData.body} />
             ) : (
               <textarea
                 id="p-body"
