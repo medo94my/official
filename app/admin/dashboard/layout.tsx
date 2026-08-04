@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { href: '/admin/dashboard/inbox', label: 'Inbox' },
   { href: '/admin/dashboard/hero', label: 'Hero' },
   { href: '/admin/dashboard/projects', label: 'Projects' },
+  { href: '/admin/dashboard/blog', label: 'Blog' },
   { href: '/admin/dashboard/services', label: 'Services' },
   { href: '/admin/dashboard/skills', label: 'Skills' },
   { href: '/admin/dashboard/experience', label: 'Experience' },

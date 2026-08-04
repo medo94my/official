@@ -1,6 +1,6 @@
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { cache } from 'react'
-import type { Project, ProjectMedia, Service } from '@prisma/client'
+import type { Post, Project, ProjectMedia, Service } from '@prisma/client'
 import { prisma } from './prisma'
 
 /**
@@ -26,6 +26,52 @@ function toPublicMedia(media: ProjectMedia): PublicMedia {
   const { createdAt: _createdAt, projectId: _projectId, ...rest } = media
   return rest
 }
+
+/**
+ * A post as the public pages see it.
+ *
+ * `publishedAt` becomes an ISO string at this boundary rather than staying a
+ * `Date`. These reads go through `unstable_cache`, which serialises — a Date in
+ * comes back as a string out, and every consumer calling `.getFullYear()` on it
+ * breaks at runtime with nothing failing at compile time. The same trap was
+ * already hit once with ProjectMedia; converting here makes the type honest
+ * about what actually arrives.
+ */
+export type PublicPost = Omit<Post, 'publishedAt' | 'createdAt' | 'updatedAt'> & {
+  publishedAt: string | null
+}
+
+function toPublicPost(post: Post): PublicPost {
+  const { createdAt: _createdAt, updatedAt: _updatedAt, publishedAt, ...rest } = post
+  return { ...rest, publishedAt: publishedAt ? publishedAt.toISOString() : null }
+}
+
+/**
+ * Published posts, newest first.
+ *
+ * The status filter lives here rather than at each call site, so a new page
+ * that forgets it cannot leak a draft: there is no exported read that returns
+ * unpublished posts to the public side at all.
+ */
+export async function getPublishedPosts(): Promise<PublicPost[]> {
+  const posts = await prisma.post.findMany({
+    where: { status: 'published' },
+    orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
+  })
+  return posts.map(toPublicPost)
+}
+
+/**
+ * One published post, or null.
+ *
+ * Null for a draft as well as for a missing slug, and the page turns both into
+ * the same 404 — a draft URL must be indistinguishable from one that never
+ * existed, or an unfinished post leaks through a shared link.
+ */
+export const getPostBySlug = cache(async (slug: string): Promise<PublicPost | null> => {
+  const post = await prisma.post.findFirst({ where: { slug, status: 'published' } })
+  return post ? toPublicPost(post) : null
+})
 
 /** `tags` is a comma-separated column; every consumer wants an array. */
 export function withTagArray(project: Project & { media?: ProjectMedia[] }) {
@@ -146,7 +192,7 @@ function stripTimestamps<T extends Dated>(row: T) {
  */
 export const getSiteContent = unstable_cache(
   async () => {
-    const [projects, skills, services, about, hero, stats, experience] =
+    const [projects, skills, services, about, hero, stats, experience, posts] =
       await Promise.all([
         getProjects(),
         getSkills(),
@@ -155,6 +201,10 @@ export const getSiteContent = unstable_cache(
         getHero(),
         getStats(),
         getExperience(),
+        // The homepage needs to know whether anything is published, so it can
+        // decide whether a Writing link belongs in the nav. Counting here keeps
+        // it inside the one cached round rather than adding a query per render.
+        getPublishedPosts(),
       ])
 
     // Arrow wrappers, not a bare reference: `.map(stripTimestamps)` would also
@@ -168,6 +218,9 @@ export const getSiteContent = unstable_cache(
       hero: hero ? stripTimestamps(hero) : null,
       stats: stats.map((row) => stripTimestamps(row)),
       experience: experience.map((row) => stripTimestamps(row)),
+      // `PublicPost` has already had its Dates converted, so these cross the
+      // cache boundary safely without stripTimestamps.
+      posts,
     }
   },
   ['site-content'],

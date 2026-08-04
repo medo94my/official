@@ -11,10 +11,17 @@ nothing on the site is hardcoded in a component.
   about and hero are all editable at `/admin/dashboard`
 - **Case studies** — each project has its own URL at `/projects/<slug>` with
   thirteen optional write-up fields; each hides itself when empty
+- **Blog** — Markdown posts at `/blog/<slug>` with tags, an RSS feed and cover
+  images. Drafts are invisible and their URLs 404; the Writing link only appears
+  in the site header once something is published
 - **Light and dark themes** — both designed, not one inverted; no flash on load
 - **Working contact form** — server-validated, rate-limited, saved to Postgres,
   readable in an admin inbox, with optional email notification
 - **Authenticated admin** — NextAuth credentials, guarded at the edge by middleware
+- **AI post writer** *(optional)* — drafts a whole post from a topic. Ungrounded
+  by design, so it always lands as a draft and is flagged unreviewed until the
+  body is edited; the prompt forbids first-person claims, because the model has
+  no way to know them
 - **AI voice input** *(optional)* — dictate a description and have it tidied
 - **Case-study drafting** *(optional)* — drafts five case-study fields from a
   project's GitHub README, each shown with the heading it came from. It drafts

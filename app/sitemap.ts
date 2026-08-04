@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { getProjects } from '@/lib/content'
+import { getProjects, getPublishedPosts } from '@/lib/content'
 import { absoluteUrl } from '@/lib/site'
 
 /**
@@ -25,9 +25,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const roots: MetadataRoute.Sitemap = [
     { url: absoluteUrl('/'), changeFrequency: 'monthly', priority: 1 },
     { url: absoluteUrl('/projects'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: absoluteUrl('/blog'), changeFrequency: 'weekly', priority: 0.8 },
   ]
 
-  const projects = await getProjects().catch(() => [])
+  const [projects, posts] = await Promise.all([
+    getProjects().catch(() => []),
+    // Published only — getPublishedPosts filters by status, so a draft can
+    // never be advertised to a crawler.
+    getPublishedPosts().catch(() => []),
+  ])
 
   return [
     ...roots,
@@ -38,6 +44,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Featured work is the work worth landing on. Everything else is still
       // listed; it is just not competing with the homepage.
       priority: project.featured ? 0.7 : 0.5,
+    })),
+    ...posts.map((post) => ({
+      url: absoluteUrl(`/blog/${post.slug}`),
+      // publishedAt rather than an edit time: a typo fix is not a reason to
+      // tell every crawler the post changed.
+      lastModified: post.publishedAt ? new Date(post.publishedAt) : undefined,
+      changeFrequency: 'yearly' as const,
+      priority: 0.6,
     })),
   ]
 }

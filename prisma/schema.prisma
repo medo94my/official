@@ -90,6 +90,48 @@ model Project {
   @@index([featured, order])
 }
 
+/// A blog post.
+///
+/// Deliberately close in shape to Project: unique title, unique slug, a
+/// comma-separated tag column, plain-text body. Everything an editor touches is
+/// a textarea, so there is no JSON column waiting to become a syntax-error trap
+/// for the one person who edits it.
+model Post {
+  id      String @id @default(cuid())
+  title   String @unique
+  slug    String @unique
+  /// One or two sentences. Required rather than optional: it is the index
+  /// entry, the meta description and the RSS body, and a post without one is a
+  /// bad search result three times over.
+  summary String
+  /// Markdown. Rendered server-side with raw HTML disabled — see
+  /// components/PostBody.tsx, where that is the security boundary.
+  body    String
+  tags    String @default("")
+
+  /// Site-relative, from the media upload. Never a remote URL.
+  coverImage String?
+  coverAlt   String  @default("")
+
+  /// "draft" | "published". Free text, matching `Project.type` and
+  /// `Project.status`, rather than introducing this schema's first enum.
+  status      String    @default("draft")
+  /// Set once, on first publish. Editing a post later must not reorder the
+  /// index or tell every feed reader it is new again.
+  publishedAt DateTime?
+
+  /// True while the body is still exactly as a model wrote it, cleared on any
+  /// manual edit. Drives the admin notice, so an unreviewed draft is visibly
+  /// unreviewed rather than looking like something the owner wrote.
+  aiDrafted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Every public read is "published, newest first".
+  @@index([status, publishedAt])
+}
+
 /// Screenshots and short silent clips for a project.
 ///
 /// Separate from `Project.image`, which stays the single cover used by the list

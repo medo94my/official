@@ -200,3 +200,146 @@
       box-shadow !important;
   }
 }
+
+/* ── Post body ──────────────────────────────────────────────────────────
+   Markdown output has no classes to target, so the element styles live here
+   scoped under .post-body rather than being sprayed through a `components`
+   map in the renderer.
+
+   Syntax highlighting is written against this site's own tokens instead of
+   importing a highlight.js theme. Every colour on the site is
+   `rgb(var(--x) / <alpha-value>)` with a documented rule against raw hex, and
+   a stock theme would be the one element ignoring both light and dark. */
+@layer components {
+  .post-body > * + * {
+    margin-top: 1.25em;
+  }
+
+  .post-body h2,
+  .post-body h3,
+  .post-body h4 {
+    color: rgb(var(--foreground));
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    /* Headings need more air above than below: the gap belongs to the section
+       they open, not to the paragraph they leave behind. */
+    margin-top: 2.25em;
+    margin-bottom: 0.6em;
+  }
+  .post-body h2 { font-size: 1.5rem; }
+  .post-body h3 { font-size: 1.2rem; }
+  .post-body h4 { font-size: 1.05rem; }
+
+  .post-body p,
+  .post-body li {
+    color: rgb(var(--foreground) / 0.8);
+    line-height: 1.75;
+  }
+
+  .post-body ul,
+  .post-body ol {
+    padding-left: 1.35em;
+  }
+  .post-body ul { list-style: disc; }
+  .post-body ol { list-style: decimal; }
+  .post-body li + li { margin-top: 0.4em; }
+
+  .post-body a {
+    color: rgb(var(--primary));
+    text-decoration: underline;
+    text-decoration-color: rgb(var(--border));
+    text-underline-offset: 0.2em;
+  }
+  .post-body a:hover {
+    text-decoration-color: rgb(var(--primary));
+  }
+
+  .post-body blockquote {
+    border-left: 2px solid rgb(var(--accent));
+    padding-left: 1em;
+    color: rgb(var(--foreground) / 0.75);
+    font-style: italic;
+  }
+
+  .post-body hr {
+    border: 0;
+    border-top: 1px solid rgb(var(--border));
+    margin: 2.5em 0;
+  }
+
+  .post-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .post-body th,
+  .post-body td {
+    border-bottom: 1px solid rgb(var(--border));
+    padding: 0.5em 0.75em;
+    text-align: left;
+  }
+  .post-body th {
+    color: rgb(var(--foreground));
+    font-weight: 600;
+  }
+
+  /* Inline code, distinct from a block. */
+  .post-body :not(pre) > code {
+    background: rgb(var(--background-subtle));
+    border: 1px solid rgb(var(--border));
+    border-radius: 0.1875rem;
+    padding: 0.1em 0.35em;
+    font-size: 0.875em;
+    color: rgb(var(--foreground));
+  }
+
+  /* A long line must scroll inside its own box; the page body must never
+     scroll sideways. */
+  .post-body pre {
+    background: rgb(var(--background-subtle));
+    border: 1px solid rgb(var(--border));
+    padding: 1em 1.1em;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  .post-body pre code {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: rgb(var(--foreground) / 0.9);
+  }
+
+  /* highlight.js class names, mapped onto the palette rather than a theme.
+     Deliberately few: five roles carry almost all of the signal, and a
+     thirty-colour scheme would fight the rest of the page. */
+  .post-body .hljs-comment,
+  .post-body .hljs-quote {
+    color: rgb(var(--foreground-subtle));
+    font-style: italic;
+  }
+  .post-body .hljs-keyword,
+  .post-body .hljs-selector-tag,
+  .post-body .hljs-literal,
+  .post-body .hljs-type {
+    color: rgb(var(--primary));
+  }
+  .post-body .hljs-string,
+  .post-body .hljs-attr,
+  .post-body .hljs-addition {
+    color: rgb(var(--success));
+  }
+  .post-body .hljs-number,
+  .post-body .hljs-symbol,
+  .post-body .hljs-deletion {
+    color: rgb(var(--accent));
+  }
+  .post-body .hljs-title,
+  .post-body .hljs-name,
+  .post-body .hljs-section,
+  .post-body .hljs-built_in {
+    color: rgb(var(--foreground));
+    font-weight: 600;
+  }
+}

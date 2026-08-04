@@ -50,11 +50,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-      select: { id: true, slug: true, _count: { select: { media: true } } },
-    })
-    if (!project) {
+    // `projectId` is optional. With one, the upload becomes a gallery row on
+    // that project. Without, the file is stored and its URL returned for the
+    // caller to keep somewhere else — a blog post's cover, which belongs on the
+    // Post row rather than in a project's gallery. Every check below is the
+    // same either way, which is the point of sharing this route rather than
+    // writing a second uploader with its own idea of what is safe.
+    const project = projectId
+      ? await prisma.project.findUnique({
+          where: { id: projectId },
+          select: { id: true, slug: true, _count: { select: { media: true } } },
+        })
+      : null
+
+    if (projectId && !project) {
       return NextResponse.json(
         { error: 'Save the project before adding media to it.' },
         { status: 404 }
@@ -67,13 +76,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: verdict.reason }, { status: 415 })
     }
 
-    const name = mediaFilename(project.slug, verdict.type.ext)
+    const name = mediaFilename(project?.slug ?? 'upload', verdict.type.ext)
     await ensureMediaDir()
     await writeFile(join(MEDIA_DIR, name), bytes)
 
     const url = `/media/${name}`
     const width = numberOrNull(form.get('width'))
     const height = numberOrNull(form.get('height'))
+
+    // No project: the file is the whole result. No row to create, and nothing
+    // to roll back if the caller never stores the URL — an orphan is cleaned up
+    // when the post that would have referenced it is deleted, or never existed.
+    if (!project) {
+      return contentChanged({ url, width, height, kind: verdict.type.kind }, { status: 201 })
+    }
 
     try {
       const media = await prisma.projectMedia.create({

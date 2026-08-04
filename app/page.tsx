@@ -40,7 +40,7 @@ const FALLBACK = {
  * testable, and reusable on /projects and the case-study pages.
  */
 export default async function HomePage() {
-  const { projects, skills, services, about, hero, stats, experience } =
+  const { projects, skills, services, about, hero, stats, experience, posts } =
     await getSiteContent()
 
   const skillsByCategory = groupSkillsByCategory(skills)
@@ -61,6 +61,10 @@ export default async function HomePage() {
     skillsByCategory.length > 0 && { href: '#stack', label: 'Stack' },
     experience.length > 0 && { href: '#experience', label: 'Experience' },
     about?.bio && { href: '#about', label: 'About' },
+    // A real route rather than an anchor, and only once something is published
+    // — the same rule every section here follows. An empty blog in the nav is
+    // an invitation to a dead end.
+    posts.length > 0 && { href: '/blog', label: 'Writing' },
     { href: '#contact', label: 'Contact' },
   ].filter(Boolean) as NavItem[]
 
@@ -80,7 +84,11 @@ export default async function HomePage() {
 
   // The rail's ticks come from the same list as the nav, so a section that hid
   // itself never gets a tick pointing at nothing.
-  const sectionIds = nav.map((item) => item.href.replace('#', ''))
+  // Anchors only. The Writing link is a route, and passing "/blog" here would
+  // give the rail a tick looking for an element that does not exist.
+  const sectionIds = nav
+    .filter((item) => item.href.startsWith('#'))
+    .map((item) => item.href.slice(1))
 
   return (
     <>

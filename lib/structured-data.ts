@@ -76,6 +76,48 @@ export function websiteSchema(about: AboutLike, fallbackName: string) {
  *
  * Emitted only when there is a write-up to read — see the note in JsonLd.tsx.
  */
+/**
+ * One post, as a `BlogPosting`.
+ *
+ * `datePublished` is the field search engines actually read for an article, and
+ * it comes from `publishedAt` rather than `createdAt` — a post drafted in
+ * January and published in March was published in March, and claiming otherwise
+ * is a small lie a crawler will believe.
+ *
+ * `publishedAt` arrives as an ISO string, not a Date: see `PublicPost` in
+ * lib/content.ts for why it is converted at that boundary.
+ */
+export function postSchema(
+  post: {
+    title: string
+    slug: string
+    summary: string
+    tags: string
+    coverImage: string | null
+    publishedAt: string | null
+  },
+  about: AboutLike,
+  fallbackName: string
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    '@id': absoluteUrl(`/blog/${post.slug}#post`),
+    headline: post.title,
+    description: post.summary,
+    url: absoluteUrl(`/blog/${post.slug}`),
+    image: post.coverImage ? absoluteUrl(post.coverImage) : undefined,
+    keywords: post.tags || undefined,
+    datePublished: post.publishedAt ?? undefined,
+    author: {
+      '@type': 'Person',
+      '@id': PERSON_ID,
+      name: about?.name || fallbackName,
+    },
+    isPartOf: { '@id': SITE_ID },
+  }
+}
+
 export function projectSchema(
   project: ProjectWithTags,
   about: AboutLike,
