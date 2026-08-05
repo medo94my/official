@@ -1,6 +1,7 @@
 import JsonLd from '@/components/JsonLd'
 import SiteFooter from '@/components/layout/SiteFooter'
 import SiteNav, { type NavItem } from '@/components/layout/SiteNav'
+import Bubbles from '@/components/motion/Bubbles.client'
 import ScrollRail from '@/components/motion/ScrollRail.client'
 import AboutSection from '@/components/sections/AboutSection'
 import ContactSection from '@/components/sections/ContactSection'
@@ -101,6 +102,7 @@ export default async function HomePage() {
         resume={about?.resume}
       />
 
+      <Bubbles />
       <ScrollRail sectionIds={sectionIds} />
 
       <main id="main" tabIndex={-1} className="outline-none">

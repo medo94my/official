@@ -2,6 +2,7 @@ import { ButtonLink } from '@/components/ui/Button'
 import Container from '@/components/ui/Container'
 import RevealText from '@/components/motion/RevealText'
 import Reveal from '@/components/motion/Reveal'
+import HeroObject from '@/components/motion/HeroObject.client'
 
 export type LedgerCell = { label: string; value: string }
 
@@ -36,8 +37,12 @@ export default function HeroSection({
   contactHref,
 }: HeroSectionProps) {
   return (
-    <section className="pt-14 sm:pt-20 lg:pt-28">
-      <Container>
+    // `relative` so the object can be absolutely placed against it, and
+    // `overflow-hidden` so the wireframe cannot widen the page as it turns.
+    <section className="relative overflow-hidden pt-14 sm:pt-20 lg:pt-28">
+      <HeroObject />
+
+      <Container className="relative">
         {/* Staged, and the indices are the running order. The accent bar used to
             sit at the default index 0, so it landed simultaneously with the
             eyebrow above the headline rather than after it — the sequence read
