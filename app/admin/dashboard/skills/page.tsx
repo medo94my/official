@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { BTN, BTN_DANGER, BTN_GHOST, FIELD, PAGE_TITLE, PANEL } from '@/app/admin/ui'
+import { BTN, BTN_DANGER, BTN_GHOST, FIELD, LABEL, PAGE_TITLE, PANEL } from '@/app/admin/ui'
 import { apiRequest, errorMessage } from '@/app/admin/client'
 import ListState from '@/components/admin/ListState'
 
@@ -74,35 +74,50 @@ export default function SkillsPage() {
         <div className="lg:col-span-1">
           <div className={`${PANEL} sticky top-8`}>
             <h2 className="text-xl font-bold text-foreground mb-4">{editingId ? 'Edit' : 'Add'} Skill</h2>
+            {/* Labels, not placeholders. A placeholder disappears the moment
+                anyone types, so the field loses its name exactly when a user
+                would want to check it, and the category select had no name at
+                all — an audit reported it as unlabelled. */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Skill name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                className={`${FIELD}`}
-              />
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className={`${FIELD}`}
-              >
-                <option>Frontend</option>
-                <option>Backend</option>
-                <option>Tools</option>
-                <option>Other</option>
-              </select>
-              <input
-                type="text"
-                placeholder="Icon (emoji or class)"
-                value={formData.icon}
-                onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                className={`${FIELD}`}
-              />
               <div>
-                <label className="block text-sm text-foreground mb-2">Level: {formData.level}%</label>
+                <label htmlFor="s-name" className={`${LABEL}`}>Name</label>
                 <input
+                  id="s-name"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  className={`${FIELD}`}
+                />
+              </div>
+              <div>
+                <label htmlFor="s-category" className={`${LABEL}`}>Category</label>
+                <select
+                  id="s-category"
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className={`${FIELD}`}
+                >
+                  <option>Frontend</option>
+                  <option>Backend</option>
+                  <option>Tools</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="s-icon" className={`${LABEL}`}>Icon (emoji or class)</label>
+                <input
+                  id="s-icon"
+                  type="text"
+                  value={formData.icon}
+                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                  className={`${FIELD}`}
+                />
+              </div>
+              <div>
+                <label htmlFor="s-level" className={`${LABEL}`}>Level: {formData.level}%</label>
+                <input
+                  id="s-level"
                   type="range"
                   min="0"
                   max="100"
@@ -111,13 +126,16 @@ export default function SkillsPage() {
                   className="w-full"
                 />
               </div>
-              <input
-                type="number"
-                placeholder="Order"
-                value={formData.order}
-                onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-                className={`${FIELD}`}
-              />
+              <div>
+                <label htmlFor="s-order" className={`${LABEL}`}>Order</label>
+                <input
+                  id="s-order"
+                  type="number"
+                  value={formData.order}
+                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
+                  className={`${FIELD}`}
+                />
+              </div>
               <button type="submit" className={`${BTN} w-full`}>
                 {editingId ? 'Update' : 'Add'} Skill
               </button>

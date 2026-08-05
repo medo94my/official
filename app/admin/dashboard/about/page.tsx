@@ -80,8 +80,9 @@ export default function AboutPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className={`${LABEL}`}>Name</label>
+              <label htmlFor="a-name" className={`${LABEL}`}>Name</label>
               <input
+                id="a-name"
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -91,8 +92,9 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <label className={`${LABEL}`}>Title/Role</label>
+              <label htmlFor="a-title-role" className={`${LABEL}`}>Title/Role</label>
               <input
+                id="a-title-role"
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -103,11 +105,12 @@ export default function AboutPage() {
           </div>
 
           <div>
-            <label className={`${LABEL}`}>
+            <label htmlFor="a-bio" className={`${LABEL}`}>
               Bio
               
             </label>
             <textarea
+              id="a-bio"
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               required
@@ -124,8 +127,9 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className={`${LABEL}`}>Email</label>
+              <label htmlFor="a-email" className={`${LABEL}`}>Email</label>
               <input
+                id="a-email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -134,8 +138,9 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <label className={`${LABEL}`}>Phone</label>
+              <label htmlFor="a-phone" className={`${LABEL}`}>Phone</label>
               <input
+                id="a-phone"
                 type="text"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -144,8 +149,9 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <label className={`${LABEL}`}>WhatsApp</label>
+              <label htmlFor="a-whatsapp" className={`${LABEL}`}>WhatsApp</label>
               <input
+                id="a-whatsapp"
                 type="text"
                 value={formData.whatsapp}
                 onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
@@ -159,8 +165,9 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <label className={`${LABEL}`}>Location</label>
+              <label htmlFor="a-location" className={`${LABEL}`}>Location</label>
               <input
+                id="a-location"
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -169,8 +176,9 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <label className={`${LABEL}`}>Avatar URL</label>
+              <label htmlFor="a-avatar-url" className={`${LABEL}`}>Avatar URL</label>
               <input
+                id="a-avatar-url"
                 type="text"
                 value={formData.avatar}
                 onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
@@ -179,8 +187,9 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <label className={`${LABEL}`}>Resume URL</label>
+              <label htmlFor="a-resume-url" className={`${LABEL}`}>Resume URL</label>
               <input
+                id="a-resume-url"
                 type="text"
                 value={formData.resume}
                 onChange={(e) => setFormData({ ...formData, resume: e.target.value })}
@@ -189,8 +198,9 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <label className={`${LABEL}`}>GitHub</label>
+              <label htmlFor="a-github" className={`${LABEL}`}>GitHub</label>
               <input
+                id="a-github"
                 type="text"
                 value={formData.github}
                 onChange={(e) => setFormData({ ...formData, github: e.target.value })}
@@ -200,8 +210,9 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <label className={`${LABEL}`}>LinkedIn</label>
+              <label htmlFor="a-linkedin" className={`${LABEL}`}>LinkedIn</label>
               <input
+                id="a-linkedin"
                 type="text"
                 value={formData.linkedin}
                 onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
@@ -211,8 +222,9 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <label className={`${LABEL}`}>Twitter</label>
+              <label htmlFor="a-twitter" className={`${LABEL}`}>Twitter</label>
               <input
+                id="a-twitter"
                 type="text"
                 value={formData.twitter}
                 onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}

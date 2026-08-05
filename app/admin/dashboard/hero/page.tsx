@@ -72,8 +72,9 @@ export default function HeroPage() {
         {!loading && (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className={`${LABEL}`}>Headline</label>
+            <label htmlFor="h-headline" className={`${LABEL}`}>Headline</label>
             <input
+              id="h-headline"
               type="text"
               value={formData.headline}
               onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
@@ -120,8 +121,9 @@ export default function HeroPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={`${LABEL}`}>CTA Button Text</label>
+              <label htmlFor="h-cta-button-text" className={`${LABEL}`}>CTA Button Text</label>
               <input
+                id="h-cta-button-text"
                 type="text"
                 value={formData.ctaText}
                 onChange={(e) => setFormData({ ...formData, ctaText: e.target.value })}
@@ -130,8 +132,9 @@ export default function HeroPage() {
             </div>
 
             <div>
-              <label className={`${LABEL}`}>CTA URL</label>
+              <label htmlFor="h-cta-url" className={`${LABEL}`}>CTA URL</label>
               <input
+                id="h-cta-url"
                 type="text"
                 value={formData.ctaUrl}
                 onChange={(e) => setFormData({ ...formData, ctaUrl: e.target.value })}
@@ -141,8 +144,9 @@ export default function HeroPage() {
           </div>
 
           <div>
-            <label className={`${LABEL}`}>Background Image URL</label>
+            <label htmlFor="h-background-image-url" className={`${LABEL}`}>Background Image URL</label>
             <input
+              id="h-background-image-url"
               type="text"
               value={formData.background}
               onChange={(e) => setFormData({ ...formData, background: e.target.value })}

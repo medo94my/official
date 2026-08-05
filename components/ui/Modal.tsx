@@ -1,6 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useId, useRef, type ReactNode } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  type ReactNode,
+  type RefObject,
+} from 'react'
 
 /** Everything a keyboard can land on inside the panel. */
 const FOCUSABLE = [
@@ -22,6 +29,18 @@ type ModalProps = {
   children: ReactNode
   /** Panel width. Defaults to the two-column form width. */
   size?: 'md' | 'lg'
+  /**
+   * Where to send focus on close when the element that opened the dialog is
+   * gone from the page.
+   *
+   * Needed because a trigger is sometimes unmounted deliberately while its
+   * dialog is open — the projects page hides "Add New Project" so a half-typed
+   * form cannot be clobbered from behind. The captured node is then detached,
+   * `.focus()` on it does nothing at all, and the keyboard lands on `<body>`.
+   * Point this at the ref the trigger remounts into and focus goes back where
+   * the user left it.
+   */
+  returnFocusRef?: RefObject<HTMLElement>
 }
 
 /**
@@ -51,9 +70,11 @@ export default function Modal({
   description,
   children,
   size = 'lg',
+  returnFocusRef,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null)
-  const returnFocusRef = useRef<HTMLElement | null>(null)
+  /** Whatever had focus when the dialog opened. May be detached by close. */
+  const capturedRef = useRef<HTMLElement | null>(null)
   const titleId = useId()
   const descriptionId = useId()
 
@@ -70,7 +91,7 @@ export default function Modal({
   useEffect(() => {
     if (!open) return
 
-    returnFocusRef.current = document.activeElement as HTMLElement | null
+    capturedRef.current = document.activeElement as HTMLElement | null
 
     // First focusable, else the panel itself — a dialog whose focus stays on the
     // page behind it is worse than no dialog.
@@ -123,10 +144,38 @@ export default function Modal({
       document.removeEventListener('keydown', onKeyDown, true)
       document.body.style.overflow = overflow
       document.body.style.paddingRight = paddingRight
-      // Back to the button that opened it, if it is still on the page.
-      returnFocusRef.current?.focus?.()
+
+      // Deferred a frame, and both refs are read *inside* the callback rather
+      // than snapshotted here. That is deliberate: when the trigger was
+      // unmounted while the dialog was open, React has not yet remounted it at
+      // the moment this cleanup runs, so a snapshot would capture the stale
+      // node this whole branch exists to avoid.
+      requestAnimationFrame(() => {
+        // The rule below advises copying this ref to a variable in the effect
+        // body. Doing so is precisely the bug being fixed: the trigger is
+        // remounted between the effect and this frame, so the copy would be
+        // the detached node the `isConnected` check exists to reject.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const opener = returnFocusRef?.current
+        const captured = capturedRef.current
+        // `isConnected` is the point. Focusing a detached node is a silent
+        // no-op, so without this check a closed dialog leaves the keyboard at
+        // the top of the document with nothing to indicate why.
+        const target =
+          (opener?.isConnected ? opener : null) ??
+          (captured?.isConnected ? captured : null) ??
+          document.querySelector<HTMLElement>('main')
+
+        if (!target) return
+        // <main> is not focusable by default; make it a programmatic-only stop
+        // so it never becomes a tab stop of its own.
+        if (target.tagName === 'MAIN' && !target.hasAttribute('tabindex')) {
+          target.setAttribute('tabindex', '-1')
+        }
+        target.focus()
+      })
     }
-  }, [open, onClose, focusables])
+  }, [open, onClose, focusables, returnFocusRef])
 
   if (!open) return null
 

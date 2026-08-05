@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import VoiceRecorder from '@/components/VoiceRecorder'
 import toast from 'react-hot-toast'
 import { BTN, BTN_DANGER, BTN_GHOST, CHECKBOX, FIELD, FIELD_MONO, LABEL, PAGE_TITLE, PANEL } from '@/app/admin/ui'
@@ -93,6 +93,8 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const addButtonRef = useRef<HTMLButtonElement>(null)
+  const importButtonRef = useRef<HTMLButtonElement>(null)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [caseStudyOpen, setCaseStudyOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -218,10 +220,14 @@ export default function ProjectsPage() {
             inside the form, so there is never a dirty form to clobber. */}
         {!isFormOpen && (
           <div className="flex flex-wrap gap-2">
-            <button onClick={() => setIsFormOpen(true)} className={`${BTN}`}>
+            {/* The refs are how focus finds its way back. Both buttons are
+                unmounted above while a dialog is open, so the node the dialog
+                captured on open is detached by the time it closes; these point
+                at the ones React remounts. */}
+            <button ref={addButtonRef} onClick={() => setIsFormOpen(true)} className={`${BTN}`}>
               Add New Project
             </button>
-            <button onClick={() => setPickerOpen(true)} className={BTN_GHOST}>
+            <button ref={importButtonRef} onClick={() => setPickerOpen(true)} className={BTN_GHOST}>
               Import from GitHub
             </button>
           </div>
@@ -231,6 +237,7 @@ export default function ProjectsPage() {
       <GithubRepoPicker
         open={pickerOpen}
         projects={projects}
+        returnFocusRef={importButtonRef}
         onClose={() => setPickerOpen(false)}
         onSelect={(repo: RepoSummary) => {
           // Spread over EMPTY, not over the current form: importing is starting
@@ -299,6 +306,7 @@ export default function ProjectsPage() {
         open={isFormOpen}
         onClose={resetForm}
         title={editingProject ? 'Edit Project' : 'Add New Project'}
+        returnFocusRef={addButtonRef}
       >
             <form onSubmit={handleSubmit} className="space-y-4">
           {prefillSource && (
@@ -362,8 +370,9 @@ export default function ProjectsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className={`${LABEL}`}>Type</label>
+                  <label htmlFor="p-type" className={`${LABEL}`}>Type</label>
                   <select
+                    id="p-type"
                     value={formData.type}
                     onChange={(e) => set('type', e.target.value)}
                     className={`${FIELD}`}
@@ -374,8 +383,9 @@ export default function ProjectsPage() {
                 </div>
 
                 <div>
-                  <label className={`${LABEL}`}>Order</label>
+                  <label htmlFor="p-order" className={`${LABEL}`}>Order</label>
                   <input
+                    id="p-order"
                     type="number"
                     value={formData.order}
                     onChange={(e) => set('order', Number(e.target.value) || 0)}
@@ -385,8 +395,9 @@ export default function ProjectsPage() {
               </div>
 
               <div>
-                <label className={`${LABEL}`}>Image URL</label>
+                <label htmlFor="p-image-url" className={`${LABEL}`}>Image URL</label>
                 <input
+                  id="p-image-url"
                   type="text"
                   value={formData.image}
                   onChange={(e) => set('image', e.target.value)}
@@ -395,8 +406,9 @@ export default function ProjectsPage() {
               </div>
 
               <div>
-                <label className={`${LABEL}`}>GitHub URL</label>
+                <label htmlFor="p-github-url" className={`${LABEL}`}>GitHub URL</label>
                 <input
+                  id="p-github-url"
                   type="text"
                   value={formData.githubUrl}
                   onChange={(e) => set('githubUrl', e.target.value)}
@@ -405,8 +417,9 @@ export default function ProjectsPage() {
               </div>
 
               <div>
-                <label className={`${LABEL}`}>Live URL</label>
+                <label htmlFor="p-live-url" className={`${LABEL}`}>Live URL</label>
                 <input
+                  id="p-live-url"
                   type="text"
                   value={formData.liveUrl}
                   onChange={(e) => set('liveUrl', e.target.value)}
@@ -415,10 +428,11 @@ export default function ProjectsPage() {
               </div>
 
               <div>
-                <label className={`${LABEL}`}>
+                <label htmlFor="p-tags-comma-separated" className={`${LABEL}`}>
                   Tags (comma-separated)
                 </label>
                 <input
+                  id="p-tags-comma-separated"
                   type="text"
                   value={formData.tags}
                   onChange={(e) => set('tags', e.target.value)}
@@ -428,10 +442,11 @@ export default function ProjectsPage() {
               </div>
 
               <div>
-                <label className={`${LABEL}`}>
+                <label htmlFor="p-specs-one-quot-label-value-quot-per-line" className={`${LABEL}`}>
                   Specs — one &quot;Label: value&quot; per line
                 </label>
                 <textarea
+                  id="p-specs-one-quot-label-value-quot-per-line"
                   value={formData.specs}
                   onChange={(e) => set('specs', e.target.value)}
                   rows={6}

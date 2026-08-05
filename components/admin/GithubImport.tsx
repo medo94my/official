@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { BTN, BTN_GHOST, CHECKBOX, FIELD_MONO, PANEL } from '@/app/admin/ui'
 import { apiRequest, errorMessage } from '@/app/admin/client'
 import Modal from '@/components/ui/Modal'
@@ -59,6 +59,8 @@ type PickerProps = {
   onSelect: (repo: RepoSummary) => void
   onEditExisting: (projectId: string) => void
   onClose: () => void
+  /** The trigger to return focus to; it is unmounted while this is open. */
+  returnFocusRef?: RefObject<HTMLElement>
 }
 
 /**
@@ -75,6 +77,7 @@ export function GithubRepoPicker({
   onSelect,
   onEditExisting,
   onClose,
+  returnFocusRef,
 }: PickerProps) {
   const { data, error, loading, load } = useRepos(open)
   const [query, setQuery] = useState('')
@@ -111,6 +114,7 @@ export function GithubRepoPicker({
 
   return (
     <Modal
+      returnFocusRef={returnFocusRef}
       open={open}
       onClose={onClose}
       title="Import from GitHub"
@@ -151,8 +155,9 @@ export function GithubRepoPicker({
               className={FIELD_MONO}
             />
 
-            <label className="mt-3 flex items-center gap-2 text-meta text-foreground-muted">
+            <label htmlFor="gh-show-forks" className="mt-3 flex items-center gap-2 text-meta text-foreground-muted">
               <input
+                id="gh-show-forks"
                 type="checkbox"
                 checked={showForks}
                 onChange={(e) => setShowForks(e.target.checked)}
