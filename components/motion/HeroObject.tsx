@@ -61,7 +61,13 @@ export default function HeroObject() {
     const parent = canvas.parentElement
     if (!parent) return
 
-    let context = fitCanvas(canvas, parent.clientWidth, parent.clientHeight)
+    // Size is read here and in the observer below, never inside the frame loop.
+    // `clientWidth` forces the browser to flush pending layout before it can
+    // answer, so reading it every frame is a forced reflow at 60 Hz — which is
+    // exactly what a Lighthouse trace of this page reported.
+    let width = parent.clientWidth
+    let height = parent.clientHeight
+    let context = fitCanvas(canvas, width, height)
     let frame = 0
     let running = true
 
@@ -79,7 +85,11 @@ export default function HeroObject() {
     }
 
     const resize = () => {
-      context = fitCanvas(canvas, parent.clientWidth, parent.clientHeight)
+      // The observer already ran because layout changed, so reading it here
+      // costs nothing extra — unlike reading it mid-frame.
+      width = parent.clientWidth
+      height = parent.clientHeight
+      context = fitCanvas(canvas, width, height)
     }
 
     const observer = new ResizeObserver(resize)
@@ -99,8 +109,6 @@ export default function HeroObject() {
     function draw(now: number) {
       if (!context || !running) return
 
-      const width = parent!.clientWidth
-      const height = parent!.clientHeight
       const t = (now - start) / 1000
 
       context.clearRect(0, 0, width, height)
