@@ -69,6 +69,13 @@ seed file, so it must not be wired into startup.
 
 ### On Netlify
 
+> **Not the deployment in use.** The live site runs the Docker stack above,
+> behind Traefik and a Cloudflare Tunnel. `netlify.toml` is kept because the
+> path still works and costs nothing to leave in place, but it is untested
+> against the current code — the media volume, the health check and the
+> settings encryption all assume a long-lived server with a disk, and a
+> serverless deploy would need a hosted Postgres and an object store instead.
+
 `netlify.toml` configures the Next.js runtime, so a connected site builds with
 no extra setup. Set these in the Netlify UI first — the build succeeds without
 them, but the site will have no content and no working login:
@@ -184,13 +191,9 @@ Alt text is required on images. Without it a screenshot is announced to a screen
 reader as nothing at all, and it doubles as the caption underneath.
 
 > **These live in a Docker named volume (`media`), and nothing else backs them
-> up.** `docker compose down -v` destroys them along with the database. Back up
-> with:
->
-> ```bash
-> docker run --rm -v official_media:/m -v "$PWD:/backup" alpine \
->   tar czf /backup/media.tgz -C /m .
-> ```
+> up.** `docker compose down -v` destroys them along with the database. See
+> [Backups](#backups) — `scripts/backup.sh` covers this volume and the
+> database together.
 
 They are **not** in `public/`. Next's standalone server fixes that directory at
 build time and will not serve anything written to it afterwards — verified, not
@@ -201,6 +204,48 @@ the shape the uploader generates never reaches the filesystem.
 Deleting media removes the row and the file immediately, but a CDN may keep
 serving it for up to an hour (`s-maxage=3600`). If something was published that
 should not have been, that is the window.
+
+## Backups
+
+Two things here cannot be rebuilt from this repository: the **database** (every
+project, post, experience entry, inquiry and encrypted setting) and the
+**`media` volume** (uploaded screenshots and clips). Both are Docker volumes, so
+`docker compose down -v` erases them and nothing on the host keeps a copy.
+
+```bash
+scripts/backup.sh                 # writes to ./backups (git-ignored)
+scripts/backup.sh /mnt/somewhere  # or anywhere else
+```
+
+It refuses to overwrite an existing backup, and verifies the dump decompresses
+and contains a table before reporting success — an empty archive found at
+restore time is worse than no archive, because it was trusted.
+
+Restoring is printed by the script itself. In short:
+
+```bash
+gzip -dc backups/db-<stamp>.sql.gz \
+  | docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+```
+
+> **`.env` is deliberately not in the backup.** It holds the `SETTINGS_KEY`
+> that decrypts the settings inside the dump, and storing the two together
+> turns one stolen archive into a full compromise. Keep it separately — and do
+> keep it: a dump restored without that key leaves every stored secret
+> unreadable.
+
+Nothing schedules this. A cron entry on the host is the obvious next step and is
+not set up.
+
+## Health
+
+`GET /api/health` round-trips the database and returns `200` with
+`{"status":"ok"}` or `503` when Postgres is unreachable. The compose healthcheck
+polls it every 30s, because `restart: unless-stopped` only notices a process
+that has *exited* — a Node process that is running but cannot reach the database
+would otherwise stay "up" indefinitely.
+
+It is unauthenticated and returns no versions, connection strings or error text.
 
 ## Adding a résumé
 
@@ -241,9 +286,20 @@ are claims only the owner can make truthfully:
 - `npm run dev` — development server
 - `npm run build` / `npm start` — production build and server
 - `npm run lint` — ESLint
+- `npm test` — 300 assertions over the pure modules; no DOM, network or database
+- `npm run check` — typecheck, lint and tests. What CI runs.
 - `npx tsc --noEmit` — typecheck
 - `npx prisma studio` — database GUI
 - `npx prisma migrate dev --name <name>` — create a migration after a schema change
+- `scripts/backup.sh` — database and uploaded media, see [Backups](#backups)
+
+Against a **running** site, and therefore not part of `npm run check` or CI:
+
+- `npm run audit:a11y` — WCAG 2.1 A/AA on every public route in both themes
+- `npm run audit:interact` — keyboard, theme persistence, mobile nav, dead links
+
+Both take `BASE_URL` and need a browser; see [`tests/browser/README.md`](tests/browser/README.md),
+which also documents installing Chromium without root.
 
 ## Project structure
 

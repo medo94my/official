@@ -42,3 +42,13 @@ prisma/*.db-journal
 # Uploaded screenshots and clips. Owner content, not source — these live in a
 # Docker named volume in production and are not tracked here.
 /media/
+
+# Output of scripts/backup.sh, whose default destination is exactly this
+# directory. A committed dump would push the whole content database to a public
+# repository — the admin password hash, every encrypted setting, and every
+# contact message. Scoped to this path rather than a bare *.sql, because
+# prisma/migrations/*/migration.sql is tracked on purpose and a broad rule
+# would drop the schema history without saying so.
+/backups/
+*.sql.gz
+media-*.tgz
