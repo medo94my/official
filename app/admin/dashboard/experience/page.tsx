@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+// The same formatter the public page uses. It used to be copied into this file,
+// which is how the two would have disagreed about what "2022" means.
+import { formatMonth } from '@/lib/dates'
 import {
   BTN,
   BTN_DANGER,
@@ -38,14 +41,6 @@ const EMPTY = {
   highlights: '',
   url: '',
   order: 0,
-}
-
-/** "2023-06" → "Jun 2023". Mirrors formatMonth in lib/content.ts. */
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-function formatMonth(value?: string | null) {
-  if (!value) return 'Present'
-  const m = /^(\d{4})-(\d{2})$/.exec(value)
-  return m ? `${MONTHS[Number(m[2]) - 1] ?? ''} ${m[1]}`.trim() : value
 }
 
 export default function ExperiencePage() {
@@ -148,22 +143,33 @@ export default function ExperiencePage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label htmlFor="startDate" className={LABEL}>Started</label>
-                  {/* type=month yields exactly the YYYY-MM the column expects,
-                      with a native picker and no parsing layer. */}
+                  {/* Text, not type=month. A month picker cannot express "2022",
+                      and a CV routinely gives only a year for older roles — the
+                      picker would force a month nobody actually knows. `pattern`
+                      keeps the native validation that type=month provided. */}
                   <input
                     id="startDate"
-                    type="month"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d{4}(-(0[1-9]|1[0-2]))?"
+                    placeholder="2023-06"
                     value={formData.startDate}
                     onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                     required
                     className={FIELD_MONO}
                   />
+                  <p className="mt-1 text-meta text-foreground-subtle">
+                    YYYY-MM, or just YYYY
+                  </p>
                 </div>
                 <div>
                   <label htmlFor="endDate" className={LABEL}>Ended</label>
                   <input
                     id="endDate"
-                    type="month"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d{4}(-(0[1-9]|1[0-2]))?"
+                    placeholder="2025-03"
                     value={formData.endDate}
                     onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                     className={FIELD_MONO}

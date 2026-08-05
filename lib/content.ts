@@ -360,27 +360,6 @@ export function splitServices<T extends Pick<Service, 'kind'>>(services: T[]) {
   }
 }
 
-/**
- * "2023-06" → "Jun 2023". A null end date means the role is current.
- *
- * Parsed by hand rather than through Date: constructing a Date from "2023-06"
- * pins it to UTC midnight on the 1st, which renders as May 2023 for anyone
- * west of UTC.
- */
-const MONTHS = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-]
-
-export function formatMonth(value?: string | null) {
-  if (!value) return 'Present'
-  const match = /^(\d{4})-(\d{2})$/.exec(value.trim())
-  // Anything that isn't YYYY-MM is shown as typed rather than mangled.
-  if (!match) return value
-  const month = MONTHS[Number(match[2]) - 1]
-  return month ? `${month} ${match[1]}` : value
-}
-
 /** Groups skills for the skills grid, preserving each category's first-seen order. */
 export function groupSkillsByCategory<T extends { category: string }>(skills: T[]) {
   const grouped = new Map<string, T[]>()

@@ -1,4 +1,5 @@
-import { formatMonth, parseLines } from '@/lib/content'
+import { parseLines } from '@/lib/content'
+import { formatMonth } from '@/lib/dates'
 
 type ExperienceEntryProps = {
   company: string
