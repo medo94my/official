@@ -26,6 +26,13 @@ services:
     # run `prisma studio` from the host.
     # ports:
     #   - "5432:5432"
+    logging:
+      # Same reason as the app service: carry the bound with the stack rather
+      # than inheriting it from whichever daemon happens to run it.
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   app:
     build:
@@ -91,6 +98,30 @@ services:
       # The cost is that `docker compose down -v` destroys every upload, and
       # nothing else backs this up. See "Uploaded media" in the README.
       - media:/app/media
+    healthcheck:
+      # `restart: unless-stopped` only notices a process that has exited. A Node
+      # process that is up but cannot reach Postgres keeps the container
+      # "running" and keeps serving errors, which is the failure that actually
+      # happens. /api/health round-trips the database, so this judges the pair.
+      #
+      # wget rather than curl — the runtime image is node:20-alpine and busybox
+      # provides wget, not curl.
+      test: ["CMD-SHELL", "wget -qO- --tries=1 --timeout=4 http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      # Migrations run on every start; a cold boot must not be called unhealthy
+      # while `prisma migrate deploy` is still working.
+      start_period: 60s
+    logging:
+      # The daemon on this host already defaults to these, so today this
+      # changes nothing. It is here so the stack carries its own bound to a
+      # host that does not — the json-file driver is unlimited by default, and
+      # an unrotated container log fills the disk Postgres is sitting on.
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     # ── Routing ───────────────────────────────────────────────────────────
     # Traefik discovers this container over infra-proxy and reads these.
     #

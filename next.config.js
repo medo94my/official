@@ -80,11 +80,38 @@ const nextConfig = {
   },
 
   images: {
+    /**
+     * A hostname on this list is a standing instruction to fetch, transcode and
+     * cache anything under it on request, from any visitor. Measured against
+     * production before narrowing it:
+     *
+     *   /_next/image?url=https://raw.githubusercontent.com/github/explore/…png
+     *   -> 200, 1087 bytes
+     *
+     * That is an arbitrary third-party file pulled through this server and
+     * written to its disk, and nothing bounds how many distinct URLs an
+     * attacker may ask for — the concrete form of the "unbounded next/image
+     * disk cache growth" and Image Optimizer DoS advisories open against
+     * Next 14, on a box where the disk is shared with Postgres.
+     *
+     * `pathname` scopes the one host that has a plausible use to this account.
+     * The other two are gone: nothing references them, and neither
+     * user-images.githubusercontent.com (numeric upload paths) nor i.imgur.com
+     * (opaque IDs) can be scoped to an owner at all, so each was an open image
+     * proxy kept for a feature that does not exist. `repoPrefill` deliberately
+     * never sets `image`, and both project images on the site are local files.
+     */
     remotePatterns: [
-      { protocol: 'https', hostname: 'raw.githubusercontent.com' },
-      { protocol: 'https', hostname: 'user-images.githubusercontent.com' },
-      { protocol: 'https', hostname: 'i.imgur.com' },
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com',
+        pathname: '/medo94my/**',
+      },
     ],
+    // A day, rather than the 60-second default. Each (url, width, quality) is a
+    // separate cache entry revalidated on expiry, so a short TTL multiplies
+    // upstream fetches for images that are content-addressed anyway.
+    minimumCacheTTL: 86400,
   },
 
   async headers() {
