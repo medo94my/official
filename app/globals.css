@@ -39,8 +39,14 @@
     /* ── Text ─────────────────────────────────────────────────────────── */
     --foreground: 12 12 14; /* #0C0C0E  15.44:1 */
     --foreground-muted: 74 68 56; /* #4A4438   7.63:1 */
-    --foreground-subtle: 110 101 83; /* #6E6553   4.55:1 */
+    --foreground-subtle: 110 101 83; /* #6E6553   4.55:1 on --background */
     --foreground-inverse: 236 228 210; /* #ECE4D2 */
+    /* Comments inside a code block sit on --background-subtle, not on
+       --background. --foreground-subtle is only 4.55:1 against the page and
+       drops to 4.21:1 against the recessed ground — an audit caught it there
+       and nowhere else, because a code block is the one place that pairing
+       occurs. Darkened just enough to clear AA on the darker of the two. */
+    --code-comment: 95 87 72; /* #5F5748   5.23:1 on --background-subtle */
 
     /* ── Primary: maroon, which passes on ivory ───────────────────────── */
     --primary: 126 21 48; /* #7E1530   8.15:1 */
@@ -90,8 +96,13 @@
     /* ── Text ─────────────────────────────────────────────────────────── */
     --foreground: 236 228 210; /* #ECE4D2  15.44:1 */
     --foreground-muted: 183 177 164; /* #B7B1A4   9.16:1 */
-    --foreground-subtle: 143 134 112; /* #8F8670   5.41:1 */
+    --foreground-subtle: 143 134 112; /* #8F8670   5.41:1 on --background */
     --foreground-inverse: 12 12 14;
+    /* Unchanged from --foreground-subtle here: the dark theme's recessed
+       ground is darker than its page ground, so the pairing gets *more*
+       contrast rather than less, and this already measures 5.47:1. The token
+       exists so both themes name the role explicitly. */
+    --code-comment: 143 134 112; /* #8F8670   5.47:1 on --background-subtle */
 
     /* ── Primary: maroon fails on onyx, so text uses the derived rose and
        the fill uses the one value that clears both thresholds. ───────── */
@@ -316,7 +327,7 @@
      thirty-colour scheme would fight the rest of the page. */
   .post-body .hljs-comment,
   .post-body .hljs-quote {
-    color: rgb(var(--foreground-subtle));
+    color: rgb(var(--code-comment));
     font-style: italic;
   }
   .post-body .hljs-keyword,

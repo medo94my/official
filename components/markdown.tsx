@@ -62,4 +62,14 @@ export const markdownComponents: Components = {
   // anything. Covers are an uploaded field with alt text, which is the
   // supported path.
   img: () => null,
+  // A code block scrolls horizontally when a line is too long. A region that
+  // scrolls but cannot be focused is unreachable by keyboard: a mouse user
+  // drags it, a keyboard user has no way to move it at all and simply cannot
+  // read the end of the line. `tabIndex` makes it a stop, which is the whole
+  // fix — arrow keys scroll a focused element for free.
+  pre: ({ children, ...rest }) => (
+    <pre tabIndex={0} {...rest}>
+      {children}
+    </pre>
+  ),
 }

@@ -70,7 +70,7 @@ export default function SiteFooter({
           </div>
 
           <nav aria-label="Footer" className="lg:col-span-1">
-            <h2 className="font-mono text-label uppercase tracking-[0.09em] text-brand-ivory/50">
+            <h2 className="font-mono text-label uppercase tracking-[0.09em] text-brand-ivory/60">
               Sections
             </h2>
             <ul className="mt-3">
@@ -93,7 +93,7 @@ export default function SiteFooter({
 
           {direct.length > 0 && (
             <div className="lg:col-span-1">
-              <h2 className="font-mono text-label uppercase tracking-[0.09em] text-brand-ivory/50">
+              <h2 className="font-mono text-label uppercase tracking-[0.09em] text-brand-ivory/60">
                 Direct
               </h2>
               <dl className="mt-3">
@@ -119,7 +119,7 @@ export default function SiteFooter({
 
           {socials.length > 0 && (
             <div className="lg:col-span-1">
-              <h2 className="font-mono text-label uppercase tracking-[0.09em] text-brand-ivory/50">
+              <h2 className="font-mono text-label uppercase tracking-[0.09em] text-brand-ivory/60">
                 Elsewhere
               </h2>
               <ul className="mt-3">
@@ -144,14 +144,14 @@ export default function SiteFooter({
         </div>
 
         <div className="mt-12 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-brand-ivory/15 pt-6">
-          <p className="font-mono text-label uppercase tracking-[0.09em] tnum text-brand-ivory/50">
+          <p className="font-mono text-label uppercase tracking-[0.09em] tnum text-brand-ivory/60">
             © {new Date().getFullYear()} {name}
           </p>
           {/* An in-page anchor, not a route change: it scrolls, and it also
               lands focus on the main landmark for keyboard users. */}
           <a
             href="#main"
-            className="inline-flex min-h-11 items-center font-mono text-label uppercase tracking-[0.09em] text-brand-ivory/50 transition-colors hover:text-brand-gold"
+            className="inline-flex min-h-11 items-center font-mono text-label uppercase tracking-[0.09em] text-brand-ivory/60 transition-colors hover:text-brand-gold"
           >
             Back to top ↑
           </a>

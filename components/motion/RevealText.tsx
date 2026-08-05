@@ -23,8 +23,15 @@ type RevealTextProps = {
  * complete headline immediately, and the animation is decoration layered on
  * afterwards rather than a gate in front of the content.
  *
- * The split version carries `aria-label` with the full string and hides the
- * spans, so a screen reader reads one sentence instead of thirty fragments.
+ * The split version keeps a visually-hidden copy of the full string and hides
+ * the animated spans, so a screen reader reads one sentence instead of thirty
+ * fragments.
+ *
+ * That copy replaced an `aria-label` on the wrapper, which an accessibility
+ * audit caught: `aria-label` is only honoured on elements with a role that
+ * supports a name, and a bare `<span>` has none. The attribute was silently
+ * ignored, so the label did nothing and the fragments were what got read —
+ * the exact failure the attribute was there to prevent.
  */
 export default function RevealText({
   text,
@@ -43,7 +50,8 @@ export default function RevealText({
   const units = by === 'line' ? text.split('\n') : text.split(' ')
 
   return (
-    <Component className={className} aria-label={text}>
+    <Component className={className}>
+      <span className="sr-only">{text}</span>
       {units.map((unit, i) => (
         <span
           key={`${unit}-${i}`}
